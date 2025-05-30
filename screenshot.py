@@ -4,8 +4,8 @@ def take_screenshot(url: str, filename: str):
     with sync_playwright() as p:
         # Launch browser with anti-detection options
         proxy: ProxySettings = {
-            # "server": "http://137.184.174.32:4857"  # https://proxyscrape.com/free-proxy-list
-            "server": "http://200.174.198.86:8888"  # https://free-proxy-list.net/
+            "server": "http://137.184.174.32:4857"  # https://proxyscrape.com/free-proxy-list
+            # "server": "http://200.174.198.86:8888"  # https://free-proxy-list.net/
         }
         browser = p.chromium.launch(
             headless=True,
