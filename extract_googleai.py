@@ -12,7 +12,7 @@ model = genai.GenerativeModel("gemini-2.0-flash-lite")
 def extract(filename: str):
     img = Image.open(filename)
     prompt = """
-    Extract buy/hold/sell values and low/average/high price forecasts from this image.
+    Extract buy/hold/sell values and low/average/high price forecasts from image.
     Return JSON with plain ints or floats.
     """
     response = model.generate_content([prompt, img])

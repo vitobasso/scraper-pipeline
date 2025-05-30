@@ -1,6 +1,4 @@
 from screenshot import take_screenshot
-# from extract_layoutlm import extract
-# from extract_textract import extract
 from extract_googleai import extract
 import datetime
 
