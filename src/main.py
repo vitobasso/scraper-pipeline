@@ -1,5 +1,5 @@
-from screenshots import run_tasks
-from extract_googleai import extract
+from src.stocks.screenshots import run_tasks
+from src.stocks.visual_scrape import extract
 
 if __name__ == '__main__':
     run_tasks()
