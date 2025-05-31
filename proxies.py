@@ -4,7 +4,7 @@ from random import randrange, choice
 
 db = TinyDB('output/proxies.json')
 
-with open('resources/proxies.txt') as f:
+with open('input/proxies.csv') as f:
     for line in f.read().splitlines():
         db.upsert({'proxy': line}, Query().proxy == line)
 
