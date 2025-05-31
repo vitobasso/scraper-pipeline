@@ -1,7 +1,6 @@
-import google.generativeai as genai
+import os, google.generativeai as genai
 from PIL import Image
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 api_key = os.getenv("GOOGLE_GENAI_API_KEY")
