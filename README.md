@@ -7,7 +7,7 @@ brew install python3 poetry
 
 #### Build project
 ```bash
-poetry install
+poetry install --no-root
 playwright install
 ```
 

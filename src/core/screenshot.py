@@ -1,8 +1,6 @@
 from playwright.async_api import async_playwright, ProxySettings
 
-output_dir = 'output/screenshots'
-
-async def screenshot(url: str, filename: str, proxy: str):
+async def screenshot(url: str, path: str, proxy: str):
     async with async_playwright() as playwright:
         proxy_settings: ProxySettings = {'server': f'http://{proxy}'}
 
@@ -48,7 +46,7 @@ async def screenshot(url: str, filename: str, proxy: str):
 
             # Take screenshot
             await page.screenshot(
-                path=f'{output_dir}/{filename}',
+                path=path,
                 full_page=True,
                 animations='disabled'  # Disable animations for cleaner screenshot
             )
