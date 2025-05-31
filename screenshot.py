@@ -1,13 +1,13 @@
-from playwright.sync_api import sync_playwright, ProxySettings
+from playwright.async_api import async_playwright, ProxySettings
 
 output_dir = 'output/screenshots'
 
-def take_screenshot(url: str, filename: str, proxy: str):
-    with sync_playwright() as p:
+async def take_screenshot(url: str, filename: str, proxy: str):
+    async with async_playwright() as playwright:
         proxy_settings: ProxySettings = {'server': f'http://{proxy}'}
 
         # Launch browser with anti-detection options
-        browser = p.chromium.launch(
+        browser = await playwright.chromium.launch(
             headless=True,
             proxy=proxy_settings,
             args=[
@@ -20,7 +20,7 @@ def take_screenshot(url: str, filename: str, proxy: str):
         )
 
         # Create context with custom user agent and viewport
-        context = browser.new_context(
+        context = await browser.new_context(
             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             viewport={'width': 1280, 'height': 720},
             # Some sites check for webdriver property
@@ -28,26 +28,26 @@ def take_screenshot(url: str, filename: str, proxy: str):
         )
 
         # Optionally set extra headers
-        context.set_extra_http_headers({
+        await context.set_extra_http_headers({
             'Accept-Language': 'en-US,en;q=0.9',
             'Referer': 'https://www.google.com/'
         })
 
-        page = context.new_page()
+        page = await context.new_page()
 
         try:
             # Navigate with longer timeout and wait strategy
-            page.goto(
+            await page.goto(
                 url,
                 timeout=60000,
                 wait_until='domcontentloaded'
             )
 
             # Wait a bit to let page load completely
-            page.wait_for_timeout(10000)
+            await page.wait_for_timeout(10000)
 
             # Take screenshot
-            page.screenshot(
+            await page.screenshot(
                 path=f'{output_dir}/{filename}',
                 full_page=True,
                 animations='disabled'  # Disable animations for cleaner screenshot
@@ -58,4 +58,4 @@ def take_screenshot(url: str, filename: str, proxy: str):
         #     raise e
 
         finally:
-            browser.close()
+            await browser.close()

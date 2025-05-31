@@ -8,10 +8,10 @@ with open('input/proxies.csv') as f:
     for line in f.read().splitlines():
         db.upsert({'proxy': line}, Query().proxy == line)
 
-def run_task(task):
+async def run_task(task):
     proxy = _pick()
     try:
-        task(proxy)
+        await task(proxy)
         _feedback(proxy, True)
     except Exception as e:
         _feedback(proxy, False)
