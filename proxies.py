@@ -2,23 +2,21 @@ from tinydb import TinyDB, Query
 import datetime
 from random import randrange, choice
 
-with open('resources/proxies.txt') as f:
-    proxies = f.read().splitlines()
-
 db = TinyDB('output/proxies.json')
 
-for line in proxies:
-    db.upsert({'proxy': line}, Query().proxy == line)
+with open('resources/proxies.txt') as f:
+    for line in f.read().splitlines():
+        db.upsert({'proxy': line}, Query().proxy == line)
 
 def run_task(task):
-    proxy = pick()
+    proxy = _pick()
     try:
         task(proxy)
-        report(proxy, True)
+        _feedback(proxy, True)
     except Exception as e:
-        report(proxy, False)
-    
-def report(proxy: str, succeeded: bool):
+        _feedback(proxy, False)
+
+def _feedback(proxy: str, succeeded: bool):
     print(f'proxy {proxy} {'succeeded' if succeeded else 'failed'}')
     if records := db.search(Query().proxy == proxy):
         record = records[0]
@@ -29,19 +27,26 @@ def report(proxy: str, succeeded: bool):
             record['last_succeeded'] = record['last_used']
         db.update(record, Query().proxy == proxy)
 
-def pick():
-    record = _pick()
+def _pick():
+    record = _pick_record()
     return record['proxy'] if record else None
 
-def _pick():
-    all_proxies = db.all()
-    healthy = [x for x in all_proxies if _is_healthy(x)]
-    never_used = [x for x in all_proxies if _is_never_used(x)]
-    retriable = [x for x in all_proxies if _is_retriable(x)]
+def _pick_record():
+    categorized = _categorize(db.all())
+    healthy = categorized['healthy']
+    never_used = categorized['never_used']
+    retriable = categorized['retriable']
     if randrange(0, 10) < 9:
         return _pick_random(never_used) or _pick_oldest(retriable) or _pick_oldest(healthy)
     else:
         return _pick_oldest(healthy) or _pick_random(never_used) or _pick_oldest(retriable)
+
+def _categorize(_list):
+    return {
+        "healthy": [x for x in _list if _is_healthy(x)],
+        "never_used": [x for x in _list if _is_never_used(x)],
+        "retriable": [x for x in _list if _is_retriable(x)],
+    }
 
 def _pick_oldest(_list):
     return sorted(_list, key=lambda x: x['last_used'], reverse=True)[0] if _list else None
@@ -63,3 +68,13 @@ def _is_retriable(record):
         count_failures = record.get('count_usages', 0) - record.get('count_successes', 0)
         ratio_success = record.get('count_successes', 0) / record.get('count_usages', 0)
         return count_failures < 10 or ratio_success > .1
+
+def _print_report():
+    all_proxies = db.all()
+    categorized = _categorize(all_proxies)
+    healthy = len(categorized['healthy'])
+    never_used = len(categorized['never_used'])
+    discarded = len(all_proxies) - healthy - never_used - len(categorized['retriable'])
+    print(f'{len(all_proxies)} known proxies: {healthy} healthy, {never_used} never used, {discarded} discarded')
+
+_print_report()
