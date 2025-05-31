@@ -1,6 +1,6 @@
 import csv, datetime, asyncio
-import proxies
-from browser import screenshot
+from src.core import proxies
+from src.core.screenshot import screenshot
 
 parallel = 10
 
