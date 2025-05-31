@@ -2,7 +2,7 @@ from playwright.sync_api import sync_playwright, ProxySettings
 
 def take_screenshot(url: str, filename: str, proxy: str):
     with sync_playwright() as p:
-        proxy_settings: ProxySettings = { "server": f"http://{proxy}" }
+        proxy_settings: ProxySettings = {'server': f'http://{proxy}'}
 
         # Launch browser with anti-detection options
         browser = p.chromium.launch(
@@ -46,13 +46,13 @@ def take_screenshot(url: str, filename: str, proxy: str):
 
             # Take screenshot
             page.screenshot(
-                path=f"screenshots/{filename}",
+                path=f'screenshots/{filename}',
                 full_page=True,
                 animations='disabled'  # Disable animations for cleaner screenshot
             )
 
         except Exception as e:
-            print(f"Error: {e}")
+            print(f'Error: {e}')
             raise e
 
         finally:
