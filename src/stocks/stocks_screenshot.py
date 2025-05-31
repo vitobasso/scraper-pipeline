@@ -1,8 +1,10 @@
-import csv, datetime, asyncio
+import os, csv, datetime, asyncio
 from src.core import proxies
 from src.core.screenshot import screenshot
+from src.stocks.stocks_image_validate import validate
 
-parallel = 10
+screenshot_dir = 'output/screenshots'
+parallel = 2
 
 def run_tasks():
     with open('input/tickers.csv', 'r') as file:
@@ -18,13 +20,23 @@ async def _run_task(task):
     return task()
 
 async def _screenshot_tipranks(ticker: str, ticker_type: str):
-    await _screenshot_template('tipranks', ticker, f'https://www.tipranks.com/{ticker_type}/{ticker}/forecast')
+    await _screenshot('tipranks', ticker, f'https://www.tipranks.com/{ticker_type}/{ticker}/forecast')
 
 async def _screenshot_tradingview(ticker: str):
-    await _screenshot_template('tradingview', ticker, f'https://tradingview.com/symbols/{ticker}/forecast/')
+    await _screenshot('tradingview', ticker, f'https://tradingview.com/symbols/{ticker}/forecast/')
 
-async def _screenshot_template(site: str, ticker: str, url: str):
+async def _screenshot(site: str, ticker: str, url: str):
     timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
     filename = f'{site}-{ticker}-{timestamp}.png'
     print(f'taking screenshot, url: {url}, filename: {filename}')
-    await proxies.run_task(lambda proxy: screenshot(url, filename, proxy))
+    temp_path = f'{screenshot_dir}/temp/{filename}'
+    valid_path = f'{screenshot_dir}/valid/{filename}'
+    invalid_path = f'{screenshot_dir}/invalid/{filename}'
+    await proxies.run_task(lambda proxy: screenshot(url, temp_path, proxy))
+    if os.path.exists(temp_path):
+        dest_path = valid_path if validate(temp_path) else invalid_path
+        _move_file(temp_path, dest_path)
+
+def _move_file(temp_path, dest_path):
+    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+    os.rename(temp_path, dest_path)

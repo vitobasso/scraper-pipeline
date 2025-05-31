@@ -7,4 +7,5 @@ dependencies = [
     "google-generativeai",
     "python-dotenv",
     "tinydb",
+    "easyocr",
 ]
