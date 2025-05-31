@@ -1,11 +1,8 @@
-import csv
+import csv, datetime, asyncio
 import proxies
-from screenshot import take_screenshot
-from extract_googleai import extract
-import datetime
-import asyncio
+from browser import screenshot
 
-parallel = 3
+parallel = 10
 
 def run_tasks():
     with open('input/tickers.csv', 'r') as file:
@@ -29,4 +26,4 @@ async def _screenshot_template(site: str, ticker: str, url: str):
     timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
     filename = f'{site}-{ticker}-{timestamp}.png'
     print(f'taking screenshot, url: {url}, filename: {filename}')
-    await proxies.run_task(lambda proxy: take_screenshot(url, filename, proxy))
+    await proxies.run_task(lambda proxy: screenshot(url, filename, proxy))

@@ -2,7 +2,7 @@ from playwright.async_api import async_playwright, ProxySettings
 
 output_dir = 'output/screenshots'
 
-async def take_screenshot(url: str, filename: str, proxy: str):
+async def screenshot(url: str, filename: str, proxy: str):
     async with async_playwright() as playwright:
         proxy_settings: ProxySettings = {'server': f'http://{proxy}'}
 
