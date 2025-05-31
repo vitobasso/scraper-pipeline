@@ -1,15 +1,13 @@
 from playwright.sync_api import sync_playwright, ProxySettings
 
-def take_screenshot(url: str, filename: str):
+def take_screenshot(url: str, filename: str, proxy: str):
     with sync_playwright() as p:
+        proxy_settings: ProxySettings = { "server": f"http://{proxy}" }
+
         # Launch browser with anti-detection options
-        proxy: ProxySettings = {
-            "server": "http://137.184.174.32:4857"  # https://proxyscrape.com/free-proxy-list
-            # "server": "http://200.174.198.86:8888"  # https://free-proxy-list.net/
-        }
         browser = p.chromium.launch(
             headless=True,
-            proxy=proxy,
+            proxy=proxy_settings,
             args=[
                 '--disable-blink-features=AutomationControlled',
                 '--no-sandbox',
@@ -44,7 +42,7 @@ def take_screenshot(url: str, filename: str):
             )
 
             # Wait a bit to let page load completely
-            page.wait_for_timeout(2000)
+            page.wait_for_timeout(10000)
 
             # Take screenshot
             page.screenshot(
@@ -55,6 +53,7 @@ def take_screenshot(url: str, filename: str):
 
         except Exception as e:
             print(f"Error: {e}")
+            raise e
 
         finally:
             browser.close()
