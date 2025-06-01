@@ -9,6 +9,7 @@ prefer_fresh_rate = config.get('proxies.prefer_fresh.rate')
 healthy_max_age = config.get('proxies.healthy.max_age')
 retry_tolerated_failure_count = config.get('proxies.retry.tolerated_failure.count')
 retry_tolerated_failure_rate = config.get('proxies.retry.tolerated_failure.rate')
+parallel = config.get('screenshot.parallel')
 db = TinyDB(db_path)
 
 with open(input_csv) as f:
@@ -40,27 +41,21 @@ def _pick():
 
 def _pick_record():
     categorized = _categorize(db.all())
-    healthy = categorized['healthy']
-    never_used = categorized['never_used']
-    retriable = categorized['retriable']
-    if randrange(0, 10) < prefer_fresh_rate:
-        return _pick_random(never_used) or _pick_oldest(retriable) or _pick_oldest(healthy)
-    else:
-        return _pick_oldest(healthy) or _pick_random(never_used) or _pick_oldest(retriable)
-        #FIXME same proxy being picked by all parallel screenshots
+    healthy = categorized['healthy'] + categorized['never_used'] + categorized['retriable']
+    never_used = categorized['never_used'] + categorized['retriable'] + categorized['healthy']
+    preference = healthy if randrange(0, 10) < prefer_fresh_rate else never_used
+    selection = min(randrange(0, parallel), len(preference))
+    return preference[selection]
 
 def _categorize(_list):
     return {
-        "healthy": [x for x in _list if _is_healthy(x)],
+        "healthy": _sorted([x for x in _list if _is_healthy(x)]),
+        "retriable": _sorted([x for x in _list if _is_retriable(x)]),
         "never_used": [x for x in _list if _is_never_used(x)],
-        "retriable": [x for x in _list if _is_retriable(x)],
     }
 
-def _pick_oldest(_list):
-    return sorted(_list, key=lambda x: x['last_used'], reverse=True)[0] if _list else None
-
-def _pick_random(_list):
-    return choice(_list) if _list else None
+def _sorted(_list):
+    return sorted(_list, key=lambda x: x['last_used']) if _list else []
 
 def _is_never_used(record):
     return record.get('last_used') is None
