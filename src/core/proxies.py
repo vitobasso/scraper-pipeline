@@ -1,20 +1,18 @@
-import datetime
+import glob, datetime
 from tinydb import TinyDB, Query
 from random import randrange, choice
 from src.core.config import config
 
-input_csv = config.get('proxies.input_csv')
 db_path = config.get('proxies.db_path')
+load_enabled = config.get('proxies.load_new_proxies.enabled')
+input_dir = config.get('proxies.load_new_proxies.input_dir')
 prefer_fresh_rate = config.get('proxies.prefer_fresh.rate')
 healthy_max_age = config.get('proxies.healthy.max_age')
 retry_tolerated_failure_count = config.get('proxies.retry.tolerated_failure.count')
 retry_tolerated_failure_rate = config.get('proxies.retry.tolerated_failure.rate')
 parallel = config.get('screenshot.parallel')
-db = TinyDB(db_path)
 
-with open(input_csv) as f:
-    for line in f.read().splitlines():
-        db.upsert({'proxy': line}, Query().proxy == line)
+db = TinyDB(db_path)
 
 async def run_task(task):
     proxy = _pick()
@@ -77,6 +75,19 @@ def _print_report():
     healthy = len(categorized['healthy'])
     never_used = len(categorized['never_used'])
     discarded = len(all_proxies) - healthy - never_used - len(categorized['retriable'])
-    print(f'{len(all_proxies)} known proxies: {healthy} healthy, {never_used} never used, {discarded} discarded')
+    print(f'{len(all_proxies)} total proxies: {healthy} healthy, {never_used} never used, {discarded} discarded')
+
+def _load_all_lists():
+    for file in glob.glob(f"{input_dir}/*"):
+        _load_list(file)
+
+
+def _load_list(file: str):
+    with open(file) as f:
+        for line in f.read().splitlines():
+            db.upsert({'proxy': line}, Query().proxy == line)
+
+if load_enabled:
+    _load_all_lists()
 
 _print_report()

@@ -26,3 +26,7 @@ source .venv/bin/activate
 #### Cloud services
 - https://dashboard.render.com/cron/new
 - https://replit.com/ #free trial
+
+#### Proxy lists
+https://proxyscrape.com/free-proxy-list
+https://free-proxy-list.net/
