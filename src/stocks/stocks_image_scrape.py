@@ -9,8 +9,7 @@ api_key = os.getenv('GOOGLE_GENAI_API_KEY')
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel(model_name)
 
-def extract(filename: str):
-    img = Image.open(filename)
+def extract_analysis(filename: str):
     prompt = """
     Extract from image and return JSON with following properties:
     - analyst rating (int values)
@@ -24,5 +23,21 @@ def extract(filename: str):
         avg
         max (aka high)
     """
+    _extract(filename, prompt)
+
+def extract_fundamentals(filename: str):
+    prompt = """
+    A imagem contem fundamentos de uma acao
+    Extraia os seguintes valores DA IMAGEM, nao do seu conhecimento do passado, e retorne JSON:
+        ticker
+        cotacao
+        P/L
+        P/VP
+        DY
+    """
+    _extract(filename, prompt)
+
+def _extract(filename: str, prompt: str):
+    img = Image.open(filename)
     response = model.generate_content([prompt, img])
     print(response.text)
