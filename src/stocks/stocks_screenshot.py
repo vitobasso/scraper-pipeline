@@ -2,9 +2,10 @@ import os, csv, datetime, asyncio
 from src.core import proxies
 from src.core.screenshot import screenshot
 from src.stocks.stocks_image_validate import validate
+from src.core.config import config
 
-screenshot_dir = 'output/screenshots'
-parallel = 2
+screenshot_dir = config.get('screenshot.path')
+parallel = config.get('screenshot.parallel')
 
 def run_tasks():
     with open('input/tickers.csv', 'r') as file:

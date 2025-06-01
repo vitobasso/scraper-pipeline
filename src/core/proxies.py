@@ -1,10 +1,17 @@
-from tinydb import TinyDB, Query
 import datetime
+from tinydb import TinyDB, Query
 from random import randrange, choice
+from src.core.config import config
 
-db = TinyDB('output/proxies.json')
+input_csv = config.get('proxies.input_csv')
+db_path = config.get('proxies.db_path')
+prefer_fresh_rate = config.get('proxies.prefer_fresh.rate')
+healthy_max_age = config.get('proxies.healthy.max_age')
+retry_tolerated_failure_count = config.get('proxies.retry.tolerated_failure.count')
+retry_tolerated_failure_rate = config.get('proxies.retry.tolerated_failure.rate')
+db = TinyDB(db_path)
 
-with open('input/proxies.csv') as f:
+with open(input_csv) as f:
     for line in f.read().splitlines():
         db.upsert({'proxy': line}, Query().proxy == line)
 
@@ -36,10 +43,11 @@ def _pick_record():
     healthy = categorized['healthy']
     never_used = categorized['never_used']
     retriable = categorized['retriable']
-    if randrange(0, 10) < 9:
+    if randrange(0, 10) < prefer_fresh_rate:
         return _pick_random(never_used) or _pick_oldest(retriable) or _pick_oldest(healthy)
     else:
         return _pick_oldest(healthy) or _pick_random(never_used) or _pick_oldest(retriable)
+        #FIXME same proxy being picked by all parallel screenshots
 
 def _categorize(_list):
     return {
@@ -58,16 +66,15 @@ def _is_never_used(record):
     return record.get('last_used') is None
 
 def _is_healthy(record):
-    day_secs = 60 * 60 * 24
-    return not _is_never_used(record) and record.get('last_used') - record.get('last_succeeded', 0) < day_secs
+    return not _is_never_used(record) and record.get('last_used') - record.get('last_succeeded', 0) < healthy_max_age
 
 def _is_retriable(record):
     if _is_never_used(record) or _is_healthy(record):
         return False
     else:
         count_failures = record.get('count_usages', 0) - record.get('count_successes', 0)
-        ratio_success = record.get('count_successes', 0) / record.get('count_usages', 0)
-        return count_failures < 10 or ratio_success > .1
+        ratio_failure = count_failures / record.get('count_usages', 0)
+        return count_failures < retry_tolerated_failure_count or ratio_failure < retry_tolerated_failure_rate
 
 def _print_report():
     all_proxies = db.all()
