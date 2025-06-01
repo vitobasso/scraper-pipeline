@@ -1,4 +1,7 @@
 from playwright.async_api import async_playwright, ProxySettings
+from src.core.config import config
+
+load_timeout = config.get('screenshot.browser.load_timeout')
 
 async def screenshot(url: str, path: str, proxy: str):
     async with async_playwright() as playwright:
@@ -37,12 +40,9 @@ async def screenshot(url: str, path: str, proxy: str):
             # Navigate with longer timeout and wait strategy
             await page.goto(
                 url,
-                timeout=60000,
-                wait_until='domcontentloaded'
+                timeout=load_timeout,
+                wait_until='load'
             )
-
-            # Wait a bit to let page load completely
-            await page.wait_for_timeout(10000)
 
             # Take screenshot
             await page.screenshot(
@@ -50,10 +50,6 @@ async def screenshot(url: str, path: str, proxy: str):
                 full_page=True,
                 animations='disabled'  # Disable animations for cleaner screenshot
             )
-
-        # except Exception as e:
-        #     print(f'Error: {e}')
-        #     raise e
 
         finally:
             await browser.close()

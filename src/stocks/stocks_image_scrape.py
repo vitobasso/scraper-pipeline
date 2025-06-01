@@ -1,12 +1,13 @@
 import os, google.generativeai as genai
 from PIL import Image
 from dotenv import load_dotenv
+from src.core.config import config
 
+model_name = config.get('image_scrape.model')
 load_dotenv()
-api_key = os.getenv("GOOGLE_GENAI_API_KEY")
+api_key = os.getenv('GOOGLE_GENAI_API_KEY')
 genai.configure(api_key=api_key)
-# model = genai.GenerativeModel("gemini-1.5-flash")
-model = genai.GenerativeModel("gemini-2.0-flash-lite")
+model = genai.GenerativeModel(model_name)
 
 def extract(filename: str):
     img = Image.open(filename)
