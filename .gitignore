@@ -1,7 +1,12 @@
+# tools
 .idea
 __pycache__
 .venv
+
+# os
+.DS_Store
+
+# data and secrets
 .env
-poetry.lock
 input
 output
