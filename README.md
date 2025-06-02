@@ -30,3 +30,4 @@ source .venv/bin/activate
 #### Proxy lists
 https://proxyscrape.com/free-proxy-list
 https://free-proxy-list.net/
+https://httpbin.org/ip # test
