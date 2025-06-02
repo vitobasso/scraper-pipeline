@@ -13,11 +13,12 @@ def run_tasks():
     asyncio.run(_run_tasks(tickers))
 
 async def _run_tasks(tickers):
-    # tasks = [_screenshot_tradingview(tickers[i]['ticker']) for i in range(parallel)]
-    # tasks = [_screenshot_tipranks(tickers[i]['ticker'], tickers[i]['type']) for i in range(parallel)]
-    # tasks = [_screenshot_yahoo(tickers[i]['ticker']) for i in range(parallel)]
-    tasks = [_screenshot_investidor10(tickers[i]['ticker']) for i in range(parallel)]
-    return await asyncio.gather(*tasks)
+    num_tasks = int(parallel/2)
+    tasks1 = [_screenshot_tradingview(tickers[i]['ticker']) for i in range(num_tasks)]
+    # tasks2 = [_screenshot_tipranks(tickers[i]['ticker'], tickers[i]['type']) for i in range(num_tasks)]
+    # tasks3 = [_screenshot_yahoo(tickers[i]['ticker']) for i in range(num_tasks)]
+    tasks4 = [_screenshot_investidor10(tickers[i]['ticker']) for i in range(num_tasks)]
+    return await asyncio.gather(*(tasks1 + tasks4))
 
 async def _run_task(task):
     return task()
