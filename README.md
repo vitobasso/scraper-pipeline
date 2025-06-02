@@ -28,6 +28,7 @@ source .venv/bin/activate
 - https://replit.com/ #free trial
 
 #### Proxy lists
-https://proxyscrape.com/free-proxy-list
-https://free-proxy-list.net/
-https://httpbin.org/ip # test
+https://github.com/proxifly/free-proxy-list # socks proxies work
+https://httpbin.org/ip # url to test a proxy
+https://proxyscrape.com/free-proxy-list # most are broken
+https://free-proxy-list.net/ # most are broken

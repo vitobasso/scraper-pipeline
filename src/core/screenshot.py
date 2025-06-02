@@ -6,7 +6,7 @@ after_load_timeout = config.get('screenshot.browser.after_load_timeout')
 
 async def screenshot(url: str, path: str, proxy: str):
     async with async_playwright() as playwright:
-        proxy_settings: ProxySettings = {'server': f'http://{proxy}'}
+        proxy_settings: ProxySettings = {'server': f'{proxy}'}
 
         # Launch browser with anti-detection options
         browser = await playwright.chromium.launch(
