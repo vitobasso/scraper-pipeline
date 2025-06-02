@@ -27,13 +27,12 @@ def extract_analysis(filename: str):
 
 def extract_fundamentals(filename: str):
     prompt = """
-    A imagem contem fundamentos de uma acao
-    Extraia os seguintes valores DA IMAGEM, nao do seu conhecimento do passado, e retorne JSON:
-        ticker
-        cotacao
-        P/L
-        P/VP
-        DY
+    Extraia da imagem para JSON:
+    1. ticker e cotação
+    2. rentabiliade
+    3. indicadores fundamentalistas
+    4. dados sobre a empresa
+    5. informações sobre a empresa
     """
     _extract(filename, prompt)
 
