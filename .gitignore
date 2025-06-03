@@ -8,5 +8,6 @@ __pycache__
 
 # data and secrets
 .env
+gcp-secret.json
 input
 output

@@ -5,6 +5,15 @@
 brew install python3 poetry
 ```
 
+#### Secrets
+#### 1. Google AI 
+https://aistudio.google.com/apikey
+Add the `GOOGLE_GENAI_API_KEY` var in the `.env` file at the project root.
+
+#### 2. Google Drive
+https://console.cloud.google.com/iam-admin/serviceaccounts/details/113244814507907976994;edit=true/keys?inv=1&invt=AbzKDA&project=api-project-168147909795
+Add key, JSON, download it, name `gcp-secret.json` and place at the project root. 
+
 #### Build project
 ```bash
 poetry install --no-root
