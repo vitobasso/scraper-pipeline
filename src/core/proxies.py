@@ -15,7 +15,7 @@ parallel = config.get('screenshot.parallel')
 db = TinyDB(db_path)
 
 async def run_task(task):
-    proxy = _pick()
+    proxy = pick()
     try:
         await task(proxy)
         _feedback(proxy, True)
@@ -33,7 +33,7 @@ def _feedback(proxy: str, succeeded: bool):
             record['last_succeeded'] = record['last_used']
         db.update(record, Query().proxy == proxy)
 
-def _pick():
+def pick():
     record = _pick_record()
     return record['proxy'] if record else None
 
