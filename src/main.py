@@ -5,8 +5,11 @@
 # from src.stocks.screening_sheet import create_spreadsheet
 # import src.stocks.statusinvest as statusinvest
 # import src.stocks.b3idiv as b3idiv
+import scheduler
 
 if __name__ == '__main__':
+    for i in range(20):
+        scheduler.schedule_next('tradingview')
     # proxy = random_proxy()
     # ticker_screenshot.screenshot_yahoo('bbas3.sa')
     # statusinvest.sync_download()

@@ -40,6 +40,8 @@ async def browser_page(proxy: str, url: str,
         try:
             await page.goto(url, timeout=load_timeout, wait_until=wait_until)
             yield page
+        except Exception:
+            raise
         finally:
             await browser.close()
 
