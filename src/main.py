@@ -4,13 +4,16 @@ from src.stocks import stocks_screenshot
 # from src.stocks.screening_sheet import create_spreadsheet
 import src.stocks.statusinvest as statusinvest
 import src.stocks.b3idiv as b3idiv
+# from src.core.proxies import random_proxy
 
 if __name__ == '__main__':
     # stocks_screenshot.run_tasks()
     # statusinvest.sync_download()
-    b3idiv.sync_download()
+    # b3idiv.sync_download()
     # extract_analysis("output/screenshots/valid/tradingview-BMFBOVESPA-PETR4-20250530T184949.png")
     # extract_analysis("output/screenshots/valid/tipranks-qqq-20250530T180430.png")
     # extract_fundamentals("output/screenshots/valid/investidor10-bbas3-20250601T155718.png")
     # create_spreadsheet()
+    # proxy = random_proxy()
+    pass
 
