@@ -44,7 +44,7 @@ async def _screenshot(site: str, ticker: str, url: str):
     temp_path = f'{screenshot_dir}/temp/{filename}'
     valid_path = f'{screenshot_dir}/valid/{filename}'
     invalid_path = f'{screenshot_dir}/invalid/{filename}'
-    await screenshot(url, temp_path, proxy)
+    await screenshot(proxy, url, temp_path)
     if os.path.exists(temp_path):
         dest_path = valid_path if validate(temp_path) else invalid_path
         _move_file(temp_path, dest_path)
@@ -58,4 +58,4 @@ def download_statusinvest():
     path = f'output/downloads/statusinvest-{timestamp}.csv'
     proxy = random_proxy()
     print(f'downloading csv, path: {path}, proxy: {proxy}')
-    asyncio.run(download(path, random_proxy()))
+    asyncio.run(download(random_proxy(), path))

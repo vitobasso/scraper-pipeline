@@ -1,0 +1,44 @@
+from playwright.async_api import async_playwright, ProxySettings, ViewportSize
+from src.core.config import config
+from typing import Literal
+from contextlib import asynccontextmanager
+
+load_timeout = config.get('screenshot.browser.load_timeout')
+
+@asynccontextmanager
+async def browser_page(proxy: str, url: str,
+                  wait_until: Literal['commit', 'domcontentloaded', 'load', 'networkidle'] = 'domcontentloaded'):
+    async with async_playwright() as playwright:
+        proxy_settings: ProxySettings = {'server': f'{proxy}'}
+
+        browser = await playwright.chromium.launch(
+            headless=True,
+            proxy=proxy_settings,
+            args=[
+                '--disable-blink-features=AutomationControlled',
+                '--no-sandbox',
+                # '--disable-dev-shm-usage',
+                # '--disable-web-security',
+                # '--disable-extensions'
+            ]
+        )
+
+        viewport:ViewportSize = {'width': 1280, 'height': 720}
+        context = await browser.new_context(
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            viewport=viewport,
+            bypass_csp=True
+        )
+
+        await context.set_extra_http_headers({
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': 'https://www.google.com/'
+        })
+
+        page = await context.new_page()
+
+        try:
+            await page.goto(url, timeout=load_timeout, wait_until=wait_until)
+            yield page
+        finally:
+            await browser.close()
