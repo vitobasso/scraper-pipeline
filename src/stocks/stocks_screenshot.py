@@ -2,7 +2,7 @@ import os, csv, datetime, asyncio
 from src.core.proxies import random_proxy
 from src.core.config import config
 from src.core.screenshot import screenshot
-from src.stocks.stocks_image_validate import validate
+from src.core.screenshot_validator import validate
 
 screenshot_dir = config.get('screenshot.path')
 parallel = config.get('screenshot.parallel')
