@@ -3,7 +3,6 @@ from src.core.proxies import random_proxy
 from src.core.config import config
 from src.core.screenshot import screenshot
 from src.stocks.stocks_image_validate import validate
-from src.stocks.download_statusinvest import download
 
 screenshot_dir = config.get('screenshot.path')
 parallel = config.get('screenshot.parallel')
@@ -52,10 +51,3 @@ async def _screenshot(site: str, ticker: str, url: str):
 def _move_file(temp_path, dest_path):
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     os.rename(temp_path, dest_path)
-
-def download_statusinvest():
-    timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-    path = f'output/downloads/statusinvest-{timestamp}.csv'
-    proxy = random_proxy()
-    print(f'downloading csv, path: {path}, proxy: {proxy}')
-    asyncio.run(download(random_proxy(), path))
