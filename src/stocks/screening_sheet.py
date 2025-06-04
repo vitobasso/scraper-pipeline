@@ -1,13 +1,31 @@
-import datetime, csv, re
-from src.core.google_sheets import copy_file, add_worksheet
+import csv, re, calendar
+from datetime import datetime
+from src.core.google_sheets import copy_file, find_worksheet_by_title
 
-template_id = '1kFkYWp_ZflNbYC0QeSRAiILiPjOTvr-81A6YJ1eS92I'
+template_id = '1eWwqMZr4PeuH5siVoICz_XPcWVE8dGEgx_jKaarZ_4Y' #TODO export to file and make it a local resource?
 
 def create_spreadsheet():
+    timestamp = datetime.now().strftime('%Y-%m')
+    spreadsheet = copy_file(template_id, f'screening {timestamp}')
+    _populate_constants(spreadsheet)
+    _populate_screening(spreadsheet)
+    _populate_statusinvest(spreadsheet)
+
+def _populate_constants(spreadsheet):
+    worksheet = find_worksheet_by_title(spreadsheet, 'constants')
+    timestamp = _last_day_of_month().strftime('%d/%m/%Y')
+    worksheet.update("B1", [[timestamp]], value_input_option='USER_ENTERED')
+
+def _populate_screening(spreadsheet):
+    with open('input/ticker-list/acoes-br.csv', 'r') as file:
+        tickers = [[line.strip()] for line in file.readlines()]
+        worksheet = find_worksheet_by_title(spreadsheet, 'screening')
+        worksheet.update("A3", tickers)
+
+def _populate_statusinvest(spreadsheet):
+    worksheet = find_worksheet_by_title(spreadsheet, 'statusinvest')
     data = _load_statusinvest_data()
-    timestamp = datetime.datetime.now().strftime('%Y%m%d')
-    spreadsheet = copy_file(template_id, f'screening-{timestamp}')
-    add_worksheet(spreadsheet, 'statusinvest', data)
+    worksheet.update(values=data)
 
 def _load_statusinvest_data():
     with open('output/downloads/statusinvest-20250602T214159.csv', 'r') as file:
@@ -16,11 +34,11 @@ def _load_statusinvest_data():
 
 def _clean_statusinvest_data(data):
     return [
-        [_clean_value(value) for value in row]
+        [_clean_numbers(value) for value in row]
         for row in data
     ]
 
-def _clean_value(value):
+def _clean_numbers(value):
     replaced = str(value).replace(".", "").replace(",", ".")
     return convert_if_number(replaced)
 
@@ -28,3 +46,8 @@ def convert_if_number(value):
     if isinstance(value, str) and re.fullmatch(r'^-?\d+\.?\d*$', value):
         return float(value)
     return value
+
+def _last_day_of_month():
+    today = datetime.now()
+    _, last_day = calendar.monthrange(today.year, today.month)
+    return datetime(today.year, today.month, last_day)
