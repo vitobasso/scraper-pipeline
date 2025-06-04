@@ -1,6 +1,7 @@
-import os, datetime, asyncio
+import datetime, asyncio, sys
+import re
+
 from src.core.proxies import random_proxy
-from src.core.screenshot_validator import validate
 from src.core.browser_session import browser_page
 from src.core.config import config
 
@@ -25,21 +26,18 @@ def sync_screenshot(site_name: str, ticker: str, url: str):
 async def screenshot(site_name: str, ticker: str, url: str):
     timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
     filename = f'{site_name}-{ticker}-{timestamp}.png'
-    temp_path = f'{output_dir}/temp/{filename}'
-    valid_path = f'{output_dir}/valid/{filename}'
-    invalid_path = f'{output_dir}/invalid/{filename}'
+    temp_path = f'{output_dir}/awaiting-validation/{filename}'
     proxy = random_proxy()
     print(f'taking screenshot, url: {url}, filename: {filename}, proxy: {proxy}')
     await _screenshot(proxy, url, temp_path)
-    if os.path.exists(temp_path):
-        dest_path = valid_path if validate(temp_path) else invalid_path
-        _move_file(temp_path, dest_path)
 
 async def _screenshot(proxy: str, url: str, path: str):
-    async with browser_page(proxy, url, wait_until='load') as page:
-        await page.wait_for_timeout(after_load_timeout)
-        await page.screenshot(path=path, full_page=True, animations='disabled')
+    try:
+        async with browser_page(proxy, url, wait_until='load') as page:
+            await page.wait_for_timeout(after_load_timeout)
+            await page.screenshot(path=path, full_page=True, animations='disabled')
+    except Exception as e:
+        print(f'   failed: {_error_type(e)}', sys.stderr)
 
-def _move_file(temp_path, dest_path):
-    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-    os.rename(temp_path, dest_path)
+def _error_type(e: Exception):
+    return re.match(r'(\w+) .*', type(e).__name__).group(1)
