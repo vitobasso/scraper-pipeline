@@ -1,21 +1,46 @@
-import glob
+import os, glob, sys, time, datetime, random, re, urllib.request
+from pathlib import Path
 from src.core.config import config
-import random
 
-input_dir = config.get('proxies.lists_dir')
+list_dir = 'output/proxy-list'
+timestamp_format = '%Y%m%dT%H%M%S'
+download_url = config.get('proxies.download.url')
 
 def random_proxy():
     return random.choice(proxies)
 
-def _load_all_lists():
-    return [
-        line
-        for file in glob.glob(f"{input_dir}/*")
-        for line in _load_list(file)
-    ]
+def _init():
+    if not _validate_latest_file():
+        _download_list()
+    if not _validate_latest_file():
+        print('failed to download proxy lists', file=sys.stderr)
+        sys.exit(1)
+    file = _latest_file()
+    return _load_list(file)
 
-def _load_list(file: str):
-    with open(file) as f:
+def _validate_latest_file():
+    file = _latest_file()
+    return file and _validate_file(file)
+
+def _validate_file(path: str):
+    file_time = os.path.getctime(path)
+    file_age = time.time() - file_time
+    day_in_seconds = 60 * 60 * 24
+    return file_age < day_in_seconds
+
+def _latest_file():
+    files = glob.glob(f'{list_dir}/*')
+    return max(files) if files else None
+
+def _load_list(path: str):
+    with open(path) as f:
         return f.read().splitlines()
 
-proxies = _load_all_lists()
+def _download_list():
+    timestamp = datetime.datetime.now().strftime(timestamp_format)
+    path = f'{list_dir}/proxify-socks4-{timestamp}.txt'
+    Path(list_dir).mkdir(parents=True, exist_ok=True)
+    print(f'downloading proxy list, url: {download_url}, path: {path}')
+    urllib.request.urlretrieve(download_url, path)
+
+proxies = _init()
