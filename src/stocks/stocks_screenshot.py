@@ -9,7 +9,7 @@ screenshot_dir = config.get('screenshot.path')
 parallel = config.get('screenshot.parallel')
 
 def run_tasks():
-    with open('input/tickers.csv', 'r') as file:
+    with open('input/ticker-list/screening.csv', 'r') as file:
         tickers = [record for record in csv.DictReader(file, fieldnames=['ticker', 'type'])]
     asyncio.run(_run_tasks(tickers))
 
