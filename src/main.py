@@ -1,5 +1,5 @@
 # from src.core.proxies import random_proxy
-# import src.stocks.ticker_screenshot as ticker_screenshot
+import src.stocks.ticker_screenshot as ticker_screenshot
 # from src.stocks.stocks_image_scrape import extract_analysis
 # from src.stocks.stocks_image_scrape import extract_fundamentals
 # from src.stocks.screening_sheet import create_spreadsheet
@@ -12,6 +12,7 @@ if __name__ == '__main__':
         scheduler.schedule_next('yahoo-br')
     # proxy = random_proxy()
     # ticker_screenshot.screenshot_yahoo('bbas3.sa')
+    # ticker_screenshot.screenshot_simplywall()
     # statusinvest.sync_download()
     # b3idiv.sync_download()
     # extract_analysis("output/screenshots/valid/tradingview-BMFBOVESPA-PETR4-20250530T184949.png")

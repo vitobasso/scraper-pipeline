@@ -38,9 +38,14 @@ def _load_list(path: str):
 
 def _download_list():
     timestamp = datetime.datetime.now().strftime(timestamp_format)
-    path = f'{list_dir}/proxify-socks4-{timestamp}.txt'
+    name = _extract_name(download_url)
+    path = f'{list_dir}/proxify-{name}-{timestamp}.txt'
     Path(list_dir).mkdir(parents=True, exist_ok=True)
     print(f'downloading proxy list, url: {download_url}, path: {path}')
     urllib.request.urlretrieve(download_url, path)
+
+def _extract_name(path):
+    return re.search('/(\w+)/data.txt', path).group(1)
+
 
 proxies = _init()
