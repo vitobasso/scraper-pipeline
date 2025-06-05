@@ -13,8 +13,7 @@ genai.configure(api_key=api_key)
 model = genai.GenerativeModel(model_name)
 
 def extract_analysis(path: str):
-    prompt = """
-    Extract from image and return JSON with following properties:
+    prompt = f"""
     - analyst rating (int values)
         buy
         hold
@@ -26,16 +25,26 @@ def extract_analysis(path: str):
         avg
         max (aka high)
     """
-    _extract(path, prompt)
+    _extract_json(path, prompt)
 
 def extract_fundamentals(path: str):
-    prompt = """
-    Extraia da imagem para JSON:
+    prompt = f"""
     1. ticker e cotação
     2. rentabiliade
     3. indicadores fundamentalistas
     4. dados sobre a empresa
     5. informações sobre a empresa
+    """
+    _extract_json(path, prompt)
+
+def _extract_json(path: str, prompt_json_properties: str):
+    prompt = f"""
+    Extract the following data as raw JSON (do not use any markdown formatting or backticks):
+    Fields to extract (partial data is okay):
+    {prompt_json_properties}
+    
+    If extraction fails entirely, reply with:
+    ERROR: <reason, 5 or less words>
     """
     _extract(path, prompt)
 
