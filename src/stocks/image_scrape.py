@@ -14,16 +14,16 @@ model = genai.GenerativeModel(model_name)
 
 def extract_analysis(path: str):
     prompt = f"""
-    - analyst rating (int values)
-        buy
-        hold
-        sell
-        strong buy (optional)
-        strong sell (optional)
-    - price forecast (float values)
-        min (aka low)
-        avg
-        max (aka high)
+    1. analyst rating (int):
+       - strong buy (optional)
+       - buy
+       - hold
+       - sell
+       - strong sell (optional)
+    2. price forecast (float values)
+       - min (aka low)
+       - avg
+       - max (aka high)
     """
     _extract_json(path, prompt)
 
@@ -39,8 +39,10 @@ def extract_fundamentals(path: str):
 
 def _extract_json(path: str, prompt_json_properties: str):
     prompt = f"""
-    Extract the following data as raw JSON (do not use any markdown formatting or backticks):
-    Fields to extract (partial data is okay):
+    Extract the following data as raw JSON.
+    Do not use any markdown formatting or backticks.
+    Partial data is okay.
+    
     {prompt_json_properties}
     
     If extraction fails entirely, reply with:
