@@ -13,10 +13,6 @@ def screenshot_tipranks(ticker: str, ticker_type: str):
 def screenshot_tradingview(ticker: str):
     sync_screenshot(f'tradingview-{ticker}', f'https://tradingview.com/symbols/{ticker}/forecast/')
 
-def screenshot_yahoo(ticker: str):
-    url_ticker = f'{ticker}.sa' if re.match(r'\w{4}\d\d?', ticker) else ticker
-    asyncio.run(_screenshot_yahoo(*_params(f'yahoo-{ticker}', f'https://finance.yahoo.com/quote/{url_ticker}/analysis')))
-
 def screenshot_investidor10(ticker: str):
     sync_screenshot(f'investidor10-{ticker}', f'https://investidor10.com.br/acoes/{ticker}/')
 
@@ -39,16 +35,6 @@ async def _screenshot(proxy: str, url: str, path: str):
         async with browser_page(proxy, url, wait_until='load') as page:
             await page.wait_for_timeout(after_load_timeout)
             await page.screenshot(path=path, full_page=True, animations='disabled')
-    except Exception as e:
-        print(f'   failed: {_error_type(e)}', file=sys.stderr)
-
-async def _screenshot_yahoo(proxy: str, url: str, path: str):
-    print(f'taking screenshot, url: {url}, path: {path}, proxy: {proxy}')
-    try:
-        async with browser_page(proxy, url, wait_until='domcontentloaded') as page:
-            await click(page, 'button[type="submit"][name="reject"]') #TODO optionally
-            await page.wait_for_load_state('domcontentloaded')
-            await page.screenshot(path=path, full_page=True, animations='disabled') #TODO page.locator('selector').screenshot
     except Exception as e:
         print(f'   failed: {_error_type(e)}', file=sys.stderr)
 
