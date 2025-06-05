@@ -1,18 +1,24 @@
-import os, glob, re, random
+import glob, re, random
 import src.stocks.ticker_screenshot as ticker_screenshot
 from src.core.screenshot_validator import validate
 from src.stocks.stocks_image_scrape import extract_analysis
+from typing import Literal
 
 tickers_path = 'input/ticker-list/acoes-br.csv'
 awaiting_validation_path = 'output/screenshots/awaiting-validation'
 awaiting_extraction_path = 'output/screenshots/awaiting-extraction'
 completed_path = 'output/data'
 
+flows = {
+    'tradingview': ticker_screenshot.screenshot_tradingview,
+    'yahoo-br': ticker_screenshot.screenshot_yahoo_br,
+}
+FlowType = Literal[tuple(flows.keys())]
 
-def schedule_next(flow: str):
+def schedule_next(flow: FlowType):
     _try_phase(flow, 'extract', lambda: _get_all_files(awaiting_extraction_path, flow), extract_analysis) or \
     _try_phase(flow, 'validate', lambda: _get_all_files(awaiting_validation_path, flow), validate) or \
-    _try_phase(flow, 'screenshot', lambda: _find_tickers_awaiting_screenshot(flow), ticker_screenshot.screenshot_tradingview)
+    _try_phase(flow, 'screenshot', lambda: _find_tickers_awaiting_screenshot(flow), flows[flow])
 
 
 def _try_phase(flow: str, phase: str, find_input, execute):
