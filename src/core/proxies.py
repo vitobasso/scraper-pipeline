@@ -45,7 +45,7 @@ def _download_list():
     urllib.request.urlretrieve(download_url, path)
 
 def _extract_name(path):
-    return re.search('/(\w+)/data.txt', path).group(1)
+    return re.search('/(\\w+)/data.txt', path).group(1)
 
 
 proxies = _init()

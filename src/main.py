@@ -9,9 +9,9 @@ import scheduler
 
 if __name__ == '__main__':
     for i in range(100):
-        scheduler.schedule_next('yahoo-br')
+        scheduler.schedule_next('yahoo')
     # proxy = random_proxy()
-    # ticker_screenshot.screenshot_yahoo('bbas3.sa')
+    # ticker_screenshot.screenshot_yahoo_br('bbas3')
     # ticker_screenshot.screenshot_simplywall()
     # statusinvest.sync_download()
     # b3idiv.sync_download()
