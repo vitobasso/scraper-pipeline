@@ -46,15 +46,15 @@ async def browser_page(proxy: str, url: str,
             await browser.close()
 
 
-async def click(page, selector: str, button_text: str):
+async def click(page, selector: str, button_text: str = ''):
     button = page.locator(selector, has_text=button_text)
     await button.wait_for(state="visible")
     await button.click()
 
 async def click_download(file_path: str, page, selector: str, button_text: str):
-    download_button = page.locator(selector, has_text=button_text)
-    await download_button.wait_for(state="visible")
+    button = page.locator(selector, has_text=button_text)
+    await button.wait_for(state="visible")
     async with page.expect_download() as download_info:
-        await download_button.click()
+        await button.click()
     download = await download_info.value
     await download.save_as(file_path)

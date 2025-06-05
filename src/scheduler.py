@@ -7,13 +7,14 @@ from typing import Literal
 tickers_path = 'input/ticker-list/acoes-br.csv'
 awaiting_validation_path = 'output/screenshots/awaiting-validation'
 awaiting_extraction_path = 'output/screenshots/awaiting-extraction'
-completed_path = 'output/data'
+completed_path = 'output/data/awaiting-validation'
 
 flows = {
     'tradingview': ticker_screenshot.screenshot_tradingview,
-    'yahoo-br': ticker_screenshot.screenshot_yahoo_br,
+    'yahoo': ticker_screenshot.screenshot_yahoo,
 }
 FlowType = Literal[tuple(flows.keys())]
+
 
 def schedule_next(flow: FlowType):
     _try_phase(flow, 'extract', lambda: _get_all_files(awaiting_extraction_path, flow), extract_analysis) or \
@@ -55,4 +56,3 @@ def _get_all_tickers(dir_path: str, filter_term: str):
 
 def _get_all_files(dir_path: str, filter_term: str):
     return [path for path in glob.glob(f"{dir_path}/*") if filter_term in path]
-
