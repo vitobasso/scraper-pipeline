@@ -5,6 +5,7 @@ from src.core.config import config
 list_dir = 'output/proxy-list'
 timestamp_format = '%Y%m%dT%H%M%S'
 download_url = config.get('proxies.download.url')
+refresh_seconds = 2 * 60 * 60
 
 def random_proxy():
     return random.choice(proxies)
@@ -25,8 +26,7 @@ def _validate_latest_file():
 def _validate_file(path: str):
     file_time = os.path.getctime(path)
     file_age = time.time() - file_time
-    day_in_seconds = 60 * 60 * 24
-    return file_age < day_in_seconds
+    return file_age < refresh_seconds
 
 def _latest_file():
     files = glob.glob(f'{list_dir}/*')

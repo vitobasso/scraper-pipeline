@@ -16,6 +16,9 @@ def screenshot_tradingview(ticker: str):
 def screenshot_yahoo(ticker: str):
     sync_screenshot('yahoo', ticker, f'https://finance.yahoo.com/quote/{ticker}/analysis')
 
+def screenshot_yahoo_br(ticker: str):
+    sync_screenshot('yahoo', ticker, f'https://finance.yahoo.com/quote/{ticker}.sa/analysis')
+
 def screenshot_investidor10(ticker: str):
     sync_screenshot('investidor10', ticker, f'https://investidor10.com.br/acoes/{ticker}/')
 

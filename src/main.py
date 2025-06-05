@@ -8,8 +8,8 @@
 import scheduler
 
 if __name__ == '__main__':
-    for i in range(20):
-        scheduler.schedule_next('tradingview')
+    for i in range(100):
+        scheduler.schedule_next('yahoo-br')
     # proxy = random_proxy()
     # ticker_screenshot.screenshot_yahoo('bbas3.sa')
     # statusinvest.sync_download()
