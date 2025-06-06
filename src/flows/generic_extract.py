@@ -37,15 +37,15 @@ def _extract_json(image_path: str, prompt_json_properties: str):
     
     If extraction fails entirely, reply with:
     ERROR: <reason, 5 or less words>
-    """
+    """ #TODO tell if there's a popup in front or error message in the page
     _extract(image_path, prompt)
 
 def _extract(image_path: str, prompt: str):
     print(f'extracting data, path: {image_path}')
     image = Image.open(image_path)
     response = model.generate_content([prompt, image])
-    json_path = f'{data_dir}/{_filename_without_extension(image_path)}.json'
-    with open(json_path, "w") as file:
+    data_path = f'{data_dir}/{_filename_without_extension(image_path)}.json'
+    with open(data_path, "w") as file:
         file.write(response.text)
     consumed_path = f'{consumed_dir}/{os.path.basename(image_path)}'
     os.rename(image_path, consumed_path)

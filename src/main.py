@@ -6,4 +6,5 @@ if __name__ == '__main__':
         scheduler.schedule_next(yahoo.flow())
     # proxy = random_proxy()
     # yahoo.compile_data()
+    # yahoo.screenshot('cmig4')
     pass
