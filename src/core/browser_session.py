@@ -61,7 +61,7 @@ async def click_download(file_path: str, page, selector: str, button_text: str):
     download = await download_info.value
     await download.save_as(file_path)
 
-def error_type(e: Exception):
+def error_name(e: Exception):
     if isinstance(e, TimeoutError):
         return type(e).__name__
     if isinstance(e, PlaywrightError):

@@ -1,7 +1,8 @@
-import os, re, google.generativeai as genai
+import os, google.generativeai as genai
 from PIL import Image
 from dotenv import load_dotenv
 from src.config import visual_llm_model as model_name
+from src.core import util
 
 json_dir = 'output/data/awaiting-validation'
 consumed_dir = 'output/screenshots/consumed'
@@ -43,18 +44,12 @@ def _extract(image_path: str, prompt: str):
     image = Image.open(image_path)
     print(f'extracting data, path: {image_path}')
     response = model.generate_content([prompt, image])
-    json_path = f'{json_dir}/{_get_filename_without_extension(image_path)}.json'
+    json_path = f'{json_dir}/{_filename_without_extension(image_path)}.json'
     with open(json_path, "w") as file:
         file.write(response.text)
-    consumed_path = f'{consumed_dir}/{_get_filename(image_path)}'
-    _move_file(image_path, consumed_path)
+    consumed_path = f'{consumed_dir}/{os.path.basename(image_path)}'
+    util.move_file(image_path, consumed_path)
 
-def _get_filename(path: str):
-    return re.match(r'.*/(.*)', path).group(1)
+def _filename_without_extension(path: str):
+    return os.path.splitext(os.path.basename(path))[0]
 
-def _get_filename_without_extension(path: str):
-    return re.match(r'.*/(.*)\.png', path).group(1)
-
-def _move_file(src_path, dst_path):
-    os.makedirs(os.path.dirname(dst_path), exist_ok=True)
-    os.rename(src_path, dst_path)

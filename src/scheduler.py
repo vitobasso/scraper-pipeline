@@ -1,5 +1,6 @@
-import glob, re, random
+import random
 from typing import Callable, TypedDict
+from src.core.util import get_ticker, get_all_files
 
 tickers_path = 'input/ticker-list/acoes-br.csv'
 awaiting_screenshot_validation_path = 'output/screenshots/awaiting-validation'
@@ -18,9 +19,9 @@ class Flow(TypedDict):
 
 def schedule_next(flow: Flow):
     flow_name = flow['name']
-    _try_phase(flow['validate_data'], lambda: _get_all_files(awaiting_data_validation_path, flow_name)) or \
-    _try_phase(flow['extract_data'], lambda: _get_all_files(awaiting_extraction_path, flow_name)) or \
-    _try_phase(flow['validate_screenshot'], lambda: _get_all_files(awaiting_screenshot_validation_path, flow_name)) or \
+    _try_phase(flow['validate_data'], lambda: get_all_files(awaiting_data_validation_path, flow_name)) or \
+    _try_phase(flow['extract_data'], lambda: get_all_files(awaiting_extraction_path, flow_name)) or \
+    _try_phase(flow['validate_screenshot'], lambda: get_all_files(awaiting_screenshot_validation_path, flow_name)) or \
     _try_phase(flow['screenshot'], lambda: _find_tickers_awaiting_screenshot(flow_name))
 
 
@@ -49,13 +50,5 @@ def _find_tickers_awaiting_screenshot(filter_term: str):
     )
 
 
-def _get_ticker(path: str):
-    return re.match(r'.*/\w+?-(\w+)+.*', path).group(1)
-
-
 def _get_all_tickers(dir_path: str, filter_term: str):
-    return [_get_ticker(path) for path in glob.glob(f"{dir_path}/*") if filter_term in path]
-
-
-def _get_all_files(dir_path: str, filter_term: str):
-    return [path for path in glob.glob(f"{dir_path}/*") if filter_term in path]
+    return [get_ticker(path) for path in get_all_files(dir_path, filter_term)]
