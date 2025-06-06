@@ -1,6 +1,7 @@
 import csv, re, calendar
 from datetime import datetime
 from src.core.google_sheets import copy_file, find_worksheet_by_title
+import src.stocks.flow_yahoo as flow_yahoo
 
 template_id = '1eWwqMZr4PeuH5siVoICz_XPcWVE8dGEgx_jKaarZ_4Y' #TODO export to file and make it a local resource?
 
@@ -9,6 +10,7 @@ def create_spreadsheet():
     spreadsheet = copy_file(template_id, f'screening {timestamp}')
     _populate_constants(spreadsheet)
     _populate_screening(spreadsheet)
+    _populate_forecast(spreadsheet)
     _populate_statusinvest(spreadsheet)
 
 def _populate_constants(spreadsheet):
@@ -21,6 +23,11 @@ def _populate_screening(spreadsheet):
         tickers = [[line.strip()] for line in file.readlines()]
         worksheet = find_worksheet_by_title(spreadsheet, 'screening')
         worksheet.update("A3", tickers)
+
+def _populate_forecast(spreadsheet):
+    data = flow_yahoo.compile_data()
+    worksheet = find_worksheet_by_title(spreadsheet, 'forecast')
+    worksheet.update("A3", data)
 
 def _populate_statusinvest(spreadsheet):
     worksheet = find_worksheet_by_title(spreadsheet, 'statusinvest')

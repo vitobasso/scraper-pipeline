@@ -1,4 +1,4 @@
-import os, re, asyncio, sys, json
+import os, re, asyncio, sys, glob, json
 from src.core.browser_session import browser_page, click
 from src.stocks.ticker_screenshot import _params, _error_type
 from src.stocks.image_scrape import _extract_json
@@ -29,11 +29,11 @@ async def _reject_cookies(page):
 def extract_data(path: str):
     prompt = f"""
     1. analyst_rating (int values):
-       - strong_buy (optional)
+       - strong_buy
        - buy
        - hold
+       - underperform
        - sell
-       - strong_sell (optional)
         
         You should see a stacked bar chart. Use the latest (rightmost) month.
         The taller segments will have numbers. Use them when available [[priority]].
@@ -44,9 +44,9 @@ def extract_data(path: str):
             - estimate their numbers based on relative height (distribute the remainder)
         
     2. price_forecast (float values)
-       - min (aka low)
+       - min
        - avg
-       - max (aka high)
+       - max
     """
     _extract_json(path, prompt)
 
@@ -64,6 +64,25 @@ def _validate_data(path):
         return all(k in data for k in ("analyst_rating", "price_forecast"))
     except Exception:
         return False
+
+def compile_data():
+    return [_compile_row(path) for path in _get_all_files(f'{data_dir}/ready', 'yahoo')]
+
+def _compile_row(path):
+    ticker = _get_ticker(path)
+    with open(path) as file:
+        data = json.load(file)
+        analyst_rating = data.get('analyst_rating') or {}
+        price_forecast = data.get('price_forecast') or {}
+        return [ticker, None, None, None, None, None, analyst_rating.get('strong_buy'), analyst_rating.get('buy'),
+                analyst_rating.get('hold'), analyst_rating.get('sell'), analyst_rating.get('strong_sell'), #TODO underperform and sell
+                price_forecast.get('min'), price_forecast.get('avg'), price_forecast.get('max')]
+
+def _get_ticker(path: str):
+    return re.match(r'.*/\w+?-(\w+)+.*', path).group(1)
+
+def _get_all_files(dir_path: str, filter_term: str):
+    return [path for path in glob.glob(f"{dir_path}/*") if filter_term in path]
 
 def _move_file(src_path, dst_path):
     os.makedirs(os.path.dirname(dst_path), exist_ok=True)
