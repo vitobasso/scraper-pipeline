@@ -1,18 +1,18 @@
 import os, easyocr, warnings
 from src.config import output_dir
-from src.core import util
+from src.core.util import mkdir
 
-screenshot_dir = f'{output_dir}/screenshots'
 ocr_min_lines = 50
+
+valid_dir = mkdir(f'{output_dir}/screenshots/awaiting-extraction')
+invalid_dir = mkdir(f'{output_dir}/screenshots/failed-validation')
 warnings.filterwarnings("ignore", message=".*pin_memory.*MPS.*")
 reader = easyocr.Reader(['en'])
 
 def validate(image_path: str):
-    filename = os.path.basename(image_path)
-    valid_path = f'{screenshot_dir}/awaiting-extraction/{filename}'
-    invalid_path = f'{screenshot_dir}/failed-validation/{filename}'
-    dest_path = valid_path if _validate(image_path) else invalid_path
-    util.move_file(image_path, dest_path)
+    dest_dir = valid_dir if _validate(image_path) else invalid_dir
+    dest_path = f'{dest_dir}/{os.path.basename(image_path)}'
+    os.rename(image_path, dest_path)
 
 def _validate(image_path: str):
     lines = reader.readtext(image_path, detail=0)
