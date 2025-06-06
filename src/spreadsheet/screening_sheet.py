@@ -47,9 +47,9 @@ def _clean_statusinvest_data(data):
 
 def _clean_numbers(value):
     replaced = str(value).replace(".", "").replace(",", ".")
-    return convert_if_number(replaced)
+    return _convert_if_number(replaced)
 
-def convert_if_number(value):
+def _convert_if_number(value):
     if isinstance(value, str) and re.fullmatch(r'^-?\d+\.?\d*$', value):
         return float(value)
     return value
