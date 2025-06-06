@@ -1,3 +1,5 @@
+import re
+from playwright._impl._errors import TimeoutError, Error as PlaywrightError
 from playwright.async_api import async_playwright, ProxySettings, ViewportSize
 from src.core.config import config
 from typing import Literal
@@ -59,3 +61,12 @@ async def click_download(file_path: str, page, selector: str, button_text: str):
         await button.click()
     download = await download_info.value
     await download.save_as(file_path)
+
+def error_type(e: Exception):
+    if isinstance(e, TimeoutError):
+        return type(e).__name__
+    if isinstance(e, PlaywrightError):
+        match = re.search(r'ERR_\w+', str(e))
+        return match.group(0) if match else str(e)
+    else:
+        return str(e)
