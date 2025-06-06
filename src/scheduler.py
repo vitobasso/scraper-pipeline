@@ -1,7 +1,7 @@
 import glob, re, random
-import src.stocks.ticker_screenshot as ticker_screenshot
-import src.stocks.yahoo as yahoo
-import src.stocks.image_scrape as image_scrape
+import src.flows.ticker_screenshot as ticker_screenshot
+import src.flows.yahoo as yahoo
+import src.flows.image_extract as image_extract
 from src.core.screenshot_validator import validate
 from typing import Literal
 
@@ -14,7 +14,7 @@ completed_path = 'output/data/awaiting-validation'
 flows = {
     'tradingview': {
         'screenshot': ticker_screenshot.screenshot_tradingview,
-        'extract': image_scrape.extract_analysis,
+        'extract': image_extract.extract_analysis,
         'validate-data': lambda: None,
     },
     'yahoo': {

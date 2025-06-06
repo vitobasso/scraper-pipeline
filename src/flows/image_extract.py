@@ -5,7 +5,7 @@ from src.core.config import config
 
 json_dir = 'output/data/awaiting-validation'
 consumed_dir = 'output/screenshots/consumed'
-model_name = config.get('image_scrape.model')
+model_name = config.get('image_extract.model')
 
 load_dotenv()
 api_key = os.getenv('GOOGLE_GENAI_API_KEY')
