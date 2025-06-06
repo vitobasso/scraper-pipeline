@@ -1,7 +1,7 @@
 import os, re, asyncio, sys, json
 from src.config import output_dir
 from src.core.browser_session import browser_page, click, error_name
-from src.core.util import move_file, get_all_files, get_ticker
+from src.core.util import move_file, all_files, get_ticker
 from src.flows.generic_screenshot import params
 from src.flows.generic_screenshot_validate import validate as validate_screenshot
 from src.flows.generic_extract import _extract_json
@@ -78,7 +78,7 @@ def _validate_data(path):
         return False
 
 def compile_data():
-    return [_compile_row(path) for path in get_all_files(f'{data_dir}/ready', 'yahoo')]
+    return [_compile_row(path) for path in all_files(f'{data_dir}/ready', 'yahoo')]
 
 def _compile_row(path):
     ticker = get_ticker(path)

@@ -1,6 +1,6 @@
 import random
 from typing import Callable, TypedDict
-from src.core.util import get_ticker, get_all_files
+from src.core.util import get_ticker, all_files
 from src.config import output_dir
 
 tickers_path = 'input/ticker-list/acoes-br.csv'
@@ -20,10 +20,10 @@ class Flow(TypedDict):
 
 def schedule_next(flow: Flow):
     flow_name = flow['name']
-    _try_phase(flow['validate_data'], lambda: get_all_files(awaiting_data_validation_path, flow_name)) or \
-    _try_phase(flow['extract_data'], lambda: get_all_files(awaiting_extraction_path, flow_name)) or \
-    _try_phase(flow['validate_screenshot'], lambda: get_all_files(awaiting_screenshot_validation_path, flow_name)) or \
-    _try_phase(flow['screenshot'], lambda: _find_tickers_awaiting_screenshot(flow_name))
+    _try_phase(flow['validate_data'], lambda: all_files(awaiting_data_validation_path, flow_name)) or \
+    _try_phase(flow['extract_data'], lambda: all_files(awaiting_extraction_path, flow_name)) or \
+    _try_phase(flow['validate_screenshot'], lambda: all_files(awaiting_screenshot_validation_path, flow_name)) or \
+    _try_phase(flow['screenshot'], lambda: _all_tickers_awaiting_screenshot(flow_name))
 
 
 def _try_phase(execute, find_input):
@@ -41,15 +41,15 @@ def _load_tickers():
         return [line.strip().lower() for line in file.readlines()]
 
 
-def _find_tickers_awaiting_screenshot(filter_term: str):
+def _all_tickers_awaiting_screenshot(filter_term: str):
     return list(
         set(_load_tickers()) \
-        - set(_get_all_tickers(completed_path, filter_term)) \
-        - set(_get_all_tickers(awaiting_data_validation_path, filter_term)) \
-        - set(_get_all_tickers(awaiting_extraction_path, filter_term)) \
-        - set(_get_all_tickers(awaiting_screenshot_validation_path, filter_term))
+        - set(_all_tickers(completed_path, filter_term)) \
+        - set(_all_tickers(awaiting_data_validation_path, filter_term)) \
+        - set(_all_tickers(awaiting_extraction_path, filter_term)) \
+        - set(_all_tickers(awaiting_screenshot_validation_path, filter_term))
     )
 
 
-def _get_all_tickers(dir_path: str, filter_term: str):
-    return [get_ticker(path) for path in get_all_files(dir_path, filter_term)]
+def _all_tickers(dir_path: str, filter_term: str):
+    return [get_ticker(path) for path in all_files(dir_path, filter_term)]
