@@ -4,7 +4,7 @@ from src.core.browser_session import browser_page, click, error_name
 from src.core.util import mkdir, all_files, get_ticker
 from src.flows.generic_screenshot import params
 from src.flows.generic_screenshot_validate import validate as validate_screenshot
-from src.flows.generic_extract import _extract_json
+from src.flows.generic_extract import extract_json
 
 data_dir = f'{output_dir}/data'
 valid_data_dir = mkdir(f'{data_dir}/ready')
@@ -69,7 +69,7 @@ def extract_data(path: str):
        - avg
        - max
     """
-    _extract_json(path, prompt)
+    extract_json(path, prompt)
 
 def validate_data(path):
     dest_dir = valid_data_dir if _validate_data(path) else invalid_data_dir

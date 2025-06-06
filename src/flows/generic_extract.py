@@ -12,22 +12,7 @@ api_key = os.getenv('GOOGLE_GENAI_API_KEY')
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel(model_name)
 
-def extract_analysis(image_path: str):
-    prompt = f"""
-    1. analyst_rating (int):
-       - strong_buy (optional)
-       - buy
-       - hold
-       - sell
-       - strong_sell (optional)
-    2. price_forecast (float values)
-       - min (aka low)
-       - avg
-       - max (aka high)
-    """
-    _extract_json(image_path, prompt)
-
-def _extract_json(image_path: str, prompt_json_properties: str):
+def extract_json(image_path: str, prompt_json_properties: str):
     prompt = f"""
     Extract the following data as raw JSON.
     Do not use any markdown formatting or backticks.
@@ -35,12 +20,14 @@ def _extract_json(image_path: str, prompt_json_properties: str):
     
     {prompt_json_properties}
     
-    If extraction fails entirely, reply with:
-    ERROR: <reason, 5 or less words>
-    """ #TODO tell if there's a popup in front or error message in the page
-    _extract(image_path, prompt)
+    If extraction fails entirely, give concise feedback instead:
+    E.g. "A popup was blocking the view" 
+      or "Error: 404 not found"
+      or "Found no price forecast data"
+    """
+    extract(image_path, prompt)
 
-def _extract(image_path: str, prompt: str):
+def extract(image_path: str, prompt: str):
     print(f'extracting data, path: {image_path}')
     image = Image.open(image_path)
     response = model.generate_content([prompt, image])

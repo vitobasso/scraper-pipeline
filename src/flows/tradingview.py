@@ -2,7 +2,7 @@ import asyncio, sys
 from src.core.browser_session import browser_page, click, error_name
 from src.flows.generic_screenshot import params
 from src.flows.generic_screenshot_validate import validate as validate_screenshot
-from src.flows import generic_extract
+from src.flows.generic_extract import extract_json
 
 
 def flow():
@@ -10,7 +10,7 @@ def flow():
         'name': 'investidor10',
         'screenshot': screenshot,
         'validate_screenshot': validate_screenshot,
-        'extract_data': generic_extract.extract_analysis,
+        'extract_data': extract_data,
         'validate_data': lambda: None,
     }
 
@@ -36,3 +36,19 @@ def common_ancestor(page, texts: list[str]):
 
 def _xpath_contains(text: str):
     return f".//text()[contains(., '{text}')]"
+
+
+def extract_data(image_path: str):
+    prompt = f"""
+    1. analyst_rating (int):
+       - strong_buy
+       - buy
+       - hold
+       - sell
+       - strong_sell
+    2. price_forecast (float values)
+       - min
+       - avg
+       - max
+    """
+    extract_json(image_path, prompt)
