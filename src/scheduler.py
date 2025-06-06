@@ -1,6 +1,6 @@
 import glob, re, random
 import src.stocks.ticker_screenshot as ticker_screenshot
-import src.stocks.flow_yahoo as flow_yahoo
+import src.stocks.yahoo as yahoo
 import src.stocks.image_scrape as image_scrape
 from src.core.screenshot_validator import validate
 from typing import Literal
@@ -18,9 +18,9 @@ flows = {
         'validate-data': lambda: None,
     },
     'yahoo': {
-        'screenshot': flow_yahoo.screenshot_yahoo,
-        'extract': flow_yahoo.extract_data,
-        'validate-data': flow_yahoo.validate_data,
+        'screenshot': yahoo.screenshot,
+        'extract': yahoo.extract_data,
+        'validate-data': yahoo.validate_data,
     },
 }
 FlowType = Literal[tuple(flows.keys())]
