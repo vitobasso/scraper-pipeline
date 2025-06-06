@@ -1,8 +1,7 @@
-import re, datetime, asyncio, sys
+import datetime, asyncio, sys
 from src.core.config import config
 from src.core.proxies import random_proxy
-from src.core.browser_session import browser_page, click
-from playwright._impl._errors import TimeoutError, Error as PlaywrightError
+from src.core.browser_session import browser_page, error_type
 
 output_dir = 'output/screenshots'
 after_load_timeout = config.get('screenshot.browser.after_load_timeout')
@@ -13,16 +12,13 @@ def screenshot_tipranks(ticker: str, ticker_type: str):
 def screenshot_tradingview(ticker: str):
     sync_screenshot(f'tradingview-{ticker}', f'https://tradingview.com/symbols/{ticker}/forecast/')
 
-def screenshot_investidor10(ticker: str):
-    sync_screenshot(f'investidor10-{ticker}', f'https://investidor10.com.br/acoes/{ticker}/')
-
 def screenshot_simplywall():
     sync_screenshot('simplywall.st', 'https://simplywall.st/stocks/br/top-gainers')
 
 def sync_screenshot(key: str, url: str):
-    asyncio.run(_screenshot(*_params(key, url)))
+    asyncio.run(_screenshot(*params(key, url)))
 
-def _params(key: str, url: str):
+def params(key: str, url: str):
     timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
     filename = f'{key}-{timestamp}.png'
     output_path = f'{output_dir}/awaiting-validation/{filename}'
@@ -36,13 +32,4 @@ async def _screenshot(proxy: str, url: str, path: str):
             await page.wait_for_timeout(after_load_timeout)
             await page.screenshot(path=path, full_page=True, animations='disabled')
     except Exception as e:
-        print(f'   failed: {_error_type(e)}', file=sys.stderr)
-
-def _error_type(e: Exception):
-    if isinstance(e, TimeoutError):
-        return type(e).__name__
-    if isinstance(e, PlaywrightError):
-        match = re.search(r'ERR_\w+', str(e))
-        return match.group(0) if match else str(e)
-    else:
-        return str(e)
+        print(f'failed: {error_type(e)}', file=sys.stderr)

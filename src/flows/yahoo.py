@@ -1,13 +1,13 @@
 import os, re, asyncio, sys, glob, json
-from src.core.browser_session import browser_page, click
-from src.flows.ticker_screenshot import _params, _error_type
-from src.flows.image_extract import _extract_json
+from src.core.browser_session import browser_page, click, error_type
+from src.flows.generic_screenshot import params
+from src.flows.generic_extract import _extract_json
 
 data_dir = 'output/data'
 
 def screenshot(ticker: str):
     url_ticker = f'{ticker}.sa' if re.match(r'\w{4}\d\d?', ticker) else ticker
-    asyncio.run(_screenshot(*_params(f'yahoo-{ticker}', f'https://finance.yahoo.com/quote/{url_ticker}/analysis')))
+    asyncio.run(_screenshot(*params(f'yahoo-{ticker}', f'https://finance.yahoo.com/quote/{url_ticker}/analysis')))
 
 async def _screenshot(proxy: str, url: str, path: str):
     print(f'taking screenshot, url: {url}, path: {path}, proxy: {proxy}')
@@ -17,7 +17,7 @@ async def _screenshot(proxy: str, url: str, path: str):
             await page.locator('div.cards-container').screenshot(path=path)
             # await page.screenshot(path=path, full_page=True)
     except Exception as e:
-        print(f'failed: {_error_type(e)}', file=sys.stderr)
+        print(f'failed: {error_type(e)}', file=sys.stderr)
 
 async def _reject_cookies(page):
     try:

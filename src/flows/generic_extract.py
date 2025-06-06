@@ -12,7 +12,7 @@ api_key = os.getenv('GOOGLE_GENAI_API_KEY')
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel(model_name)
 
-def extract_analysis(path: str):
+def extract_analysis(image_path: str):
     prompt = f"""
     1. analyst_rating (int):
        - strong_buy (optional)
@@ -25,19 +25,9 @@ def extract_analysis(path: str):
        - avg
        - max (aka high)
     """
-    _extract_json(path, prompt)
+    _extract_json(image_path, prompt)
 
-def extract_fundamentals(path: str):
-    prompt = f"""
-    1. ticker e cotação
-    2. rentabiliade
-    3. indicadores fundamentalistas
-    4. dados sobre a empresa
-    5. informações sobre a empresa
-    """
-    _extract_json(path, prompt)
-
-def _extract_json(path: str, prompt_json_properties: str):
+def _extract_json(image_path: str, prompt_json_properties: str):
     prompt = f"""
     Extract the following data as raw JSON.
     Do not use any markdown formatting or backticks.
@@ -48,17 +38,17 @@ def _extract_json(path: str, prompt_json_properties: str):
     If extraction fails entirely, reply with:
     ERROR: <reason, 5 or less words>
     """
-    _extract(path, prompt)
+    _extract(image_path, prompt)
 
-def _extract(path: str, prompt: str):
-    image = Image.open(path)
-    print(f'extracting data, path: {path}')
+def _extract(image_path: str, prompt: str):
+    image = Image.open(image_path)
+    print(f'extracting data, path: {image_path}')
     response = model.generate_content([prompt, image])
-    json_path = f'{json_dir}/{_get_filename_without_extension(path)}.json'
+    json_path = f'{json_dir}/{_get_filename_without_extension(image_path)}.json'
     with open(json_path, "w") as file:
         file.write(response.text)
-    consumed_path = f'{consumed_dir}/{_get_filename(path)}'
-    _move_file(path, consumed_path)
+    consumed_path = f'{consumed_dir}/{_get_filename(image_path)}'
+    _move_file(image_path, consumed_path)
 
 def _get_filename(path: str):
     return re.match(r'.*/(.*)', path).group(1)
