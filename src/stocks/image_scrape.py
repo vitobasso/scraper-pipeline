@@ -14,13 +14,13 @@ model = genai.GenerativeModel(model_name)
 
 def extract_analysis(path: str):
     prompt = f"""
-    1. analyst rating (int):
-       - strong buy (optional)
+    1. analyst_rating (int):
+       - strong_buy (optional)
        - buy
        - hold
        - sell
-       - strong sell (optional)
-    2. price forecast (float values)
+       - strong_sell (optional)
+    2. price_forecast (float values)
        - min (aka low)
        - avg
        - max (aka high)

@@ -1,7 +1,9 @@
-import re, asyncio, sys
+import os, re, asyncio, sys, json
 from src.core.browser_session import browser_page, click
 from src.stocks.ticker_screenshot import _params, _error_type
 from src.stocks.image_scrape import _extract_json
+
+data_dir = 'output/data'
 
 def screenshot_yahoo(ticker: str):
     url_ticker = f'{ticker}.sa' if re.match(r'\w{4}\d\d?', ticker) else ticker
@@ -24,14 +26,14 @@ async def _reject_cookies(page):
     except Exception as e:
         pass
 
-def extract_analysis(path: str):
+def extract_data(path: str):
     prompt = f"""
-    1. analyst rating (int values):
-       - strong buy (optional)
+    1. analyst_rating (int values):
+       - strong_buy (optional)
        - buy
        - hold
        - sell
-       - strong sell (optional)
+       - strong_sell (optional)
         
         You should see a stacked bar chart. Use the latest (rightmost) month.
         The taller segments will have numbers. Use them when available [[priority]].
@@ -41,9 +43,28 @@ def extract_analysis(path: str):
             - check how many segments are missing a number (the short segments)
             - estimate their numbers based on relative height (distribute the remainder)
         
-    2. price forecast (float values)
+    2. price_forecast (float values)
        - min (aka low)
        - avg
        - max (aka high)
     """
     _extract_json(path, prompt)
+
+def validate_data(path):
+    filename = os.path.basename(path)
+    valid_path = f'{data_dir}/ready/{filename}'
+    invalid_path = f'{data_dir}/failed-validation/{filename}'
+    dest_path = valid_path if _validate_data(path) else invalid_path
+    _move_file(path, dest_path)
+
+def _validate_data(path):
+    try:
+        with open(path) as f:
+            data = json.load(f)
+        return all(k in data for k in ("analyst_rating", "price_forecast"))
+    except Exception:
+        return False
+
+def _move_file(src_path, dst_path):
+    os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+    os.rename(src_path, dst_path)
