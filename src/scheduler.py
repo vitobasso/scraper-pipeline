@@ -1,12 +1,13 @@
 import random
 from typing import Callable, TypedDict
 from src.core.util import get_ticker, get_all_files
+from src.config import output_dir
 
 tickers_path = 'input/ticker-list/acoes-br.csv'
-awaiting_screenshot_validation_path = 'output/screenshots/awaiting-validation'
-awaiting_extraction_path = 'output/screenshots/awaiting-extraction'
-awaiting_data_validation_path = 'output/data/awaiting-validation'
-completed_path = 'output/data/awaiting-validation'
+awaiting_screenshot_validation_path = f'{output_dir}/screenshots/awaiting-validation'
+awaiting_extraction_path = f'{output_dir}/screenshots/awaiting-extraction'
+awaiting_data_validation_path = f'{output_dir}/data/awaiting-validation'
+completed_path = f'{output_dir}/data/awaiting-validation'
 
 
 class Flow(TypedDict):

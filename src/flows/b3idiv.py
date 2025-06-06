@@ -1,4 +1,5 @@
 import datetime, asyncio
+from src.config import output_dir
 from src.core.proxies import random_proxy
 from src.core.browser_session import browser_page, click_download
 
@@ -7,7 +8,7 @@ def sync_download():
 
 async def download():
     timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-    path = f'output/downloads/b3idiv-{timestamp}.csv'
+    path = f'{output_dir}/downloads/b3idiv-{timestamp}.csv'
     proxy = random_proxy()
     print(f'downloading csv, path: {path}, proxy: {proxy}')
     return await _download(proxy, path)

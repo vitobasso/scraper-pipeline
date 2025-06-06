@@ -17,7 +17,7 @@ def sync_screenshot(key: str, url: str):
 def params(key: str, url: str):
     timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
     filename = f'{key}-{timestamp}.png'
-    output_path = f'{output_dir}/awaiting-validation/{filename}'
+    output_path = f'{output_dir}/screenshots/awaiting-validation/{filename}'
     proxy = random_proxy()
     return proxy, url, output_path
 

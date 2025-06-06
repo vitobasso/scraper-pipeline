@@ -1,7 +1,8 @@
 import os, easyocr, warnings
+from src.config import output_dir
 from src.core import util
 
-screenshot_dir = 'output/screenshots'
+screenshot_dir = f'{output_dir}/screenshots'
 ocr_min_lines = 50
 warnings.filterwarnings("ignore", message=".*pin_memory.*MPS.*")
 reader = easyocr.Reader(['en'])

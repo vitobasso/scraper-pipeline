@@ -1,11 +1,12 @@
 import os, re, asyncio, sys, json
+from src.config import output_dir
 from src.core.browser_session import browser_page, click, error_name
 from src.core.util import move_file, get_all_files, get_ticker
 from src.flows.generic_screenshot import params
 from src.flows.generic_screenshot_validate import validate as validate_screenshot
 from src.flows.generic_extract import _extract_json
 
-data_dir = 'output/data'
+data_dir = f'{output_dir}/data'
 
 def flow():
     return {
