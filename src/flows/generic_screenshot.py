@@ -1,10 +1,9 @@
 import datetime, asyncio, sys
-from src.core.config import config
+from src.config import output_dir
 from src.core.proxies import random_proxy
 from src.core.browser_session import browser_page, error_type
 
-output_dir = 'output/screenshots'
-after_load_timeout = config.get('screenshot.browser.after_load_timeout')
+after_load_timeout = 0
 
 def screenshot_tipranks(ticker: str, ticker_type: str):
     sync_screenshot(f'tipranks-{ticker}', f'https://www.tipranks.com/{ticker_type}/{ticker}/forecast')

@@ -1,10 +1,9 @@
 import os, glob, sys, time, datetime, random, re, urllib.request
 from pathlib import Path
-from src.core.config import config
+from src.config import proxies_url as download_url
 
 list_dir = 'output/proxy-list'
 timestamp_format = '%Y%m%dT%H%M%S'
-download_url = config.get('proxies.download.url')
 refresh_seconds = 2 * 60 * 60
 
 def random_proxy():
