@@ -1,6 +1,16 @@
 from src.flows.generic_extract import _extract_json
 from src.flows.generic_screenshot import sync_screenshot
+from src.flows.generic_screenshot_validate import validate as validate_screenshot
 
+
+def flow():
+    return {
+        'name': 'investidor10',
+        'screenshot': screenshot,
+        'validate_screenshot': validate_screenshot,
+        'extract_data': extract_data,
+        'validate_data': lambda: None,
+    }
 
 def screenshot(ticker: str):
     sync_screenshot(f'investidor10-{ticker}', f'https://investidor10.com.br/acoes/{ticker}/')

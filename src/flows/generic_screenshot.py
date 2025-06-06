@@ -9,9 +9,6 @@ after_load_timeout = config.get('screenshot.browser.after_load_timeout')
 def screenshot_tipranks(ticker: str, ticker_type: str):
     sync_screenshot(f'tipranks-{ticker}', f'https://www.tipranks.com/{ticker_type}/{ticker}/forecast')
 
-def screenshot_tradingview(ticker: str):
-    sync_screenshot(f'tradingview-{ticker}', f'https://tradingview.com/symbols/{ticker}/forecast/')
-
 def screenshot_simplywall():
     sync_screenshot('simplywall.st', 'https://simplywall.st/stocks/br/top-gainers')
 
