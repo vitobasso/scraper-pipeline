@@ -30,7 +30,6 @@ async def _screenshot(proxy: str, url: str, path: str):
             await _reject_cookies(page)
             await _dismiss_upgrade(page)
             await page.locator('div.cards-container').screenshot(path=path)
-            # await page.screenshot(path=path, full_page=True)
     except Exception as e:
         print(f'failed: {error_name(e)}', file=sys.stderr)
 
