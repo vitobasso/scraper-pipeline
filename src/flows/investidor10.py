@@ -1,4 +1,4 @@
-from src.flows.generic_extract import _extract_json
+from src.flows.generic_extract import extract_json
 from src.flows.generic_screenshot import sync_screenshot
 from src.flows.generic_screenshot_validate import validate as validate_screenshot
 
@@ -24,4 +24,4 @@ def extract_data(image_path: str):
     4. dados sobre a empresa
     5. informações sobre a empresa
     """
-    _extract_json(image_path, prompt)
+    extract_json(image_path, prompt)
