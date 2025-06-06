@@ -35,7 +35,7 @@ def _populate_statusinvest(spreadsheet):
     worksheet.update(values=data)
 
 def _load_statusinvest_data():
-    with open('output/downloads/statusinvest-20250602T214159.csv', 'r') as file:
+    with open('output/20250605/downloads/statusinvest-20250602T214159.csv', 'r') as file: # TODO dynamic path
         rows = [row for row in csv.reader(file, delimiter=';')]
         return _clean_statusinvest_data(rows)
 

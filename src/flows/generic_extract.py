@@ -1,11 +1,11 @@
 import os, google.generativeai as genai
 from PIL import Image
 from dotenv import load_dotenv
-from src.config import visual_llm_model as model_name
+from src.config import output_dir, visual_llm_model as model_name
 from src.core import util
 
-json_dir = 'output/data/awaiting-validation'
-consumed_dir = 'output/screenshots/consumed'
+json_dir = f'{output_dir}/data/awaiting-validation'
+consumed_dir = f'{output_dir}/screenshots/consumed'
 
 load_dotenv()
 api_key = os.getenv('GOOGLE_GENAI_API_KEY')
