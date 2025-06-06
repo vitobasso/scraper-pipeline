@@ -1,15 +1,12 @@
 # from src.core.proxies import random_proxy
-# import src.flows.ticker_screenshot as ticker_screenshot
 # from src.flows.image_extract import extract_analysis, extract_fundamentals
 # import src.spreadsheet.screening_sheet as screening_sheet
-# import src.flows.statusinvest as statusinvest
-# import src.flows.b3idiv as b3idiv
-# import src.flows.yahoo as yahoo
-# import scheduler
+from src.flows import yahoo, tradingview, investidor10, b3idiv, statusinvest, generic_screenshot
+import scheduler
 
 if __name__ == '__main__':
-    # for i in range(100):
-    #     scheduler.schedule_next('yahoo')
+    for i in range(100):
+        scheduler.schedule_next(yahoo.flow())
     # yahoo.extract_analysis('output/screenshots/consumed/yahoo-bbas3-20250605T180728.png')
     # proxy = random_proxy()
     # ticker_screenshot.screenshot_yahoo_br('bbas3')

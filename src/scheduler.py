@@ -1,7 +1,5 @@
 import glob, re, random
-from src.flows import generic_screenshot, generic_extract, yahoo, investidor10
-from src.core import screenshot_validator
-from typing import Literal
+from typing import Callable, TypedDict
 
 tickers_path = 'input/ticker-list/acoes-br.csv'
 awaiting_screenshot_validation_path = 'output/screenshots/awaiting-validation'
@@ -9,35 +7,24 @@ awaiting_extraction_path = 'output/screenshots/awaiting-extraction'
 awaiting_data_validation_path = 'output/data/awaiting-validation'
 completed_path = 'output/data/awaiting-validation'
 
-flows = {
-    'tradingview': {
-        'screenshot': generic_screenshot.screenshot_tradingview,
-        'extract_data': generic_extract.extract_analysis,
-        'validate_data': lambda: None,
-    },
-    'yahoo': {
-        'screenshot': yahoo.screenshot,
-        'extract_data': yahoo.extract_data,
-        'validate_data': yahoo.validate_data,
-    },
-    'investidor10': {
-        'screenshot': investidor10.screenshot,
-        'extract_data': investidor10.extract_data,
-        'validate_data': lambda: None,
-    },
-}
-FlowType = Literal[tuple(flows.keys())]
-Phase = Literal['screenshot', 'validate_screenshot', 'extract_data', 'validate_data']
+
+class Flow(TypedDict):
+    name: str
+    screenshot: Callable
+    validate_screenshot: Callable
+    extract_data: Callable
+    validate_data: Callable
 
 
-def schedule_next(flow: FlowType):
-    _try_phase(flow, 'validate_data', lambda: _get_all_files(awaiting_data_validation_path, flow), flows[flow]['validate_data']) or \
-    _try_phase(flow, 'extract_data', lambda: _get_all_files(awaiting_extraction_path, flow), flows[flow]['extract_data']) or \
-    _try_phase(flow, 'validate_screenshot', lambda: _get_all_files(awaiting_screenshot_validation_path, flow), screenshot_validator.validate) or \
-    _try_phase(flow, 'screenshot', lambda: _find_tickers_awaiting_screenshot(flow), flows[flow]['screenshot'])
+def schedule_next(flow: Flow):
+    flow_name = flow['name']
+    _try_phase(flow['validate_data'], lambda: _get_all_files(awaiting_data_validation_path, flow_name)) or \
+    _try_phase(flow['extract_data'], lambda: _get_all_files(awaiting_extraction_path, flow_name)) or \
+    _try_phase(flow['validate_screenshot'], lambda: _get_all_files(awaiting_screenshot_validation_path, flow_name)) or \
+    _try_phase(flow['screenshot'], lambda: _find_tickers_awaiting_screenshot(flow_name))
 
 
-def _try_phase(flow: FlowType, phase: Phase, find_input, execute):
+def _try_phase(execute, find_input):
     input_options = find_input()
     if input_options:
         ticker = random.choice(input_options)

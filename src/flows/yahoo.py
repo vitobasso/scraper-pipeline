@@ -1,9 +1,19 @@
 import os, re, asyncio, sys, glob, json
 from src.core.browser_session import browser_page, click, error_type
 from src.flows.generic_screenshot import params
+from src.flows.generic_screenshot_validate import validate as validate_screenshot
 from src.flows.generic_extract import _extract_json
 
 data_dir = 'output/data'
+
+def flow():
+    return {
+        'name': 'yahoo',
+        'screenshot': screenshot,
+        'validate_screenshot': validate_screenshot,
+        'extract_data': extract_data,
+        'validate_data': validate_data,
+    }
 
 def screenshot(ticker: str):
     url_ticker = f'{ticker}.sa' if re.match(r'\w{4}\d\d?', ticker) else ticker
