@@ -1,7 +1,7 @@
 import os, re, asyncio, sys, glob, json
 from src.core.browser_session import browser_page, click
-from src.stocks.ticker_screenshot import _params, _error_type
-from src.stocks.image_scrape import _extract_json
+from src.flows.ticker_screenshot import _params, _error_type
+from src.flows.image_extract import _extract_json
 
 data_dir = 'output/data'
 

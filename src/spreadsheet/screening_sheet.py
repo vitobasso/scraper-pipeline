@@ -1,7 +1,7 @@
 import csv, re, calendar
 from datetime import datetime
 from src.core.google_sheets import copy_file, find_worksheet_by_title
-import src.stocks.yahoo as yahoo
+import src.flows.yahoo as yahoo
 
 template_id = '1eWwqMZr4PeuH5siVoICz_XPcWVE8dGEgx_jKaarZ_4Y' #TODO export to file and make it a local resource?
 

@@ -14,5 +14,5 @@ async def download():
 
 async def _download(proxy: str, path: str):
     async with browser_page(proxy, 'https://statusinvest.com.br/acoes/busca-avancada') as page:
-            await click(page, 'button', 'Buscar')
-            await click_download(path, page, 'a', 'DOWNLOAD')
+        await click(page, 'button', 'Buscar')
+        await click_download(path, page, 'a', 'DOWNLOAD')
