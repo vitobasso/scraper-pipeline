@@ -12,31 +12,32 @@ completed_path = 'output/data/awaiting-validation'
 flows = {
     'tradingview': {
         'screenshot': generic_screenshot.screenshot_tradingview,
-        'extract': generic_extract.extract_analysis,
-        'validate-data': lambda: None,
+        'extract_data': generic_extract.extract_analysis,
+        'validate_data': lambda: None,
     },
     'yahoo': {
         'screenshot': yahoo.screenshot,
-        'extract': yahoo.extract_data,
-        'validate-data': yahoo.validate_data,
+        'extract_data': yahoo.extract_data,
+        'validate_data': yahoo.validate_data,
     },
     'investidor10': {
         'screenshot': investidor10.screenshot,
-        'extract': investidor10.extract_data,
-        'validate-data': lambda: None,
+        'extract_data': investidor10.extract_data,
+        'validate_data': lambda: None,
     },
 }
 FlowType = Literal[tuple(flows.keys())]
+Phase = Literal['screenshot', 'validate_screenshot', 'extract_data', 'validate_data']
 
 
 def schedule_next(flow: FlowType):
-    _try_phase(flow, 'validate-data', lambda: _get_all_files(awaiting_data_validation_path, flow), flows[flow]['validate-data']) or \
-    _try_phase(flow, 'extract', lambda: _get_all_files(awaiting_extraction_path, flow), flows[flow]['extract']) or \
-    _try_phase(flow, 'validate-screenshot', lambda: _get_all_files(awaiting_screenshot_validation_path, flow), screenshot_validator.validate) or \
+    _try_phase(flow, 'validate_data', lambda: _get_all_files(awaiting_data_validation_path, flow), flows[flow]['validate_data']) or \
+    _try_phase(flow, 'extract_data', lambda: _get_all_files(awaiting_extraction_path, flow), flows[flow]['extract_data']) or \
+    _try_phase(flow, 'validate_screenshot', lambda: _get_all_files(awaiting_screenshot_validation_path, flow), screenshot_validator.validate) or \
     _try_phase(flow, 'screenshot', lambda: _find_tickers_awaiting_screenshot(flow), flows[flow]['screenshot'])
 
 
-def _try_phase(flow: str, phase: str, find_input, execute):
+def _try_phase(flow: FlowType, phase: Phase, find_input, execute):
     input_options = find_input()
     if input_options:
         ticker = random.choice(input_options)
