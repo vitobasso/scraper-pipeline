@@ -6,26 +6,30 @@ from src.core.screenshot_validator import validate
 from typing import Literal
 
 tickers_path = 'input/ticker-list/acoes-br.csv'
-awaiting_validation_path = 'output/screenshots/awaiting-validation'
+awaiting_screenshot_validation_path = 'output/screenshots/awaiting-validation'
 awaiting_extraction_path = 'output/screenshots/awaiting-extraction'
+awaiting_data_validation_path = 'output/data/awaiting-validation'
 completed_path = 'output/data/awaiting-validation'
 
 flows = {
     'tradingview': {
         'screenshot': ticker_screenshot.screenshot_tradingview,
         'extract': image_scrape.extract_analysis,
+        'validate-data': lambda: None,
     },
     'yahoo': {
         'screenshot': flow_yahoo.screenshot_yahoo,
-        'extract': flow_yahoo.extract_analysis,
+        'extract': flow_yahoo.extract_data,
+        'validate-data': flow_yahoo.validate_data,
     },
 }
 FlowType = Literal[tuple(flows.keys())]
 
 
 def schedule_next(flow: FlowType):
+    _try_phase(flow, 'validate-data', lambda: _get_all_files(awaiting_data_validation_path, flow), flows[flow]['validate-data']) or \
     _try_phase(flow, 'extract', lambda: _get_all_files(awaiting_extraction_path, flow), flows[flow]['extract']) or \
-    _try_phase(flow, 'validate', lambda: _get_all_files(awaiting_validation_path, flow), validate) or \
+    _try_phase(flow, 'validate-screenshot', lambda: _get_all_files(awaiting_screenshot_validation_path, flow), validate) or \
     _try_phase(flow, 'screenshot', lambda: _find_tickers_awaiting_screenshot(flow), flows[flow]['screenshot'])
 
 
@@ -48,8 +52,9 @@ def _find_tickers_awaiting_screenshot(filter_term: str):
     return list(
         set(_load_tickers()) \
         - set(_get_all_tickers(completed_path, filter_term)) \
+        - set(_get_all_tickers(awaiting_data_validation_path, filter_term)) \
         - set(_get_all_tickers(awaiting_extraction_path, filter_term)) \
-        - set(_get_all_tickers(awaiting_validation_path, filter_term))
+        - set(_get_all_tickers(awaiting_screenshot_validation_path, filter_term))
     )
 
 
