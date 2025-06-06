@@ -27,7 +27,8 @@ async def browser_page(proxy: str, url: str,
         context = await browser.new_context(
             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             viewport=viewport,
-            bypass_csp=True
+            ignore_https_errors=True, # avoids ERR_CERT_AUTHORITY_INVALID, risks getting data tampered by MIM
+            bypass_csp=True,
         )
 
         await context.set_extra_http_headers({
@@ -46,9 +47,9 @@ async def browser_page(proxy: str, url: str,
             await browser.close()
 
 
-async def click(page, selector: str, button_text: str = ''):
+async def click(page, selector: str, button_text: str = '', timeout = None):
     button = page.locator(selector, has_text=button_text)
-    await button.wait_for(state="visible")
+    await button.wait_for(state="visible", timeout=timeout)
     await button.click()
 
 async def click_download(file_path: str, page, selector: str, button_text: str):

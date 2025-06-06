@@ -8,9 +8,9 @@ import src.stocks.flow_yahoo as flow_yahoo
 import scheduler
 
 if __name__ == '__main__':
-    # for i in range(100):
-    #     scheduler.schedule_next('yahoo')
-    flow_yahoo.extract_analysis('output/screenshots/consumed/yahoo-bbas3-20250605T180728.png')
+    for i in range(100):
+        scheduler.schedule_next('yahoo')
+    # flow_yahoo.extract_analysis('output/screenshots/consumed/yahoo-bbas3-20250605T180728.png')
     # proxy = random_proxy()
     # ticker_screenshot.screenshot_yahoo_br('bbas3')
     # ticker_screenshot.screenshot_simplywall()
