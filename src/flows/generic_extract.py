@@ -1,11 +1,10 @@
 import os, re, google.generativeai as genai
 from PIL import Image
 from dotenv import load_dotenv
-from src.core.config import config
+from src.config import visual_llm_model as model_name
 
 json_dir = 'output/data/awaiting-validation'
 consumed_dir = 'output/screenshots/consumed'
-model_name = config.get('image_extract.model')
 
 load_dotenv()
 api_key = os.getenv('GOOGLE_GENAI_API_KEY')

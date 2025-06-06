@@ -1,11 +1,10 @@
 import re
 from playwright._impl._errors import TimeoutError, Error as PlaywrightError
 from playwright.async_api import async_playwright, ProxySettings, ViewportSize
-from src.core.config import config
 from typing import Literal
 from contextlib import asynccontextmanager
 
-load_timeout = config.get('screenshot.browser.load_timeout')
+load_timeout = 60000
 
 @asynccontextmanager
 async def browser_page(proxy: str, url: str,

@@ -1,8 +1,7 @@
 import os, easyocr, warnings
-from src.core.config import config
 
 screenshot_dir = 'output/screenshots'
-ocr_min_lines = config.get('screenshot.validator.ocr.min_lines')
+ocr_min_lines = 50
 warnings.filterwarnings("ignore", message=".*pin_memory.*MPS.*")
 reader = easyocr.Reader(['en'])
 
