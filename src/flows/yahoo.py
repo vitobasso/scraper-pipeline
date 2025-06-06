@@ -1,12 +1,14 @@
 import os, re, asyncio, sys, json
 from src.config import output_dir
 from src.core.browser_session import browser_page, click, error_name
-from src.core.util import move_file, all_files, get_ticker
+from src.core.util import mkdir, all_files, get_ticker
 from src.flows.generic_screenshot import params
 from src.flows.generic_screenshot_validate import validate as validate_screenshot
 from src.flows.generic_extract import _extract_json
 
 data_dir = f'{output_dir}/data'
+valid_data_dir = mkdir(f'{data_dir}/ready')
+invalid_data_dir = mkdir(f'{data_dir}/failed-validation')
 
 def flow():
     return {
@@ -63,11 +65,9 @@ def extract_data(path: str):
     _extract_json(path, prompt)
 
 def validate_data(path):
-    filename = os.path.basename(path)
-    valid_path = f'{data_dir}/ready/{filename}'
-    invalid_path = f'{data_dir}/failed-validation/{filename}'
-    dest_path = valid_path if _validate_data(path) else invalid_path
-    move_file(path, dest_path)
+    dest_dir = valid_data_dir if _validate_data(path) else invalid_data_dir
+    dest_path = f'{dest_dir}/{os.path.basename(path)}'
+    os.rename(path, dest_path)
 
 def _validate_data(path):
     try:
@@ -78,7 +78,7 @@ def _validate_data(path):
         return False
 
 def compile_data():
-    return [_compile_row(path) for path in all_files(f'{data_dir}/ready', 'yahoo')]
+    return [_compile_row(path) for path in all_files(valid_data_dir, 'yahoo')]
 
 def _compile_row(path):
     ticker = get_ticker(path)

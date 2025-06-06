@@ -2,10 +2,10 @@ import os, google.generativeai as genai
 from PIL import Image
 from dotenv import load_dotenv
 from src.config import output_dir, visual_llm_model as model_name
-from src.core import util
+from src.core.util import mkdir
 
-json_dir = f'{output_dir}/data/awaiting-validation'
-consumed_dir = f'{output_dir}/screenshots/consumed'
+data_dir = mkdir(f'{output_dir}/data/awaiting-validation')
+consumed_dir = mkdir(f'{output_dir}/screenshots/consumed')
 
 load_dotenv()
 api_key = os.getenv('GOOGLE_GENAI_API_KEY')
@@ -41,14 +41,14 @@ def _extract_json(image_path: str, prompt_json_properties: str):
     _extract(image_path, prompt)
 
 def _extract(image_path: str, prompt: str):
-    image = Image.open(image_path)
     print(f'extracting data, path: {image_path}')
+    image = Image.open(image_path)
     response = model.generate_content([prompt, image])
-    json_path = f'{json_dir}/{_filename_without_extension(image_path)}.json'
+    json_path = f'{data_dir}/{_filename_without_extension(image_path)}.json'
     with open(json_path, "w") as file:
         file.write(response.text)
     consumed_path = f'{consumed_dir}/{os.path.basename(image_path)}'
-    util.move_file(image_path, consumed_path)
+    os.rename(image_path, consumed_path)
 
 def _filename_without_extension(path: str):
     return os.path.splitext(os.path.basename(path))[0]
