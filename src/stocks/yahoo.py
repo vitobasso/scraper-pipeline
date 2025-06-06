@@ -5,11 +5,11 @@ from src.stocks.image_scrape import _extract_json
 
 data_dir = 'output/data'
 
-def screenshot_yahoo(ticker: str):
+def screenshot(ticker: str):
     url_ticker = f'{ticker}.sa' if re.match(r'\w{4}\d\d?', ticker) else ticker
-    asyncio.run(_screenshot_yahoo(*_params(f'yahoo-{ticker}', f'https://finance.yahoo.com/quote/{url_ticker}/analysis')))
+    asyncio.run(_screenshot(*_params(f'yahoo-{ticker}', f'https://finance.yahoo.com/quote/{url_ticker}/analysis')))
 
-async def _screenshot_yahoo(proxy: str, url: str, path: str):
+async def _screenshot(proxy: str, url: str, path: str):
     print(f'taking screenshot, url: {url}, path: {path}, proxy: {proxy}')
     try:
         async with browser_page(proxy, url, wait_until='domcontentloaded') as page:
