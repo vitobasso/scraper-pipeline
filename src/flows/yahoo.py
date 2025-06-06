@@ -28,6 +28,7 @@ async def _screenshot(proxy: str, url: str, path: str):
     try:
         async with browser_page(proxy, url, wait_until='domcontentloaded') as page:
             await _reject_cookies(page)
+            await _dismiss_upgrade(page)
             await page.locator('div.cards-container').screenshot(path=path)
             # await page.screenshot(path=path, full_page=True)
     except Exception as e:
@@ -37,7 +38,14 @@ async def _reject_cookies(page):
     try:
         await click(page, 'button[type="submit"][name="reject"]', timeout=1000)
         await page.wait_for_load_state('domcontentloaded')
-    except Exception as e:
+    except:
+        pass
+
+async def _dismiss_upgrade(page):
+    try:
+        await click(page, '.dismiss', timeout=1000)
+        await page.wait_for_load_state('domcontentloaded')
+    except:
         pass
 
 def extract_data(path: str):
@@ -74,7 +82,7 @@ def _validate_data(path):
         with open(path) as f:
             data = json.load(f)
         return all(k in data for k in ("analyst_rating", "price_forecast"))
-    except Exception:
+    except:
         return False
 
 def compile_data():
