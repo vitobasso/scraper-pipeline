@@ -11,11 +11,18 @@ async def _screenshot_yahoo(proxy: str, url: str, path: str):
     print(f'taking screenshot, url: {url}, path: {path}, proxy: {proxy}')
     try:
         async with browser_page(proxy, url, wait_until='domcontentloaded') as page:
-            await click(page, 'button[type="submit"][name="reject"]') #TODO optionally
-            await page.wait_for_load_state('domcontentloaded')
-            await page.screenshot(path=path, full_page=True, animations='disabled') #TODO page.locator('selector').screenshot
+            await _reject_cookies(page)
+            await page.locator('div.cards-container').screenshot(path=path)
+            # await page.screenshot(path=path, full_page=True)
     except Exception as e:
-        print(f'   failed: {_error_type(e)}', file=sys.stderr)
+        print(f'failed: {_error_type(e)}', file=sys.stderr)
+
+async def _reject_cookies(page):
+    try:
+        await click(page, 'button[type="submit"][name="reject"]', timeout=1000)
+        await page.wait_for_load_state('domcontentloaded')
+    except Exception as e:
+        pass
 
 def extract_analysis(path: str):
     prompt = f"""
