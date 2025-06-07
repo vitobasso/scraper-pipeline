@@ -1,14 +1,10 @@
-import os, re, asyncio, sys, json
-from src.config import output_dir
+import re, asyncio, sys, json
 from src.core.browser_session import browser_page, click, error_name
-from src.core.util import mkdir, all_files, get_ticker
-from src.flows.generic_screenshot import params
-from src.flows.generic_screenshot_validate import validate as validate_screenshot
-from src.flows.generic_extract import extract_json
-
-data_dir = f'{output_dir}/data'
-valid_data_dir = mkdir(f'{data_dir}/ready')
-invalid_data_dir = mkdir(f'{data_dir}/failed-validation')
+from src.core.util import all_files, get_ticker
+from src.flows.generic.screenshot import params
+from src.flows.generic.validate_screenshot import validate as validate_screenshot
+from src.flows.generic.extract_data import extract_json
+from src.flows.generic.validate_data import valid_data_dir, validate_json
 
 def flow():
     return {
@@ -71,18 +67,9 @@ def extract_data(path: str):
     """
     extract_json(path, prompt)
 
-def validate_data(path):
-    dest_dir = valid_data_dir if _validate_data(path) else invalid_data_dir
-    dest_path = f'{dest_dir}/{os.path.basename(path)}'
-    os.rename(path, dest_path)
 
-def _validate_data(path):
-    try:
-        with open(path) as f:
-            data = json.load(f)
-        return all(k in data for k in ("analyst_rating", "price_forecast"))
-    except:
-        return False
+def validate_data(path: str):
+    validate_json(path, lambda data: "price_forecast" in data)
 
 def compile_data():
     return [_compile_row(path) for path in all_files(valid_data_dir, 'yahoo')]

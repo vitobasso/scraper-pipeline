@@ -1,6 +1,6 @@
-from src.flows.generic_extract import extract_json
-from src.flows.generic_screenshot import sync_screenshot
-from src.flows.generic_screenshot_validate import validate as validate_screenshot
+from src.flows.generic.extract_data import extract_json
+from src.flows.generic.screenshot import sync_screenshot
+from src.flows.generic.validate_screenshot import validate as validate_screenshot
 
 
 def flow():
