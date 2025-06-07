@@ -6,8 +6,10 @@ list_dir = f'{output_dir}/proxy-list'
 timestamp_format = '%Y%m%dT%H%M%S'
 refresh_seconds = 2 * 60 * 60
 
+
 def random_proxy():
     return random.choice(proxies)
+
 
 def _init():
     if not _validate_latest_file():
@@ -18,22 +20,27 @@ def _init():
     file = _latest_file()
     return _load_list(file)
 
+
 def _validate_latest_file():
     file = _latest_file()
     return file and _validate_file(file)
+
 
 def _validate_file(path: str):
     file_time = os.path.getctime(path)
     file_age = time.time() - file_time
     return file_age < refresh_seconds
 
+
 def _latest_file():
     files = glob.glob(f'{list_dir}/*')
     return max(files) if files else None
 
+
 def _load_list(path: str):
     with open(path) as f:
         return f.read().splitlines()
+
 
 def _download_list():
     timestamp = datetime.datetime.now().strftime(timestamp_format)
@@ -42,6 +49,7 @@ def _download_list():
     Path(list_dir).mkdir(parents=True, exist_ok=True)
     print(f'downloading proxy list, url: {download_url}, path: {path}')
     urllib.request.urlretrieve(download_url, path)
+
 
 def _extract_name(path):
     return re.search('/(\\w+)/data.txt', path).group(1)

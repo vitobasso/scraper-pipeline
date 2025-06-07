@@ -9,10 +9,12 @@ invalid_dir = mkdir(f'{output_dir}/screenshots/failed-validation')
 warnings.filterwarnings("ignore", message=".*pin_memory.*MPS.*")
 reader = easyocr.Reader(['en'])
 
+
 def validate(image_path: str):
     dest_dir = valid_dir if _validate(image_path) else invalid_dir
     dest_path = f'{dest_dir}/{os.path.basename(image_path)}'
     os.rename(image_path, dest_path)
+
 
 def _validate(image_path: str):
     lines = reader.readtext(image_path, detail=0)

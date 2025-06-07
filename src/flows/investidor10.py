@@ -12,6 +12,7 @@ def flow():
         'validate_data': lambda: None,
     }
 
+
 def screenshot(ticker: str):
     sync_screenshot(f'investidor10-{ticker}', f'https://investidor10.com.br/acoes/{ticker}/')
 

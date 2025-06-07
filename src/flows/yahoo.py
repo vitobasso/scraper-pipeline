@@ -6,6 +6,7 @@ from src.flows.generic.validate_screenshot import validate as validate_screensho
 from src.flows.generic.extract_data import extract_json
 from src.flows.generic.validate_data import valid_data_dir, validate_json
 
+
 def flow():
     return {
         'name': 'yahoo',
@@ -15,9 +16,11 @@ def flow():
         'validate_data': validate_data,
     }
 
+
 def screenshot(ticker: str):
     url_ticker = f'{ticker}.sa' if re.match(r'\w{4}\d\d?', ticker) else ticker
     asyncio.run(_screenshot(*params(f'yahoo-{ticker}', f'https://finance.yahoo.com/quote/{url_ticker}/analysis')))
+
 
 async def _screenshot(proxy: str, url: str, path: str):
     print(f'taking screenshot, url: {url}, path: {path}, proxy: {proxy}')
@@ -29,6 +32,7 @@ async def _screenshot(proxy: str, url: str, path: str):
     except Exception as e:
         print(f'failed: {error_name(e)}', file=sys.stderr)
 
+
 async def _reject_cookies(page):
     try:
         await click(page, 'button[type="submit"][name="reject"]', timeout=1000)
@@ -36,12 +40,14 @@ async def _reject_cookies(page):
     except:
         pass
 
+
 async def _dismiss_upgrade(page):
     try:
         await click(page, '.dismiss', timeout=1000)
         await page.wait_for_load_state('domcontentloaded')
     except:
         pass
+
 
 def extract_data(path: str):
     prompt = f"""
@@ -71,8 +77,10 @@ def extract_data(path: str):
 def validate_data(path: str):
     validate_json(path, lambda data: "price_forecast" in data)
 
+
 def compile_data():
     return [_compile_row(path) for path in all_files(valid_data_dir, 'yahoo')]
+
 
 def _compile_row(path):
     ticker = get_ticker(path)
@@ -81,5 +89,6 @@ def _compile_row(path):
         analyst_rating = data.get('analyst_rating') or {}
         price_forecast = data.get('price_forecast') or {}
         return [ticker, None, None, None, None, None, analyst_rating.get('strong_buy'), analyst_rating.get('buy'),
-                analyst_rating.get('hold'), analyst_rating.get('sell'), analyst_rating.get('strong_sell'), #TODO underperform and sell
+                analyst_rating.get('hold'), analyst_rating.get('sell'), analyst_rating.get('strong_sell'),
+                # TODO underperform and sell
                 price_forecast.get('min'), price_forecast.get('avg'), price_forecast.get('max')]

@@ -12,6 +12,7 @@ api_key = os.getenv('GOOGLE_GENAI_API_KEY')
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel(model_name)
 
+
 def extract_json(image_path: str, prompt_json_properties: str):
     prompt = f"""
     Extract the following data as raw JSON.
@@ -27,6 +28,7 @@ def extract_json(image_path: str, prompt_json_properties: str):
     """
     extract(image_path, prompt)
 
+
 def extract(image_path: str, prompt: str):
     print(f'extracting data, path: {image_path}')
     image = Image.open(image_path)
@@ -37,6 +39,6 @@ def extract(image_path: str, prompt: str):
     consumed_path = f'{consumed_dir}/{os.path.basename(image_path)}'
     os.rename(image_path, consumed_path)
 
+
 def _filename_without_extension(path: str):
     return os.path.splitext(os.path.basename(path))[0]
-

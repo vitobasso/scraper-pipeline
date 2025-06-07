@@ -6,9 +6,10 @@ from contextlib import asynccontextmanager
 
 load_timeout = 60000
 
+
 @asynccontextmanager
 async def browser_page(proxy: str, url: str,
-                  wait_until: Literal['commit', 'domcontentloaded', 'load', 'networkidle'] = 'domcontentloaded'):
+                       wait_until: Literal['commit', 'domcontentloaded', 'load', 'networkidle'] = 'domcontentloaded'):
     async with async_playwright() as playwright:
         proxy_settings: ProxySettings = {'server': f'{proxy}'}
 
@@ -24,11 +25,11 @@ async def browser_page(proxy: str, url: str,
             ]
         )
 
-        viewport:ViewportSize = {'width': 1280, 'height': 720}
+        viewport: ViewportSize = {'width': 1280, 'height': 720}
         context = await browser.new_context(
             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             viewport=viewport,
-            ignore_https_errors=True, # avoids ERR_CERT_AUTHORITY_INVALID, risks getting data tampered by MIM
+            ignore_https_errors=True,  # avoids ERR_CERT_AUTHORITY_INVALID, risks getting data tampered by MIM
             bypass_csp=True,
         )
 
@@ -48,10 +49,11 @@ async def browser_page(proxy: str, url: str,
             await browser.close()
 
 
-async def click(page, selector: str, button_text: str = '', timeout = None):
+async def click(page, selector: str, button_text: str = '', timeout=None):
     button = page.locator(selector, has_text=button_text)
     await button.wait_for(state="visible", timeout=timeout)
     await button.click()
+
 
 async def click_download(file_path: str, page, selector: str, button_text: str):
     button = page.locator(selector, has_text=button_text)
@@ -60,6 +62,7 @@ async def click_download(file_path: str, page, selector: str, button_text: str):
         await button.click()
     download = await download_info.value
     await download.save_as(file_path)
+
 
 def error_name(e: Exception):
     if isinstance(e, TimeoutError):
