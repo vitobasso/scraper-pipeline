@@ -4,7 +4,7 @@ from src.core.util import all_files, get_ticker
 from src.flows.generic.screenshot import params
 from src.flows.generic.validate_screenshot import validate as validate_screenshot
 from src.flows.generic.extract_data import extract_json
-from src.flows.generic.validate_data import valid_data_dir, validate_json
+from src.flows.generic.validate_data import valid_data_dir, validate
 
 
 def flow():
@@ -75,7 +75,21 @@ def extract_data(path: str):
 
 
 def validate_data(path: str):
-    validate_json(path, lambda data: "price_forecast" in data)
+    schema = {
+        'analyst_rating': ({
+           'strong_buy': int,
+           'buy': int,
+           'hold': int,
+           'underperform': int,
+           'sell': int,
+        }, None),
+        'price_forecast': {
+            'min': float,
+            'avg': float,
+            'max': float,
+        }
+    }
+    validate(path, schema)
 
 
 def compile_data():
@@ -89,6 +103,5 @@ def _compile_row(path):
         analyst_rating = data.get('analyst_rating') or {}
         price_forecast = data.get('price_forecast') or {}
         return [ticker, None, None, None, None, None, analyst_rating.get('strong_buy'), analyst_rating.get('buy'),
-                analyst_rating.get('hold'), analyst_rating.get('sell'), analyst_rating.get('strong_sell'),
-                # TODO underperform and sell
+                analyst_rating.get('hold'), analyst_rating.get('underperform'), analyst_rating.get('sell'),
                 price_forecast.get('min'), price_forecast.get('avg'), price_forecast.get('max')]
