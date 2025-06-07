@@ -5,6 +5,7 @@ scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/au
 creds = ServiceAccountCredentials.from_json_keyfile_name("gcp-secret.json", scope)
 client = gspread.authorize(creds)
 
+
 def copy_file(id, new_name: str):
     original = client.open_by_url(f'https://docs.google.com/spreadsheets/d/{id}')
     original_permission = next(
@@ -16,6 +17,7 @@ def copy_file(id, new_name: str):
                                     notify=False)
     new_file.transfer_ownership(new_permission.json()['id'])
     return new_file
+
 
 def find_worksheet_by_title(spreadsheet, title: str):
     return next((x for x in spreadsheet.worksheets() if x.title == title), None)
