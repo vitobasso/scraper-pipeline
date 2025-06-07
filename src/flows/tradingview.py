@@ -3,7 +3,7 @@ from src.core.browser_session import browser_page, error_name
 from src.flows.generic.screenshot import params
 from src.flows.generic.validate_screenshot import validate as validate_screenshot
 from src.flows.generic.extract_data import extract_json
-from src.flows.generic.validate_data import validate_json
+from src.flows.generic.validate_data import validate
 
 
 def flow():
@@ -56,4 +56,18 @@ def extract_data(image_path: str):
 
 
 def validate_data(path: str):
-    validate_json(path, lambda data: all(k in data for k in ("analyst_rating", "price_forecast")))
+    schema = {
+        'analyst_rating': {
+           'strong_buy': int,
+           'buy': int,
+           'hold': int,
+           'sell': int,
+           'strong_sell': int,
+        },
+        'price_forecast': {
+            'min': float,
+            'avg': float,
+            'max': float,
+        }
+    }
+    validate(path, schema)
