@@ -20,3 +20,6 @@ def _validate_json(path: str, validate_dict):
         return validate_dict(dict)
     except:
         return False
+
+
+# TODO instead of validate_dict, pass just a dict with required keys (with None as values)

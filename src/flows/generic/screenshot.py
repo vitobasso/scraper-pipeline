@@ -6,10 +6,6 @@ from src.core.browser_session import browser_page, error_name
 after_load_timeout = 0
 
 
-def screenshot_tipranks(ticker: str, ticker_type: str):
-    sync_screenshot(f'tipranks-{ticker}', f'https://www.tipranks.com/{ticker_type}/{ticker}/forecast')
-
-
 def screenshot_simplywall():
     sync_screenshot('simplywall.st', 'https://simplywall.st/stocks/br/top-gainers')
 

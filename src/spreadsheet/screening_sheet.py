@@ -29,7 +29,7 @@ def _populate_screening(spreadsheet):
 
 
 def _populate_forecast(spreadsheet):
-    data = yahoo.compile_data()
+    data = yahoo.compile_data() # TODO tradingview, tipranks
     worksheet = find_worksheet_by_title(spreadsheet, 'forecast')
     worksheet.update("A3", data)
 
