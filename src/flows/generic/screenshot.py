@@ -6,10 +6,6 @@ from src.core.browser_session import browser_page, error_name
 after_load_timeout = 0
 
 
-def screenshot_simplywall():
-    sync_screenshot('simplywall.st', 'https://simplywall.st/stocks/br/top-gainers')
-
-
 def sync_screenshot(key: str, url: str):
     asyncio.run(_screenshot(*params(key, url)))
 

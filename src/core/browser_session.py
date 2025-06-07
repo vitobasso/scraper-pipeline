@@ -8,8 +8,7 @@ load_timeout = 60000
 
 
 @asynccontextmanager
-async def browser_page(proxy: str, url: str,
-                       wait_until: Literal['commit', 'domcontentloaded', 'load', 'networkidle'] = 'domcontentloaded'):
+async def browser_page2(proxy: str):
     async with async_playwright() as playwright:
         proxy_settings: ProxySettings = {'server': f'{proxy}'}
 
@@ -41,12 +40,19 @@ async def browser_page(proxy: str, url: str,
         page = await context.new_page()
 
         try:
-            await page.goto(url, timeout=load_timeout, wait_until=wait_until)
             yield page
         except Exception:
             raise
         finally:
             await browser.close()
+
+
+@asynccontextmanager
+async def browser_page(proxy: str, url: str,
+                       wait_until: Literal['commit', 'domcontentloaded', 'load', 'networkidle'] = 'domcontentloaded'):
+    async with browser_page2(proxy) as page:
+        await page.goto(url, timeout=load_timeout, wait_until=wait_until)
+        yield page
 
 
 async def click(page, selector: str, button_text: str = '', timeout=None):
