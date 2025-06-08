@@ -1,10 +1,8 @@
 import random
 from typing import Callable, TypedDict, List
-from src.core.util import get_ticker, all_files, mkdir
-from src.config import output_dir
+from src.core.util import get_ticker, all_files
 
 tickers_path = 'input/ticker-list/acoes-br.csv'
-completed_dir = mkdir(f'{output_dir}/data/awaiting-validation')
 
 
 class Task(TypedDict):
@@ -37,26 +35,24 @@ def _try_task(task):
         return False
 
 
-def seed_task(execute, pipeline_name):
+def seed_task(execute):
     return {
         'find_input': lambda: True,
         'execute': execute
     }
 
 
-def ticker_task(execute, output_dirs, pipeline_name):
-    output_files = [file
-                    for task_output_dir in output_dirs
-                    for file in all_files(task_output_dir, pipeline_name)]
+def ticker_task(execute, output_dir):
+    output_tickers = [get_ticker(path) for path in all_files(output_dir)]
     return {
-        'find_input': lambda: list(set(_load_tickers()) - set([get_ticker(path) for path in output_files])),
+        'find_input': lambda: list(set(_load_tickers()) - set(output_tickers)),
         'execute': execute
     }
 
 
-def file_task(execute, input_dir, pipeline_name):
+def file_task(execute, input_dir):
     return {
-        'find_input': lambda: all_files(input_dir, pipeline_name),
+        'find_input': lambda: all_files(input_dir),
         'execute': execute
     }
 

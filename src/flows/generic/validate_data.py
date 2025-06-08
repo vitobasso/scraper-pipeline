@@ -1,22 +1,21 @@
 import os, json, re
-from src.config import output_dir
+from pathlib import Path
 from src.core.util import mkdir
 
-data_dir = f'{output_dir}/data'
-input_dir = mkdir(f'{data_dir}/awaiting-validation')
-valid_data_dir = mkdir(f'{data_dir}/ready')
-invalid_data_dir = mkdir(f'{data_dir}/failed-validation')
-failed_data_dir = mkdir(f'{data_dir}/failed-extraction')
+input_dir = lambda x: mkdir(f'{x}/data/awaiting-validation')
+valid_data_dir = lambda x: mkdir(f'{x}/data/ready')
+invalid_data_dir = lambda x: mkdir(f'{x}/data/failed-validation')
+failed_data_dir = lambda x: mkdir(f'{x}/data/failed-extraction')
 
 
-def validate(path: str, schema):
+def validate(path: str, schema, output_dir: str):
     if _is_extraction_error(path):
-        failed_path = f'{failed_data_dir}/{os.path.basename(path)}'
+        failed_path = f'{failed_data_dir(output_dir)}/{os.path.basename(path)}'
         os.rename(path, failed_path)
     else:
         errors = _validate_json(path, schema)
-        dest_dir = invalid_data_dir if errors else valid_data_dir
-        dest_path = f'{dest_dir}/{os.path.basename(path)}'
+        dest_dir = invalid_data_dir(output_dir) if errors else valid_data_dir(output_dir)
+        dest_path = f'{dest_dir}/{Path(path).name}'
         os.rename(path, dest_path)
         if errors:
             _append_errors(dest_path, errors)

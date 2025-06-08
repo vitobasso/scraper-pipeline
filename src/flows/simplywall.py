@@ -1,12 +1,12 @@
 import datetime, asyncio, sys, json
 from src.scheduler import Pipeline, seed_task, file_task
-from src.config import output_dir
+from src.config import output_root
 from src.core.util import mkdir
 from src.core.proxies import random_proxy
 from src.core.browser_session import browser_page2, error_name, load_timeout
 from src.flows.generic.validate_data import validate, input_dir as validate_data_input
 
-download_dir = mkdir(f'{output_dir}/downloads/awaiting-extraction')
+download_dir = mkdir(f'{output_root}/downloads/awaiting-extraction')
 
 
 def pipeline() -> Pipeline:

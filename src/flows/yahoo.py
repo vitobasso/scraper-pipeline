@@ -1,5 +1,6 @@
 import re, asyncio, sys, json
-from src.scheduler import Pipeline, ticker_task, file_task, completed_dir
+from src.config import output_root
+from src.scheduler import Pipeline, ticker_task, file_task
 from src.core.browser_session import browser_page, click, error_name
 from src.core.util import all_files, get_ticker
 from src.flows.generic.screenshot import params
@@ -7,24 +8,26 @@ from src.flows.generic.validate_screenshot import validate_screenshot, input_dir
 from src.flows.generic.extract_data import extract_json, input_dir as extract_data_input
 from src.flows.generic.validate_data import valid_data_dir, validate, input_dir as validate_data_input
 
+name = 'yahoo'
+output_dir = f'{output_root}/{name}'
+
 
 def pipeline() -> Pipeline:
-    name = 'yahoo'
-    output_dirs = [validate_screenshot_input, extract_data_input, validate_data_input, completed_dir]
     return {
         'name': name,
         'tasks': [
-            ticker_task(screenshot, output_dirs, name),
-            file_task(validate_screenshot, validate_screenshot_input, name),
-            file_task(extract_data, extract_data_input, name),
-            file_task(validate_data, validate_data_input, name),
+            ticker_task(screenshot, output_dir),
+            file_task(lambda path: validate_screenshot(path, output_dir), validate_screenshot_input(output_dir)),
+            file_task(extract_data, extract_data_input(output_dir)),
+            file_task(validate_data, validate_data_input(output_dir)),
         ]
     }
 
 
 def screenshot(ticker: str):
     url_ticker = f'{ticker}.sa' if re.match(r'\w{4}\d\d?', ticker) else ticker
-    asyncio.run(_screenshot(*params(f'yahoo-{ticker}', f'https://finance.yahoo.com/quote/{url_ticker}/analysis')))
+    screenshot_params = params(output_dir, ticker, f'https://finance.yahoo.com/quote/{url_ticker}/analysis')
+    asyncio.run(_screenshot(*screenshot_params))
 
 
 async def _screenshot(proxy: str, url: str, path: str):
@@ -76,7 +79,7 @@ def extract_data(path: str):
        - avg
        - max
     """
-    extract_json(path, prompt)
+    extract_json(path, prompt, output_dir)
 
 
 def validate_data(path: str):
@@ -94,11 +97,11 @@ def validate_data(path: str):
             'max': float,
         }
     }
-    validate(path, schema)
+    validate(path, schema, output_dir)
 
 
 def compile_data():
-    return [_compile_row(path) for path in all_files(valid_data_dir, 'yahoo')]
+    return [_compile_row(path) for path in all_files(valid_data_dir(output_dir))]
 
 
 def _compile_row(path):
