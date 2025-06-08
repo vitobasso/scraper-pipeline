@@ -4,9 +4,9 @@ from src.spreadsheet.screening_sheet import create_spreadsheet
 
 if __name__ == '__main__':
     for i in range(100):
-        # scheduler.schedule_next(yahoo.pipeline('input/ticker-list/acoes-br.csv'))
+        scheduler.schedule_next(yahoo.pipeline('input/ticker-list/acoes-br.csv'))
         # scheduler.schedule_next(tipranks.pipeline('input/ticker-list/stocks-us.csv'))
-        scheduler.schedule_next(statusinvest.pipeline())
+        # scheduler.schedule_next(statusinvest.pipeline())
     # simplywall.scrape()
     # proxy = random_proxy()
     # yahoo.compile_data()

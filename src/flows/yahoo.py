@@ -3,7 +3,8 @@ from src.config import output_root
 from src.scheduler import Pipeline, line_task, file_task
 from src.core.browser_session import page_goto, click, error_name
 from src.core.util import all_files, get_ticker
-from src.flows.generic.screenshot import params
+from src.core.proxies import random_proxy
+from src.flows.generic.screenshot import output_path
 from src.flows.generic.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
 from src.flows.generic.extract_data import extract_json, input_dir as extract_data_input
 from src.flows.generic.validate_data import valid_data_dir, validate, input_dir as validate_data_input
@@ -26,8 +27,9 @@ def pipeline(input_path: str) -> Pipeline:
 
 def screenshot(ticker: str):
     url_ticker = f'{ticker}.sa' if re.match(r'\w{4}\d\d?', ticker) else ticker
-    screenshot_params = params(output_dir, ticker, f'https://finance.yahoo.com/quote/{url_ticker}/analysis')
-    asyncio.run(_screenshot(*screenshot_params))
+    url = f'https://finance.yahoo.com/quote/{url_ticker}/analysis'
+    path = output_path(output_dir, ticker)
+    asyncio.run(_screenshot(random_proxy(), url, path))
 
 
 async def _screenshot(proxy: str, url: str, path: str):

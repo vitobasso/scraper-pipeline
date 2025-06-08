@@ -1,27 +1,25 @@
-import datetime, asyncio, sys
+import asyncio, sys
 from src.core.proxies import random_proxy
 from src.core.browser_session import page_goto, common_ancestor, error_name
-from src.core.util import mkdir
+from src.core.util import mkdir, timestamp
 
 after_load_timeout = 0
 
 
-def ss_full_page(output_dir: str, ticker: str, url: str):
-    asyncio.run(_screenshot_full_page(*params(output_dir, ticker, url)))
+def ss_full_page(ticker: str, url: str, output_dir: str):
+    path = output_path(output_dir, ticker)
+    asyncio.run(_screenshot_full_page(random_proxy(), url, path))
 
 
-def ss_common_ancestor(output_dir: str, ticker: str, texts, url: str):
-    proxy, url, path = params(output_dir, ticker, url)
-    asyncio.run(_screenshot_common_ancestor(proxy, url, texts, path))
+def ss_common_ancestor(ticker: str, url: str, texts, output_dir: str):
+    path = output_path(output_dir, ticker)
+    asyncio.run(_screenshot_common_ancestor(random_proxy(), url, texts, path))
 
 
-def params(screenshot_dir: str, ticker: str, url: str):
-    timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-    filename = f'{ticker}-{timestamp}.png'
+def output_path(screenshot_dir: str, ticker: str):
+    filename = f'{ticker}-{timestamp()}.png'
     screenshot_dir = mkdir(f'{screenshot_dir}/screenshots/awaiting-validation')
-    output_path = f'{screenshot_dir}/{filename}'
-    proxy = random_proxy()
-    return proxy, url, output_path
+    return f'{screenshot_dir}/{filename}'
 
 
 async def _screenshot_full_page(proxy: str, url: str, path: str):

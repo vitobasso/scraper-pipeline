@@ -22,7 +22,7 @@ def pipeline(input_path: str) -> Pipeline:
 
 
 def screenshot(ticker: str):
-    ss_full_page(output_dir, ticker, f'https://investidor10.com.br/acoes/{ticker}/')
+    ss_full_page(ticker, f'https://investidor10.com.br/acoes/{ticker}/', output_dir)
 
 
 def extract_data(image_path: str):
