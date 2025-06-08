@@ -23,8 +23,8 @@ def pipeline(input_path: str) -> Pipeline:
 
 
 def screenshot(ticker: str):
-    ss_common_ancestor(output_dir, ticker, ['Month Forecast', 'Analyst Ratings'],
-                       f'https://www.tipranks.com/stocks/{ticker}/forecast')
+    ss_common_ancestor(ticker, f'https://www.tipranks.com/stocks/{ticker}/forecast',
+                       ['Month Forecast', 'Analyst Ratings'], output_dir)
 
 
 

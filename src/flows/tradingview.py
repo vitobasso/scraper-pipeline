@@ -1,10 +1,9 @@
-import asyncio, sys
 from src.config import output_root
-from src.scheduler import Pipeline, line_task, file_task
-from src.flows.generic.screenshot import params, ss_common_ancestor
-from src.flows.generic.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
 from src.flows.generic.extract_data import extract_json, input_dir as extract_data_input
+from src.flows.generic.screenshot import ss_common_ancestor
 from src.flows.generic.validate_data import validate, input_dir as validate_data_input
+from src.flows.generic.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
+from src.scheduler import Pipeline, line_task, file_task
 
 name = 'tradingview'
 output_dir = f'{output_root}/{name}'
@@ -23,8 +22,8 @@ def pipeline(input_path: str) -> Pipeline:
 
 
 def screenshot(ticker: str):
-    ss_common_ancestor(output_dir, ticker, ['Price target', 'Analyst rating'],
-                       f'https://tradingview.com/symbols/{ticker}/forecast')
+    ss_common_ancestor(ticker, f'https://tradingview.com/symbols/{ticker}/forecast',
+                       ['Price target', 'Analyst rating'], output_dir)
 
 
 def extract_data(image_path: str):

@@ -1,4 +1,4 @@
-import os, re, glob
+import os, re, datetime
 from pathlib import Path
 
 
@@ -13,3 +13,7 @@ def all_files(dir_path: str):
 
 def get_ticker(path: str):
     return re.match(r'.*/(\w+)+.*', path).group(1)
+
+
+def timestamp():
+    return datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
