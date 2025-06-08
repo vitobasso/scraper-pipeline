@@ -1,4 +1,5 @@
 import asyncio, sys
+from src.config import output_root
 from src.scheduler import Pipeline, ticker_task, file_task
 from src.core.browser_session import browser_page, error_name
 from src.flows.generic.screenshot import params
@@ -6,23 +7,25 @@ from src.flows.generic.validate_screenshot import validate_screenshot, input_dir
 from src.flows.generic.extract_data import extract_json, input_dir as extract_data_input
 from src.flows.generic.validate_data import validate, input_dir as validate_data_input
 
+name = 'tradingview'
+output_dir = f'{output_root}/{name}'
+
 
 def pipeline() -> Pipeline:
-    name = 'tradingview'
-    output_dirs = [validate_screenshot_input, extract_data_input, validate_data_input]#, completed_dir]
     return {
         'name': name,
         'tasks': [
-            ticker_task(screenshot, output_dirs, name),
-            file_task(validate_screenshot, validate_screenshot_input, name),
-            file_task(extract_data, extract_data_input, name),
-            file_task(validate_data, validate_data_input, name),
+            ticker_task(screenshot, output_dir),
+            file_task(lambda path: validate_screenshot(path, output_dir), validate_screenshot_input(output_dir)),
+            file_task(extract_data, extract_data_input(output_dir)),
+            file_task(validate_data, validate_data_input(output_dir)),
         ]
     }
 
 
 def screenshot(ticker: str):
-    asyncio.run(_screenshot(*params(f'tradingview-{ticker}', f'https://tradingview.com/symbols/{ticker}/forecast')))
+    p = params(output_dir, ticker, f'https://tradingview.com/symbols/{ticker}/forecast')
+    asyncio.run(_screenshot(*p))
 
 
 async def _screenshot(proxy: str, url: str, path: str):
@@ -57,7 +60,7 @@ def extract_data(image_path: str):
        - avg
        - max
     """
-    extract_json(image_path, prompt)
+    extract_json(image_path, prompt, output_dir)
 
 
 def validate_data(path: str):
@@ -75,4 +78,4 @@ def validate_data(path: str):
             'max': float,
         }
     }
-    validate(path, schema)
+    validate(path, schema, output_dir)
