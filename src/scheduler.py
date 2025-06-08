@@ -23,8 +23,8 @@ def schedule_next(pipeline: Pipeline):
 
 
 def _try_task(task):
-    if task['is_ready']() and not task['is_finished']():
-        input_options = task['find_input']()
+    input_options = task['find_input']()
+    if input_options and not task['is_finished']():
         if isinstance(input_options, list):
             selected_input = random.choice(input_options)
             task['execute'](selected_input)
@@ -37,37 +37,33 @@ def _try_task(task):
 
 def seed_task(execute, output_dir):
     return {
-        'is_ready': lambda: True,
+        'find_input': lambda: True,
+        'execute': execute,
         'is_finished': lambda: all_files(output_dir),
-        'find_input': None,
-        'execute': execute
     }
 
 
 def line_task(execute, input_path, output_dir):
     return {
-        'is_ready': lambda: True,
-        'is_finished': lambda: False,
         'find_input': _find_input(input_path, output_dir),
-        'execute': execute
+        'execute': execute,
+        'is_finished': lambda: False,
     }
 
 
 def file_task(execute, input_dir):
     return {
-        'is_ready': lambda: True,
-        'is_finished': lambda: False,
         'find_input': lambda: all_files(input_dir),
-        'execute': execute
+        'execute': execute,
+        'is_finished': lambda: False,
     }
 
 
 def aggregate_task(execute, input_path, output_dir):
     return {
-        'is_ready': lambda: not _find_input(input_path, output_dir)(),
+        'find_input': lambda: not _find_input(input_path, output_dir)(),
+        'execute': execute,
         'is_finished': lambda: all_files(output_dir),
-        'find_input': None,
-        'execute': execute
     }
 
 
