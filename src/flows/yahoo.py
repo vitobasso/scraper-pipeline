@@ -14,10 +14,10 @@ def pipeline() -> Pipeline:
     return {
         'name': name,
         'tasks': [
-            ticker_task(screenshot, output_dirs, 'screenshot', name),
-            file_task(validate_screenshot, validate_screenshot_input, 'validate_screenshot', name),
-            file_task(extract_data, extract_data_input, 'extract_data', name),
-            file_task(validate_data, validate_data_input, 'validate_data', name),
+            ticker_task(screenshot, output_dirs, name),
+            file_task(validate_screenshot, validate_screenshot_input, name),
+            file_task(extract_data, extract_data_input, name),
+            file_task(validate_data, validate_data_input, name),
         ]
     }
 
