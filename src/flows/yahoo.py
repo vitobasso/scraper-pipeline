@@ -102,11 +102,11 @@ def validate_data(path: str):
     validate(path, schema, output_dir)
 
 
-def compile_data():
-    return [_compile_row(path) for path in all_files(valid_data_dir(output_dir))]
+def to_spreadsheet():
+    return [_to_spreadsheet_row(path) for path in all_files(valid_data_dir(output_dir))]
 
 
-def _compile_row(path):
+def _to_spreadsheet_row(path):
     ticker = filename_before_timestamp(path)
     with open(path) as file:
         data = json.load(file)
