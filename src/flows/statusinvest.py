@@ -1,11 +1,21 @@
 import datetime, asyncio
 from src.config import output_root
+from src.core.util import mkdir
+from src.scheduler import Pipeline, seed_task
 from src.core.proxies import random_proxy
 from src.core.browser_session import page_goto, click, click_download
 
 name = 'statusinvest'
-output_dir = f'{output_root}/{name}'
+output_dir = mkdir(f'{output_root}/{name}')
 
+
+def pipeline() -> Pipeline:
+    return {
+        'name': name,
+        'tasks': [
+            seed_task(sync_download, output_dir),
+        ]
+    }
 
 def sync_download():
     asyncio.run(download())
@@ -13,7 +23,7 @@ def sync_download():
 
 async def download():
     timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-    path = f'{output_dir}/downloads/statusinvest-{timestamp}.csv'
+    path = f'{output_dir}/{timestamp}.csv'
     proxy = random_proxy()
     print(f'downloading csv, path: {path}, proxy: {proxy}')
     return await _download(proxy, path)
