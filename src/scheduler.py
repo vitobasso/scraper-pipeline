@@ -33,9 +33,9 @@ def _try_task(task):
         return False
 
 
-def seed_task(execute):
+def seed_task(execute, output_dir):
     return {
-        'find_input': lambda: True,
+        'find_input': lambda: False if all_files(output_dir) else True,
         'execute': execute
     }
 
