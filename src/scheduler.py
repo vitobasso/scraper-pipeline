@@ -1,6 +1,6 @@
 import random
 from typing import Callable, TypedDict, List
-from src.core.util import get_ticker, all_files
+from src.core.util import filename_before_timestamp, all_files
 
 
 class Task(TypedDict):
@@ -41,10 +41,10 @@ def seed_task(execute, output_dir):
 
 
 def line_task(execute, input_path, output_dir):
-    all_tickers = _load_lines(input_path)
-    progressed_tickers = [get_ticker(path) for path in all_files(output_dir)]
+    all_lines = _load_lines(input_path)
+    progressed_lines = [filename_before_timestamp(path) for path in all_files(output_dir)]
     return {
-        'find_input': lambda: list(set(all_tickers) - set(progressed_tickers)),
+        'find_input': lambda: list(set(all_lines) - set(progressed_lines)),
         'execute': execute
     }
 
