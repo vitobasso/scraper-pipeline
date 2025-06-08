@@ -45,7 +45,7 @@ def seed_task(execute, output_dir):
 
 def line_task(execute, input_path, output_dir):
     return {
-        'find_input': _find_input(input_path, output_dir),
+        'find_input': lambda: _find_input(input_path, output_dir),
         'execute': execute,
         'is_finished': lambda: False,
     }
@@ -59,18 +59,18 @@ def file_task(execute, input_dir):
     }
 
 
-def aggregate_task(execute, input_path, output_dir):
+def aggregate_task(execute, input_path, output_dir, aggregate_dir):
     return {
-        'find_input': lambda: not _find_input(input_path, output_dir)(),
+        'find_input': lambda: not _find_input(input_path, output_dir),
         'execute': execute,
-        'is_finished': lambda: all_files(output_dir),
+        'is_finished': lambda: all_files(aggregate_dir),
     }
 
 
 def _find_input(input_path, output_dir):
     all_lines = _load_lines(input_path)
     progressed_lines = [filename_before_timestamp(path) for path in all_files(output_dir)]
-    return lambda: list(set(all_lines) - set(progressed_lines))
+    return list(set(all_lines) - set(progressed_lines))
 
 
 def _load_lines(path):
