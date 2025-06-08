@@ -1,19 +1,20 @@
 import datetime, asyncio, sys
-from src.config import output_dir
 from src.core.proxies import random_proxy
 from src.core.browser_session import browser_page, error_name
+from src.core.util import mkdir
 
 after_load_timeout = 0
 
 
-def sync_screenshot(key: str, url: str):
-    asyncio.run(_screenshot(*params(key, url)))
+def sync_screenshot(output_dir: str, ticker: str, url: str):
+    asyncio.run(_screenshot(*params(output_dir, ticker, url)))
 
 
-def params(key: str, url: str):
+def params(output_dir: str, ticker: str, url: str):
     timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-    filename = f'{key}-{timestamp}.png'
-    output_path = f'{output_dir}/screenshots/awaiting-validation/{filename}'
+    filename = f'{ticker}-{timestamp}.png'
+    output_dir = mkdir(f'{output_dir}/screenshots/awaiting-validation')
+    output_path = f'{output_dir}/{filename}'
     proxy = random_proxy()
     return proxy, url, output_path
 

@@ -1,8 +1,8 @@
 import os, glob, sys, time, datetime, random, re, urllib.request
 from pathlib import Path
-from src.config import output_dir, proxies_url as download_url
+from src.config import output_root, proxies_url as download_url
 
-list_dir = f'{output_dir}/proxy-list'
+list_dir = f'{output_root}/proxy-list'
 timestamp_format = '%Y%m%dT%H%M%S'
 refresh_seconds = 2 * 60 * 60
 
