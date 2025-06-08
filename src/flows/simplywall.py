@@ -1,5 +1,5 @@
-import asyncio, sys, json
-from src.scheduler import Pipeline, line_task, file_task
+import asyncio, sys, glob, json, pandas
+from src.scheduler import Pipeline, line_task, file_task, aggregate_task
 from src.config import output_root
 from src.core.util import mkdir, timestamp
 from src.core.proxies import random_proxy
@@ -7,17 +7,19 @@ from src.core.browser_session import new_page, error_name, load_timeout
 from src.flows.generic.validate_data import validate, input_dir as validate_data_input
 
 name = 'simplywall'
+input_path = 'input/simplywall/sectors.csv'
 output_dir = f'{output_root}/{name}'
 raw_dir = lambda country: mkdir(f'{output_dir}/{country}/raw')
-ready_dir = lambda country: mkdir(f'{output_dir}/{country}/ready')
+aggregated_dir = lambda country: mkdir(f'{output_dir}/{country}/aggregated')
 
 
 def pipeline(country) -> Pipeline:
     return {
         'name': name,
         'tasks': [
-            line_task(lambda sector: scrape(country, sector), 'input/simplywall/sectors.csv', output_dir),
+            line_task(lambda sector: scrape(country, sector), input_path, output_dir),
             # file_task(validate_data, validate_data_input(output_dir)),
+            aggregate_task(lambda: aggregate(country), input_path, output_dir),
         ]
     }
 
@@ -50,7 +52,36 @@ def validate_data(path: str):
             'future': int,
             'past': int,
             'health': int,
-            'dividend': int,
+            'income': int,
         }
     ]
     validate(path, schema, output_dir)
+
+
+def aggregate(country):
+    raw_files = glob.glob(f'{raw_dir(country)}/*.json')
+    all_data = [stock
+                for file_path in raw_files
+                for stock in _scores_from_file(file_path)]
+    df = pandas.DataFrame(all_data)
+    output_path = f'{aggregated_dir(country)}/{timestamp()}.csv'
+    df.to_csv(output_path, index=False)
+    return output_path
+
+
+def _scores_from_file(path):
+    with open(path, 'r') as f:
+        data = json.load(f)
+        return [_scores_from_obj(stock) for stock in data.get('data', [])]
+
+
+def _scores_from_obj(stock):
+    scores = stock['score']['data']
+    return {
+        'ticker': stock['ticker_symbol'],
+        'value': scores['value'],
+        'future': scores['future'],
+        'past': scores['past'],
+        'health': scores['health'],
+        'income': scores['income'],
+    }
