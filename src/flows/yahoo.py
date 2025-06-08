@@ -2,7 +2,7 @@ import re, asyncio, sys, json
 from src.config import output_root
 from src.scheduler import Pipeline, line_task, file_task
 from src.core.browser_session import page_goto, click, error_name
-from src.core.util import all_files, get_ticker
+from src.core.util import all_files, filename_before_timestamp
 from src.core.proxies import random_proxy
 from src.flows.generic.screenshot import output_path
 from src.flows.generic.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
@@ -107,7 +107,7 @@ def compile_data():
 
 
 def _compile_row(path):
-    ticker = get_ticker(path)
+    ticker = filename_before_timestamp(path)
     with open(path) as file:
         data = json.load(file)
         analyst_rating = data.get('analyst_rating') or {}

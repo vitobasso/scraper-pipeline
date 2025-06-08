@@ -1,33 +1,31 @@
 import asyncio, sys, json
-from src.scheduler import Pipeline, seed_task, file_task
+from src.scheduler import Pipeline, line_task, file_task
 from src.config import output_root
 from src.core.util import mkdir, timestamp
 from src.core.proxies import random_proxy
 from src.core.browser_session import new_page, error_name, load_timeout
 from src.flows.generic.validate_data import validate, input_dir as validate_data_input
 
-
 name = 'simplywall'
 output_dir = f'{output_root}/{name}'
-raw_dir = mkdir(f'{output_dir}/raw')
-ready_dir = mkdir(f'{output_dir}/ready')
+raw_dir = lambda country: mkdir(f'{output_dir}/{country}/raw')
+ready_dir = lambda country: mkdir(f'{output_dir}/{country}/ready')
 
 
-def pipeline() -> Pipeline:
+def pipeline(country) -> Pipeline:
     return {
         'name': name,
         'tasks': [
-            # TODO pagination
-            # TODO add output dir to know when to stop
-            seed_task(scrape, output_dir),
-            file_task(validate_data, validate_data_input(output_dir)),
+            line_task(lambda sector: scrape(country, sector), 'input/simplywall/sectors.csv', output_dir),
+            # file_task(validate_data, validate_data_input(output_dir)),
         ]
     }
 
 
-def scrape():
-    path = f'{raw_dir}/{timestamp()}.json'
-    asyncio.run(_scrape(random_proxy(), 'https://simplywall.st/stocks/br/top-gainers', path))
+def scrape(country, sector):
+    url = f'https://simplywall.st/stocks/{country}/{sector}'
+    path = f'{raw_dir(country)}/{sector}-{timestamp()}.json'
+    asyncio.run(_scrape(random_proxy(), url, path))
 
 
 async def _scrape(proxy: str, url: str, path: str):
