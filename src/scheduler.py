@@ -45,12 +45,11 @@ def seed_task(execute, pipeline_name):
 
 
 def ticker_task(execute, output_dirs, pipeline_name):
-    mid_files = [file
-                 for task_output_dir in output_dirs
-                 for file in all_files(task_output_dir, pipeline_name)]
-    processed_files = mid_files + all_files(completed_dir, pipeline_name)
+    output_files = [file
+                    for task_output_dir in output_dirs
+                    for file in all_files(task_output_dir, pipeline_name)]
     return {
-        'find_input': lambda: list(set(_load_tickers()) - set([get_ticker(path) for path in processed_files])),
+        'find_input': lambda: list(set(_load_tickers()) - set([get_ticker(path) for path in output_files])),
         'execute': execute
     }
 

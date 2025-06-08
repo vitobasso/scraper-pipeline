@@ -1,18 +1,23 @@
 import asyncio, sys
+from src.scheduler import Pipeline, ticker_task, file_task, completed_dir
 from src.core.browser_session import browser_page, error_name
 from src.flows.generic.screenshot import params
-from src.flows.generic.validate_screenshot import validate as validate_screenshot
-from src.flows.generic.extract_data import extract_json
-from src.flows.generic.validate_data import validate
+from src.flows.generic.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
+from src.flows.generic.extract_data import extract_json, input_dir as extract_data_input
+from src.flows.generic.validate_data import validate, input_dir as validate_data_input
 
 
-def flow():
+def pipeline() -> Pipeline:
+    name = 'tradingview'
+    output_dirs = [validate_screenshot_input, extract_data_input, validate_data_input, completed_dir]
     return {
-        'name': 'tradingview',
-        'screenshot': screenshot,
-        'validate_screenshot': validate_screenshot,
-        'extract_data': extract_data,
-        'validate_data': validate_data,
+        'name': name,
+        'tasks': [
+            ticker_task(screenshot, output_dirs, name),
+            file_task(validate_screenshot, validate_screenshot_input, name),
+            file_task(extract_data, extract_data_input, name),
+            file_task(validate_data, validate_data_input, name),
+        ]
     }
 
 
@@ -58,11 +63,11 @@ def extract_data(image_path: str):
 def validate_data(path: str):
     schema = {
         'analyst_rating': {
-           'strong_buy': int,
-           'buy': int,
-           'hold': int,
-           'sell': int,
-           'strong_sell': int,
+            'strong_buy': int,
+            'buy': int,
+            'hold': int,
+            'sell': int,
+            'strong_sell': int,
         },
         'price_forecast': {
             'min': float,
