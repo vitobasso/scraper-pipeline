@@ -3,6 +3,9 @@ from src.config import output_root
 from src.core.proxies import random_proxy
 from src.core.browser_session import browser_page, click, click_download
 
+name = 'statusinvest'
+output_dir = f'{output_root}/{name}'
+
 
 def sync_download():
     asyncio.run(download())
@@ -10,7 +13,7 @@ def sync_download():
 
 async def download():
     timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-    path = f'{output_root}/downloads/statusinvest-{timestamp}.csv'
+    path = f'{output_dir}/downloads/statusinvest-{timestamp}.csv'
     proxy = random_proxy()
     print(f'downloading csv, path: {path}, proxy: {proxy}')
     return await _download(proxy, path)

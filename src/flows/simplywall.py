@@ -6,24 +6,26 @@ from src.core.proxies import random_proxy
 from src.core.browser_session import browser_page2, error_name, load_timeout
 from src.flows.generic.validate_data import validate, input_dir as validate_data_input
 
-download_dir = mkdir(f'{output_root}/downloads/awaiting-extraction')
+
+name = 'simplywall'
+output_dir = f'{output_root}/{name}'
+download_dir = mkdir(f'{output_dir}/downloads/awaiting-extraction')
 
 
 def pipeline() -> Pipeline:
-    name = 'simplywall'
     return {
         'name': name,
         'tasks': [
             # TODO pagination
             # TODO add output dir to know when to stop
-            seed_task(scrape, name),
-            file_task(validate_data, validate_data_input, name),
+            seed_task(scrape),
+            file_task(validate_data, validate_data_input(output_dir)),
         ]
     }
 
 
 def scrape():
-    asyncio.run(_scrape(*params(f'simplywall', 'https://simplywall.st/stocks/br/top-gainers')))
+    asyncio.run(_scrape(*params('https://simplywall.st/stocks/br/top-gainers')))
 
 
 async def _scrape(proxy: str, url: str, path: str):
@@ -40,10 +42,9 @@ async def _scrape(proxy: str, url: str, path: str):
         print(f'failed: {error_name(e)}', file=sys.stderr)
 
 
-def params(key: str, url: str):
+def params(url: str):
     timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-    filename = f'{key}-{timestamp}.json'
-    output_path = f'{download_dir}/{filename}'
+    output_path = f'{download_dir}/{timestamp}.json'
     proxy = random_proxy()
     return proxy, url, output_path
 
@@ -59,4 +60,4 @@ def validate_data(path: str):
             'dividend': int,
         }
     ]
-    validate(path, schema)
+    validate(path, schema, output_dir)

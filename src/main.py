@@ -2,10 +2,9 @@ import scheduler
 from src.flows import yahoo, tradingview, tipranks, simplywall
 from src.spreadsheet.screening_sheet import create_spreadsheet
 
-#TODO organize output per pipeline
 if __name__ == '__main__':
     for i in range(100):
-        scheduler.schedule_next(yahoo.pipeline())
+        scheduler.schedule_next(tradingview.pipeline())
     # simplywall.scrape()
     # proxy = random_proxy()
     # yahoo.compile_data()
