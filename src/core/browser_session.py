@@ -8,7 +8,7 @@ load_timeout = 60000
 
 
 @asynccontextmanager
-async def browser_page2(proxy: str):
+async def new_page(proxy: str):
     async with async_playwright() as playwright:
         proxy_settings: ProxySettings = {'server': f'{proxy}'}
 
@@ -48,9 +48,9 @@ async def browser_page2(proxy: str):
 
 
 @asynccontextmanager
-async def browser_page(proxy: str, url: str,
-                       wait_until: Literal['commit', 'domcontentloaded', 'load', 'networkidle'] = 'domcontentloaded'):
-    async with browser_page2(proxy) as page:
+async def page_goto(proxy: str, url: str,
+                    wait_until: Literal['commit', 'domcontentloaded', 'load', 'networkidle'] = 'domcontentloaded'):
+    async with new_page(proxy) as page:
         await page.goto(url, timeout=load_timeout, wait_until=wait_until)
         yield page
 
@@ -68,6 +68,15 @@ async def click_download(file_path: str, page, selector: str, button_text: str):
         await button.click()
     download = await download_info.value
     await download.save_as(file_path)
+
+
+def common_ancestor(page, texts: list[str]):
+    children = ' and '.join([_xpath_contains(text) for text in texts])
+    return page.locator(f"""xpath=//*[{children}]""").last
+
+
+def _xpath_contains(text: str):
+    return f".//text()[contains(., '{text}')]"
 
 
 def error_name(e: Exception):

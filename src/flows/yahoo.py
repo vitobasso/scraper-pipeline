@@ -1,7 +1,7 @@
 import re, asyncio, sys, json
 from src.config import output_root
 from src.scheduler import Pipeline, line_task, file_task
-from src.core.browser_session import browser_page, click, error_name
+from src.core.browser_session import page_goto, click, error_name
 from src.core.util import all_files, get_ticker
 from src.flows.generic.screenshot import params
 from src.flows.generic.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
@@ -33,7 +33,7 @@ def screenshot(ticker: str):
 async def _screenshot(proxy: str, url: str, path: str):
     print(f'taking screenshot, url: {url}, path: {path}, proxy: {proxy}')
     try:
-        async with browser_page(proxy, url, wait_until='domcontentloaded') as page:
+        async with page_goto(proxy, url, wait_until='domcontentloaded') as page:
             await _reject_cookies(page)
             await _dismiss_upgrade(page)
             await page.locator('div.cards-container').screenshot(path=path)

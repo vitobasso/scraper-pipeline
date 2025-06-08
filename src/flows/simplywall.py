@@ -3,7 +3,7 @@ from src.scheduler import Pipeline, seed_task, file_task
 from src.config import output_root
 from src.core.util import mkdir
 from src.core.proxies import random_proxy
-from src.core.browser_session import browser_page2, error_name, load_timeout
+from src.core.browser_session import new_page, error_name, load_timeout
 from src.flows.generic.validate_data import validate, input_dir as validate_data_input
 
 
@@ -31,7 +31,7 @@ def scrape():
 async def _scrape(proxy: str, url: str, path: str):
     print(f'scraping, url: {url}, path: {path}, proxy: {proxy}')
     try:
-        async with browser_page2(proxy) as page:
+        async with new_page(proxy) as page:
             async with page.expect_response(lambda r: "api/grid/filter" in r.url) as response_info:
                 await page.goto(url, timeout=load_timeout, wait_until='domcontentloaded')
             response = await response_info.value

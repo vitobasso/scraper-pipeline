@@ -1,7 +1,7 @@
 import datetime, asyncio
 from src.config import output_root
 from src.core.proxies import random_proxy
-from src.core.browser_session import browser_page, click, click_download
+from src.core.browser_session import page_goto, click, click_download
 
 name = 'statusinvest'
 output_dir = f'{output_root}/{name}'
@@ -20,6 +20,6 @@ async def download():
 
 
 async def _download(proxy: str, path: str):
-    async with browser_page(proxy, 'https://statusinvest.com.br/acoes/busca-avancada') as page:
+    async with page_goto(proxy, 'https://statusinvest.com.br/acoes/busca-avancada') as page:
         await click(page, 'button', 'Buscar')
         await click_download(path, page, 'a', 'DOWNLOAD')

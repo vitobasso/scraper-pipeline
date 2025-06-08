@@ -1,5 +1,5 @@
 from src.config import output_root
-from src.flows.generic.screenshot import sync_screenshot
+from src.flows.generic.screenshot import ss_full_page, ss_common_ancestor
 from src.scheduler import Pipeline, line_task, file_task
 from src.flows.generic.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
 from src.flows.generic.extract_data import extract_json, input_dir as extract_data_input
@@ -21,8 +21,11 @@ def pipeline(input_path: str) -> Pipeline:
     }
 
 
+
 def screenshot(ticker: str):
-    sync_screenshot(output_dir, ticker, f'https://www.tipranks.com/stocks/{ticker}/forecast')
+    ss_common_ancestor(output_dir, ticker, ['Month Forecast', 'Analyst Ratings'],
+                       f'https://www.tipranks.com/stocks/{ticker}/forecast')
+
 
 
 def extract_data(image_path: str):
