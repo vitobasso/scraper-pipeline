@@ -1,7 +1,7 @@
 import asyncio, sys, glob, json, pandas
 from src.scheduler import Pipeline, line_task, file_task, aggregate_task
 from src.config import output_root
-from src.core.util import mkdir, timestamp
+from src.core.util import mkdir, timestamp, all_files
 from src.core.proxies import random_proxy
 from src.core.browser_session import new_page, error_name, load_timeout
 from src.flows.generic.validate_data import validate, input_dir as validate_data_input
@@ -85,3 +85,12 @@ def _scores_from_obj(stock):
         'health': scores['health'],
         'income': scores['income'],
     }
+
+
+def to_spreadsheet(country):
+    paths = all_files(aggregated_dir(country))
+    if paths:
+        df = pandas.read_csv(paths[0])
+        return sorted(df.values.tolist(), key=lambda x: x[0])
+    else:
+        return []

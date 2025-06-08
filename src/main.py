@@ -8,7 +8,7 @@ if __name__ == '__main__':
         # scheduler.schedule_next(tipranks.pipeline('input/ticker-list/stocks-us.csv'))
         # scheduler.schedule_next(statusinvest.pipeline())
         # scheduler.schedule_next(simplywall.pipeline('br'))
-    simplywall.aggregate('br')
+    # simplywall.aggregate('br')
     # proxy = random_proxy()
     # yahoo.compile_data()
     # yahoo.validate_data('output/20250606/data/awaiting-validation/yahoo-cmig4-20250606T122342.json')
