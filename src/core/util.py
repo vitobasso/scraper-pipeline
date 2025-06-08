@@ -12,7 +12,8 @@ def all_files(dir_path: str):
 
 
 def filename_before_timestamp(path: str):
-    return re.search(r'.*/(.*)[~-]', path).group(1)
+    search = re.search(r'.*/(.*)[~-]', path)
+    return search.group(1) if search else None
 
 
 def timestamp():

@@ -3,11 +3,12 @@ from src.flows import yahoo, tradingview, tipranks, simplywall, statusinvest
 from src.spreadsheet.screening_sheet import create_spreadsheet
 
 if __name__ == '__main__':
-    for i in range(400):
-        scheduler.schedule_next(yahoo.pipeline('input/ticker-list/acoes-br.csv'))
-        scheduler.schedule_next(tipranks.pipeline('input/ticker-list/stocks-us.csv'))
-        scheduler.schedule_next(statusinvest.pipeline())
-        scheduler.schedule_next(simplywall.pipeline('br'))
+    # for i in range(400):
+        # scheduler.schedule_next(yahoo.pipeline('input/ticker-list/acoes-br.csv'))
+        # scheduler.schedule_next(tradingview.pipeline('input/ticker-list/acoes-br.csv'))
+        # scheduler.schedule_next(tipranks.pipeline('input/ticker-list/stocks-us.csv'))
+        # scheduler.schedule_next(simplywall.pipeline('br'))
+        # scheduler.schedule_next(statusinvest.pipeline())
     # simplywall.aggregate('br')
     # proxy = random_proxy()
     # yahoo.compile_data()

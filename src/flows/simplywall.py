@@ -8,18 +8,18 @@ from src.flows.generic.validate_data import validate, input_dir as validate_data
 
 name = 'simplywall'
 input_path = 'input/simplywall/sectors.csv'
-output_dir = f'{output_root}/{name}'
-raw_dir = lambda country: mkdir(f'{output_dir}/{country}/raw')
-aggregated_dir = lambda country: mkdir(f'{output_dir}/{country}/aggregated')
+output_dir = lambda country: mkdir(f'{output_root}/{name}/{country}')
+raw_dir = lambda country: mkdir(f'{output_dir(country)}/raw')
+aggregated_dir = lambda country: mkdir(f'{output_dir(country)}/aggregated')
 
 
 def pipeline(country) -> Pipeline:
     return {
         'name': name,
         'tasks': [
-            line_task(lambda sector: scrape(country, sector), input_path, output_dir),
-            # file_task(validate_data, validate_data_input(output_dir)),
-            aggregate_task(lambda: aggregate(country), input_path, output_dir),
+            line_task(lambda sector: scrape(country, sector), input_path, output_dir(country)),
+            # file_task(validate_data, validate_data_input(output_dir(country)),
+            aggregate_task(lambda: aggregate(country), input_path, output_dir(country), aggregated_dir(country)),
         ]
     }
 
@@ -44,7 +44,7 @@ async def _scrape(proxy: str, url: str, path: str):
         print(f'failed: {error_name(e)}', file=sys.stderr)
 
 
-def validate_data(path: str):
+def validate_data(country: str, path: str):
     schema = [
         {
             'ticker': str,
@@ -55,7 +55,7 @@ def validate_data(path: str):
             'income': int,
         }
     ]
-    validate(path, schema, output_dir)
+    validate(path, schema, output_dir(country))
 
 
 def aggregate(country):
@@ -63,7 +63,8 @@ def aggregate(country):
     all_data = [stock
                 for file_path in raw_files
                 for stock in _scores_from_file(file_path)]
-    df = pandas.DataFrame(all_data)
+    sorted_data = sorted(all_data, key=lambda x: x['ticker'])
+    df = pandas.DataFrame(sorted_data)
     output_path = f'{aggregated_dir(country)}/{timestamp()}.csv'
     df.to_csv(output_path, index=False)
     return output_path
@@ -91,6 +92,6 @@ def to_spreadsheet(country):
     paths = all_files(aggregated_dir(country))
     if paths:
         df = pandas.read_csv(paths[0])
-        return sorted(df.values.tolist(), key=lambda x: x[0])
+        return df.values.tolist()
     else:
         return []
