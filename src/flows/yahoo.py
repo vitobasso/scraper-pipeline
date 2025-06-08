@@ -3,7 +3,7 @@ from src.scheduler import Pipeline, ticker_task, file_task, completed_dir
 from src.core.browser_session import browser_page, click, error_name
 from src.core.util import all_files, get_ticker
 from src.flows.generic.screenshot import params
-from src.flows.generic.validate_screenshot import validate as validate_screenshot, input_dir as validate_screenshot_input
+from src.flows.generic.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
 from src.flows.generic.extract_data import extract_json, input_dir as extract_data_input
 from src.flows.generic.validate_data import valid_data_dir, validate, input_dir as validate_data_input
 
