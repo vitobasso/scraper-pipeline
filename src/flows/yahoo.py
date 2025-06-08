@@ -1,19 +1,24 @@
 import re, asyncio, sys, json
+from src.scheduler import Pipeline, ticker_task, file_task, completed_dir
 from src.core.browser_session import browser_page, click, error_name
 from src.core.util import all_files, get_ticker
 from src.flows.generic.screenshot import params
-from src.flows.generic.validate_screenshot import validate as validate_screenshot
-from src.flows.generic.extract_data import extract_json
-from src.flows.generic.validate_data import valid_data_dir, validate
+from src.flows.generic.validate_screenshot import validate as validate_screenshot, input_dir as validate_screenshot_input
+from src.flows.generic.extract_data import extract_json, input_dir as extract_data_input
+from src.flows.generic.validate_data import valid_data_dir, validate, input_dir as validate_data_input
 
 
-def flow():
+def pipeline() -> Pipeline:
+    name = 'yahoo'
+    output_dirs = [validate_screenshot_input, extract_data_input, validate_data_input, completed_dir]
     return {
-        'name': 'yahoo',
-        'screenshot': screenshot,
-        'validate_screenshot': validate_screenshot,
-        'extract_data': extract_data,
-        'validate_data': validate_data,
+        'name': name,
+        'tasks': [
+            ticker_task(screenshot, output_dirs, 'screenshot', name),
+            file_task(validate_screenshot, validate_screenshot_input, 'validate_screenshot', name),
+            file_task(extract_data, extract_data_input, 'extract_data', name),
+            file_task(validate_data, validate_data_input, 'validate_data', name),
+        ]
     }
 
 
@@ -77,12 +82,12 @@ def extract_data(path: str):
 def validate_data(path: str):
     schema = {
         'analyst_rating': ({
-           'strong_buy': int,
-           'buy': int,
-           'hold': int,
-           'underperform': int,
-           'sell': int,
-        }, None),
+                               'strong_buy': int,
+                               'buy': int,
+                               'hold': int,
+                               'underperform': int,
+                               'sell': int,
+                           }, None),
         'price_forecast': {
             'min': float,
             'avg': float,

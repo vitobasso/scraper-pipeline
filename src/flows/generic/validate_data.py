@@ -3,6 +3,7 @@ from src.config import output_dir
 from src.core.util import mkdir
 
 data_dir = f'{output_dir}/data'
+input_dir = mkdir(f'{data_dir}/awaiting-validation')
 valid_data_dir = mkdir(f'{data_dir}/ready')
 invalid_data_dir = mkdir(f'{data_dir}/failed-validation')
 failed_data_dir = mkdir(f'{data_dir}/failed-extraction')
