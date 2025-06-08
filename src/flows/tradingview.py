@@ -1,6 +1,6 @@
 import asyncio, sys
 from src.config import output_root
-from src.scheduler import Pipeline, ticker_task, file_task
+from src.scheduler import Pipeline, line_task, file_task
 from src.core.browser_session import browser_page, error_name
 from src.flows.generic.screenshot import params
 from src.flows.generic.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
@@ -11,11 +11,11 @@ name = 'tradingview'
 output_dir = f'{output_root}/{name}'
 
 
-def pipeline() -> Pipeline:
+def pipeline(input_path: str) -> Pipeline:
     return {
         'name': name,
         'tasks': [
-            ticker_task(screenshot, output_dir),
+            line_task(screenshot, input_path, output_dir),
             file_task(lambda path: validate_screenshot(path, output_dir), validate_screenshot_input(output_dir)),
             file_task(extract_data, extract_data_input(output_dir)),
             file_task(validate_data, validate_data_input(output_dir)),

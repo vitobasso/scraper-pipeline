@@ -2,8 +2,6 @@ import random
 from typing import Callable, TypedDict, List
 from src.core.util import get_ticker, all_files
 
-tickers_path = 'input/ticker-list/acoes-br.csv'
-
 
 class Task(TypedDict):
     name: str
@@ -42,10 +40,11 @@ def seed_task(execute):
     }
 
 
-def ticker_task(execute, output_dir):
-    output_tickers = [get_ticker(path) for path in all_files(output_dir)]
+def line_task(execute, input_path, output_dir):
+    all_tickers = _load_lines(input_path)
+    progressed_tickers = [get_ticker(path) for path in all_files(output_dir)]
     return {
-        'find_input': lambda: list(set(_load_tickers()) - set(output_tickers)),
+        'find_input': lambda: list(set(all_tickers) - set(progressed_tickers)),
         'execute': execute
     }
 
@@ -57,6 +56,6 @@ def file_task(execute, input_dir):
     }
 
 
-def _load_tickers():
-    with open(tickers_path, 'r') as file:
+def _load_lines(path):
+    with open(path, 'r') as file:
         return [line.strip().lower() for line in file.readlines()]
