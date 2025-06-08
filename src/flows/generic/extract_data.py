@@ -1,9 +1,11 @@
 import os, google.generativeai as genai
+from pathlib import Path
 from PIL import Image
 from dotenv import load_dotenv
 from src.config import output_dir, visual_llm_model as model_name
 from src.core.util import mkdir
 
+input_dir = mkdir(f'{output_dir}/screenshots/awaiting-extraction')
 data_dir = mkdir(f'{output_dir}/data/awaiting-validation')
 consumed_dir = mkdir(f'{output_dir}/screenshots/consumed')
 
@@ -33,12 +35,8 @@ def extract(image_path: str, prompt: str):
     print(f'extracting data, path: {image_path}')
     image = Image.open(image_path)
     response = model.generate_content([prompt, image])
-    data_path = f'{data_dir}/{_filename_without_extension(image_path)}.json'
+    data_path = f'{data_dir}/{Path(image_path).stem}.json'
     with open(data_path, "w") as file:
         file.write(response.text)
-    consumed_path = f'{consumed_dir}/{os.path.basename(image_path)}'
+    consumed_path = f'{consumed_dir}/{Path(image_path).name}'
     os.rename(image_path, consumed_path)
-
-
-def _filename_without_extension(path: str):
-    return os.path.splitext(os.path.basename(path))[0]

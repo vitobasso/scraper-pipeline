@@ -4,6 +4,7 @@ from src.core.util import mkdir
 
 ocr_min_lines = 50
 
+input_dir = mkdir(f'{output_dir}/screenshots/awaiting-validation')
 valid_dir = mkdir(f'{output_dir}/screenshots/awaiting-extraction')
 invalid_dir = mkdir(f'{output_dir}/screenshots/failed-validation')
 warnings.filterwarnings("ignore", message=".*pin_memory.*MPS.*")
