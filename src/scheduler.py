@@ -37,29 +37,26 @@ def _try_task(task):
         return False
 
 
-def seed_task(execute, task_name, pipeline_name):
+def seed_task(execute, pipeline_name):
     return {
-        'name': task_name,
         'find_input': lambda: True,
         'execute': execute
     }
 
 
-def ticker_task(execute, output_dirs, task_name, pipeline_name):
+def ticker_task(execute, output_dirs, pipeline_name):
     mid_files = [file
                  for task_output_dir in output_dirs
                  for file in all_files(task_output_dir, pipeline_name)]
     processed_files = mid_files + all_files(completed_dir, pipeline_name)
     return {
-        'name': task_name,
         'find_input': lambda: list(set(_load_tickers()) - set([get_ticker(path) for path in processed_files])),
         'execute': execute
     }
 
 
-def file_task(execute, input_dir, task_name, pipeline_name):
+def file_task(execute, input_dir, pipeline_name):
     return {
-        'name': task_name,
         'find_input': lambda: all_files(input_dir, pipeline_name),
         'execute': execute
     }

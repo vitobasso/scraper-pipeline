@@ -14,8 +14,10 @@ def pipeline() -> Pipeline:
     return {
         'name': name,
         'tasks': [
-            seed_task(scrape, 'seed', name),
-            file_task(validate_data, validate_data_input, 'validate_data', name),
+            # TODO pagination
+            # TODO add output dir to know when to stop
+            seed_task(scrape, name),
+            file_task(validate_data, validate_data_input, name),
         ]
     }
 
@@ -34,7 +36,6 @@ async def _scrape(proxy: str, url: str, path: str):
             data = await response.json()
             with open(path, 'w') as f:
                 json.dump(data, f)
-            # TODO pagination
     except Exception as e:
         print(f'failed: {error_name(e)}', file=sys.stderr)
 
