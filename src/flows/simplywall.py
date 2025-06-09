@@ -4,7 +4,7 @@ from src.config import output_root
 from src.core.util import mkdir, timestamp, all_files
 from src.core.proxies import random_proxy
 from src.core.browser_session import new_page, error_name, load_timeout
-from src.flows.generic.validate_data import validate, input_dir as validate_data_input
+from src.flows.generic.validate_data import validate
 
 name = 'simplywall'
 input_path = 'input/simplywall/sectors.csv'

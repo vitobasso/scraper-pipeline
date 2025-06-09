@@ -13,7 +13,7 @@ def create_spreadsheet():
     _populate_screening(spreadsheet)
     _populate_forecast(spreadsheet)
     _populate_statusinvest(spreadsheet)
-    _populate_simplywall(spreadsheet)
+    _populate_simplywall(spreadsheet) # TODO do per stock instead
 
 
 def _populate_constants(spreadsheet):
