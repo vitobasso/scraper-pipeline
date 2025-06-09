@@ -9,8 +9,8 @@ from src.flows.generic.validate_data import validate, input_dir as validate_data
 
 name = 'simplywall'
 output_dir = mkdir(f'{output_root}/{name}')
-urls_path = mkdir(f'{output_dir}/setup/urls.csv')
-raw_dir = mkdir(f'{output_dir}/awaiting-extraction')
+raw_dir = mkdir(f'{output_dir}/data/awaiting-extraction')
+urls_path = 'input/simplywall/urls.csv'
 
 
 def pipeline(input_path: str) -> Pipeline:
