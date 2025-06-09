@@ -1,16 +1,16 @@
-import asyncio, sys, json
+import asyncio, sys, json, csv
 from src.scheduler import Pipeline, line_task, file_task
 from src.config import output_root
 from src.core.util import timestamp, mkdir
 from src.core.proxies import random_proxy
-from src.core.browser_session import new_page, error_name, load_timeout
+from src.core.browser_session import new_page, error_name, expect_json_response
 from src.flows.generic.extract_data import ask
 from src.flows.generic.validate_data import validate, input_dir as validate_data_input
 
 name = 'simplywall-single'
 output_dir = mkdir(f'{output_root}/{name}')
-urls_path = lambda t: mkdir(f'{output_dir}/setup/urls-{t}.csv')
-raw_dir = mkdir(f'{output_dir}/raw')
+urls_path = mkdir(f'{output_dir}/setup/urls.csv')
+raw_dir = mkdir(f'{output_dir}/awaiting-extraction')
 
 
 def pipeline(input_path: str) -> Pipeline:
@@ -25,22 +25,10 @@ def pipeline(input_path: str) -> Pipeline:
     }
 
 
-# TODO gemini-flash doesn't seem to work, gemini-pro gets most urls right
-def find_urls(input_path):
-    tickers = ''  # TODO load from input_path
-    path = urls_path(timestamp())
-    prompt = f"""
-    Find the url in simplywall.st for each ticker below:
-    {tickers}
-
-    Return as pure CSV with columns: ticker, url
-    Do not use any markdown formatting or backticks
-    """
-    ask(prompt, path)
-
-
 def scrape(ticker):
-    url = f'https://simplywall.st/stocks/br/banks/bovespa-{ticker}/banco-do-brasil-shares'
+    url = get_url(ticker)
+    if not url:
+        print(f'failed: simplywall.st url missing for {ticker}', file=sys.stderr)
     path = f'{raw_dir}/{ticker}-{timestamp()}.json'
     asyncio.run(_scrape(random_proxy(), url, path))
 
@@ -50,12 +38,7 @@ async def _scrape(proxy: str, url: str, path: str):
     try:
         async with new_page(proxy) as page:
             match_request = lambda r: "/graphql" in r.url and "CompanySummary" in (r.request.post_data or "")
-            async with page.expect_response(match_request) as response_info:
-                await page.goto(url, timeout=load_timeout, wait_until='domcontentloaded')
-            response = await response_info.value
-            data = await response.json()
-            with open(path, 'w') as f:
-                json.dump(data, f)
+            await expect_json_response(path, page, url, match_request)
     except Exception as e:
         print(f'failed: {error_name(e)}', file=sys.stderr)
 
@@ -73,3 +56,31 @@ def validate_data(path: str):
     ]
     validate(path, schema, raw_dir)
 
+
+def get_url(ticker):
+    with open(urls_path) as f:
+        for row in csv.reader(f):
+            if row[0].lower() == ticker.lower():
+                return row[1]
+    return None
+
+
+# TODO gemini-flash doesn't seem to work, gemini-pro gets most urls right
+def discover_urls(input_path):
+    path = f'{urls_path}-{timestamp()}'
+    with open(input_path, 'r') as f:
+        tickers = [line.strip() for line in f.readlines()]
+        prompt = f"""
+        Find the url in simplywall.st for each ticker below:
+        {tickers}
+    
+        Return as pure CSV with columns: ticker, url
+        Their urls are formated as follows: https://simplywall.st/stocks/br/<sector>/bovespa-<ticker>/<slug>
+        You'll need to find the sector and slug for each ticker in order to compose the url
+    
+        E.g.: 
+        BBAS3,https://simplywall.st/stocks/br/banks/bovespa-bbas3/banco-do-brasil-shares
+        TAEE11,https://simplywall.st/stocks/br/utilities/bovespa-taee11/transmissora-alianca-de-energia-eletrica-shares
+        GGBR4,https://simplywall.st/stocks/br/materials/bovespa-ggbr4/gerdau-shares
+        """
+        ask(prompt, path)

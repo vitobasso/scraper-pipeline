@@ -1,4 +1,4 @@
-import re
+import re, json
 from playwright._impl._errors import TimeoutError, Error as PlaywrightError
 from playwright.async_api import async_playwright, ProxySettings, ViewportSize
 from typing import Literal
@@ -68,6 +68,15 @@ async def click_download(file_path: str, page, selector: str, button_text: str):
         await button.click()
     download = await download_info.value
     await download.save_as(file_path)
+
+
+async def expect_json_response(file_path: str, page, url: str, condition):
+    async with page.expect_response(condition) as response_info:
+        await page.goto(url, timeout=load_timeout, wait_until='domcontentloaded')
+    response = await response_info.value
+    data = await response.json()
+    with open(file_path, 'w') as f:
+        json.dump(data, f)
 
 
 def common_ancestor(page, texts: list[str]):

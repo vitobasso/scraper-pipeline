@@ -3,13 +3,13 @@ from src.scheduler import Pipeline, line_task, file_task, aggregate_task
 from src.config import output_root
 from src.core.util import mkdir, timestamp, all_files
 from src.core.proxies import random_proxy
-from src.core.browser_session import new_page, error_name, load_timeout
+from src.core.browser_session import new_page, error_name, expect_json_response
 from src.flows.generic.validate_data import validate
 
 name = 'simplywall'
 input_path = 'input/simplywall/sectors.csv'
 output_dir = lambda country: mkdir(f'{output_root}/{name}/{country}')
-raw_dir = lambda country: mkdir(f'{output_dir(country)}/raw')
+raw_dir = lambda country: mkdir(f'{output_dir(country)}/awaiting-extraction')
 aggregated_dir = lambda country: mkdir(f'{output_dir(country)}/aggregated')
 
 
@@ -34,12 +34,7 @@ async def _scrape(proxy: str, url: str, path: str):
     print(f'scraping, url: {url}, path: {path}, proxy: {proxy}')
     try:
         async with new_page(proxy) as page:
-            async with page.expect_response(lambda r: "api/grid/filter" in r.url) as response_info:
-                await page.goto(url, timeout=load_timeout, wait_until='domcontentloaded')
-            response = await response_info.value
-            data = await response.json()
-            with open(path, 'w') as f:
-                json.dump(data, f)
+            await expect_json_response(path, page, url, lambda r: "api/grid/filter" in r.url)
     except Exception as e:
         print(f'failed: {error_name(e)}', file=sys.stderr)
 
