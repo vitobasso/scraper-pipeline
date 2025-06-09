@@ -1,7 +1,7 @@
 import csv, re, calendar
 from datetime import datetime
 from src.core.google_sheets import copy_file, find_worksheet_by_title
-from src.flows import yahoo, simplywall
+from src.flows import yahoo, simplywall_multi
 
 template_id = '1eWwqMZr4PeuH5siVoICz_XPcWVE8dGEgx_jKaarZ_4Y'  # TODO export to file and make it a local resource?
 
@@ -13,7 +13,7 @@ def create_spreadsheet():
     _populate_screening(spreadsheet)
     _populate_forecast(spreadsheet)
     _populate_statusinvest(spreadsheet)
-    _populate_simplywall(spreadsheet) # TODO do per stock instead
+    _populate_simplywall(spreadsheet)
 
 
 def _populate_constants(spreadsheet):
@@ -41,9 +41,10 @@ def _populate_statusinvest(spreadsheet):
     worksheet.update(values=data)
 
 
+# TODO do per stock instead
 def _populate_simplywall(spreadsheet):
     worksheet = find_worksheet_by_title(spreadsheet, 'simplywall')
-    data = simplywall.to_spreadsheet('br')
+    data = simplywall_multi.to_spreadsheet('br')
     worksheet.update(values=data)
 
 

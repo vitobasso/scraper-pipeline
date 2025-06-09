@@ -1,32 +1,35 @@
-import asyncio, sys, glob, json, pandas
-from src.scheduler import Pipeline, line_task, file_task, aggregate_task
+import asyncio, sys, json, csv
+from src.scheduler import Pipeline, line_task, file_task
 from src.config import output_root
-from src.core.util import mkdir, timestamp, all_files
+from src.core.util import timestamp, mkdir
 from src.core.proxies import random_proxy
 from src.core.browser_session import new_page, error_name, expect_json_response
-from src.flows.generic.validate_data import validate
+from src.flows.generic.extract_data import ask
+from src.flows.generic.validate_data import validate, input_dir as validate_data_input
 
 name = 'simplywall'
-input_path = 'input/simplywall/sectors.csv'
-output_dir = lambda country: mkdir(f'{output_root}/{name}/{country}')
-raw_dir = lambda country: mkdir(f'{output_dir(country)}/awaiting-extraction')
-aggregated_dir = lambda country: mkdir(f'{output_dir(country)}/aggregated')
+output_dir = mkdir(f'{output_root}/{name}')
+urls_path = mkdir(f'{output_dir}/setup/urls.csv')
+raw_dir = mkdir(f'{output_dir}/awaiting-extraction')
 
 
-def pipeline(country) -> Pipeline:
+def pipeline(input_path: str) -> Pipeline:
     return {
         'name': name,
         'tasks': [
-            line_task(lambda sector: scrape(country, sector), input_path, output_dir(country)),
-            # file_task(validate_data, validate_data_input(output_dir(country)),
-            aggregate_task(lambda: aggregate(country), input_path, output_dir(country), aggregated_dir(country)),
+            line_task(scrape, input_path, output_dir),
+            # file_task(lambda path: validate_raw(path, output_dir), validate_raw_input(output_dir)),
+            # file_task(extract_data, extract_data_input(output_dir)),
+            file_task(validate_data, validate_data_input(output_dir)),
         ]
     }
 
 
-def scrape(country, sector):
-    url = f'https://simplywall.st/stocks/{country}/{sector}'
-    path = f'{raw_dir(country)}/{sector}-{timestamp()}.json'
+def scrape(ticker):
+    url = get_url(ticker)
+    if not url:
+        print(f'failed: simplywall.st url missing for {ticker}', file=sys.stderr)
+    path = f'{raw_dir}/{ticker}-{timestamp()}.json'
     asyncio.run(_scrape(random_proxy(), url, path))
 
 
@@ -34,12 +37,13 @@ async def _scrape(proxy: str, url: str, path: str):
     print(f'scraping, url: {url}, path: {path}, proxy: {proxy}')
     try:
         async with new_page(proxy) as page:
-            await expect_json_response(path, page, url, lambda r: "api/grid/filter" in r.url)
+            match_request = lambda r: "/graphql" in r.url and "CompanySummary" in (r.request.post_data or "")
+            await expect_json_response(path, page, url, match_request)
     except Exception as e:
         print(f'failed: {error_name(e)}', file=sys.stderr)
 
 
-def validate_data(country: str, path: str):
+def validate_data(path: str):
     schema = [
         {
             'ticker': str,
@@ -50,43 +54,33 @@ def validate_data(country: str, path: str):
             'income': int,
         }
     ]
-    validate(path, schema, output_dir(country))
+    validate(path, schema, raw_dir)
 
 
-def aggregate(country):
-    raw_files = glob.glob(f'{raw_dir(country)}/*.json')
-    all_data = [stock
-                for file_path in raw_files
-                for stock in _scores_from_file(file_path)]
-    sorted_data = sorted(all_data, key=lambda x: x['ticker'])
-    df = pandas.DataFrame(sorted_data)
-    output_path = f'{aggregated_dir(country)}/{timestamp()}.csv'
-    df.to_csv(output_path, index=False)
-    return output_path
+def get_url(ticker):
+    with open(urls_path) as f:
+        for row in csv.reader(f):
+            if row[0].lower() == ticker.lower():
+                return row[1]
+    return None
 
 
-def _scores_from_file(path):
-    with open(path, 'r') as f:
-        data = json.load(f)
-        return [_scores_from_obj(stock) for stock in data.get('data', [])]
-
-
-def _scores_from_obj(stock):
-    scores = stock['score']['data']
-    return {
-        'ticker': stock['ticker_symbol'],
-        'value': scores['value'],
-        'future': scores['future'],
-        'past': scores['past'],
-        'health': scores['health'],
-        'income': scores['income'],
-    }
-
-
-def to_spreadsheet(country):
-    paths = all_files(aggregated_dir(country))
-    if paths:
-        df = pandas.read_csv(paths[0])
-        return df.values.tolist()
-    else:
-        return []
+# TODO gemini-flash doesn't seem to work, gemini-pro gets most urls right
+def discover_urls(input_path):
+    path = f'{urls_path}-{timestamp()}'
+    with open(input_path, 'r') as f:
+        tickers = [line.strip() for line in f.readlines()]
+        prompt = f"""
+        Find the url in simplywall.st for each ticker below:
+        {tickers}
+    
+        Return as pure CSV with columns: ticker, url
+        Their urls are formated as follows: https://simplywall.st/stocks/br/<sector>/bovespa-<ticker>/<slug>
+        You'll need to find the sector and slug for each ticker in order to compose the url
+    
+        E.g.: 
+        BBAS3,https://simplywall.st/stocks/br/banks/bovespa-bbas3/banco-do-brasil-shares
+        TAEE11,https://simplywall.st/stocks/br/utilities/bovespa-taee11/transmissora-alianca-de-energia-eletrica-shares
+        GGBR4,https://simplywall.st/stocks/br/materials/bovespa-ggbr4/gerdau-shares
+        """
+        ask(prompt, path)
