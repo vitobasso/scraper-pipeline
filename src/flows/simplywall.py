@@ -1,5 +1,5 @@
 import asyncio, sys, json, csv
-from src.scheduler import Pipeline, line_task, file_task
+from src.scheduler import Pipeline, line_task, file_task, line_progress
 from src.config import output_root
 from src.core.util import timestamp, mkdir
 from src.core.proxies import random_proxy
@@ -21,7 +21,8 @@ def pipeline(input_path: str) -> Pipeline:
             # file_task(lambda path: validate_raw(path, output_dir), validate_raw_input(output_dir)),
             # file_task(extract_data, extract_data_input(output_dir)),
             file_task(validate_data, validate_data_input(output_dir)),
-        ]
+        ],
+        'progress': line_progress(input_path, raw_dir)
     }
 
 
