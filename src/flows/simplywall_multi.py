@@ -1,5 +1,5 @@
 import asyncio, sys, glob, json, pandas
-from src.scheduler import Pipeline, line_task, file_task, aggregate_task
+from src.scheduler import Pipeline, line_task, file_task, aggregate_task, line_progress
 from src.config import output_root
 from src.core.util import mkdir, timestamp, all_files
 from src.core.proxies import random_proxy
@@ -20,7 +20,8 @@ def pipeline(country) -> Pipeline:
             line_task(lambda sector: scrape(country, sector), input_path, output_dir(country)),
             # file_task(validate_data, validate_data_input(output_dir(country)),
             aggregate_task(lambda: aggregate(country), input_path, output_dir(country), aggregated_dir(country)),
-        ]
+        ],
+        'progress': line_progress(input_path, aggregated_dir)
     }
 
 
