@@ -69,7 +69,8 @@ def aggregate_task(execute, input_path, output_dir, aggregate_dir):
 
 def _find_input(input_path, output_dir):
     all_lines = _load_lines(input_path)
-    progressed_lines = [filename_before_timestamp(path) for path in all_files(output_dir)]
+    progressed_lines = [filename_before_timestamp(path)
+                        for path in all_files(output_dir) if 'awaiting' in path or 'ready' in path]
     return list(set(all_lines) - set(progressed_lines))
 
 
