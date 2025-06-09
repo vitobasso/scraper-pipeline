@@ -40,3 +40,9 @@ def extract(image_path: str, prompt: str, output_dir: str):
         file.write(response.text)
     consumed_path = f'{consumed_dir(output_dir)}/{Path(image_path).name}'
     os.rename(image_path, consumed_path)
+
+
+def ask(prompt: str, output_path: str):
+    response = model.generate_content(prompt)
+    with open(output_path, "w") as file:
+        file.write(response.text)
