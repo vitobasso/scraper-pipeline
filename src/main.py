@@ -11,7 +11,7 @@ if __name__ == '__main__':
         # schedule_next(simplywall.pipeline(acoes_br))
         # schedule_next(tipranks.pipeline('input/ticker-list/stocks-us.csv'))
         # schedule_next(statusinvest.pipeline())
-    schedule_next(statusinvest.pipeline())
+    # schedule_next(statusinvest.pipeline())
     # create_spreadsheet()
 
     report(yahoo.pipeline(acoes_br))

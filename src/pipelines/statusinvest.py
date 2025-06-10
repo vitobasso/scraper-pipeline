@@ -39,9 +39,9 @@ async def _download(proxy: str, path: str):
 def to_spreadsheet():
     files = all_files(output_dir)
     if files:
-        file = files[0]
-        rows = [row for row in csv.reader(file, delimiter=';')]
-        return _clean_data(rows)
+        with open(files[0]) as file:
+            rows = [row for row in csv.reader(file, delimiter=';')]
+            return _clean_data(rows)
     else:
         return []
 
