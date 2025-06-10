@@ -1,6 +1,6 @@
 import random
 from typing import Callable, TypedDict, List
-from src.core.util import filename_before_timestamp, all_files, file_lines
+from src.common.util import filename_before_timestamp, all_files, file_lines
 
 
 class Task(TypedDict):

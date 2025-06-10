@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
 from PIL import Image
-from src.core.util import mkdir
-from src.core.llm import llm
+from src.common.util import mkdir
+from src.services.llm import llm
 
 input_dir = lambda x: mkdir(f'{x}/screenshots/awaiting-extraction')
 data_dir = lambda x: mkdir(f'{x}/data/awaiting-validation')

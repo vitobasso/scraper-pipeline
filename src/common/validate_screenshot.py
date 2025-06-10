@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
-from src.core.util import mkdir
-from src.core.ocr import ocr
+from src.common.util import mkdir
+from src.services.ocr import ocr
 
 ocr_min_lines = 50
 

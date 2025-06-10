@@ -1,10 +1,8 @@
 from src.config import output_root
 from src.scheduler import Pipeline, line_task, file_task
-from src.flows.generic.screenshot import ss_full_page
-from src.flows.generic.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
-from src.flows.generic.extract_data import extract_json, input_dir as extract_data_input
-from src.flows.generic.validate_data import input_dir as validate_data_input
-
+from src.common.screenshot import ss_full_page
+from src.common.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
+from src.common.extract_data import extract_json, input_dir as extract_data_input
 
 name = 'investidor10'
 output_dir = f'{output_root}/{name}'

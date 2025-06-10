@@ -1,10 +1,10 @@
 import asyncio, sys, glob, json, pandas
-from src.scheduler import Pipeline, line_task, file_task, aggregate_task, line_progress
+from src.scheduler import Pipeline, line_task, aggregate_task, line_progress
 from src.config import output_root
-from src.core.util import mkdir, timestamp, all_files
-from src.core.proxies import random_proxy
-from src.core.browser_session import new_page, error_name, expect_json_response
-from src.flows.generic.validate_data import validate
+from src.common.util import mkdir, timestamp, all_files
+from src.services.proxies import random_proxy
+from src.services.browser import new_page, error_name, expect_json_response
+from src.common.validate_data import validate
 
 name = 'simplywall_multi'
 input_path = 'input/simplywall/sectors.csv'

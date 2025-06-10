@@ -1,9 +1,9 @@
 import asyncio
 from src.config import output_root
-from src.core.util import mkdir, timestamp
+from src.common.util import mkdir, timestamp
 from src.scheduler import Pipeline, seed_task
-from src.core.proxies import random_proxy
-from src.core.browser_session import page_goto, click, click_download
+from src.services.proxies import random_proxy
+from src.services.browser import page_goto, click, click_download
 
 name = 'statusinvest'
 output_dir = mkdir(f'{output_root}/{name}')

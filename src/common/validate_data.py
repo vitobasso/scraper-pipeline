@@ -1,6 +1,6 @@
 import os, json, re
 from pathlib import Path
-from src.core.util import mkdir
+from src.common.util import mkdir
 
 input_dir = lambda x: mkdir(f'{x}/data/awaiting-validation')
 valid_data_dir = lambda x: mkdir(f'{x}/data/ready')
