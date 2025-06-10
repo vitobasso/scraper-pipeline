@@ -6,9 +6,18 @@ list_dir = f'{output_root}/proxy-list'
 timestamp_format = '%Y%m%dT%H%M%S'
 refresh_seconds = 2 * 60 * 60
 
+_proxies = None
+
 
 def random_proxy():
-    return random.choice(proxies)
+    return random.choice(_get_proxies())
+
+
+def _get_proxies():
+    global _proxies
+    if not _proxies:
+        _proxies = _init()
+    return _proxies
 
 
 def _init():
@@ -53,6 +62,3 @@ def _download_list():
 
 def _extract_name(path):
     return re.search('/(\\w+)/data.txt', path).group(1)
-
-
-proxies = _init()
