@@ -1,7 +1,7 @@
-import csv, re, calendar
+import calendar
 from datetime import datetime
 from src.services.google_sheets import copy_file, find_worksheet_by_title
-from src.pipelines import yahoo, simplywall_multi
+from src.pipelines import yahoo, simplywall_multi, statusinvest
 
 template_id = '1eWwqMZr4PeuH5siVoICz_XPcWVE8dGEgx_jKaarZ_4Y'  # TODO export to file and make it a local resource?
 
@@ -37,7 +37,7 @@ def _populate_forecast(spreadsheet):
 
 def _populate_statusinvest(spreadsheet):
     worksheet = find_worksheet_by_title(spreadsheet, 'statusinvest')
-    data = _load_statusinvest_data()
+    data = statusinvest.to_spreadsheet()
     worksheet.update(values=data)
 
 
@@ -47,30 +47,6 @@ def _populate_simplywall(spreadsheet):
     data = simplywall_multi.to_spreadsheet('br')
     worksheet.update(values=data)
 
-
-def _load_statusinvest_data():
-    with open('output/20250605/downloads/statusinvest-20250602T214159.csv', 'r') as file:  # TODO dynamic path
-        rows = [row for row in csv.reader(file, delimiter=';')]
-        return _clean_statusinvest_data(rows)
-
-
-# TODO move to statusinvest.py
-def _clean_statusinvest_data(data):
-    return [
-        [_clean_numbers(value) for value in row]
-        for row in data
-    ]
-
-
-def _clean_numbers(value):
-    replaced = str(value).replace(".", "").replace(",", ".")
-    return _convert_if_number(replaced)
-
-
-def _convert_if_number(value):
-    if isinstance(value, str) and re.fullmatch(r'^-?\d+\.?\d*$', value):
-        return float(value)
-    return value
 
 
 def _last_day_of_month():
