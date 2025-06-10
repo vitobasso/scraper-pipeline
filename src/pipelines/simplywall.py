@@ -1,7 +1,7 @@
 import asyncio, sys, json, csv
 from src.scheduler import Pipeline, line_task, file_task, line_progress
 from src.config import output_root
-from src.common.util import timestamp, mkdir, all_files
+from src.common.util import timestamp, mkdir, all_files, filename_before_timestamp
 from src.services.proxies import random_proxy
 from src.services.browser import new_page, error_name, expect_json_response
 from src.common.extract_data import ask
@@ -66,29 +66,14 @@ def get_url(ticker):
 
 
 def to_spreadsheet():
-    paths = all_files(raw_dir)
-    if paths:
-        all_data = [_extract_row(path) for path in paths]
-        return sorted(all_data, key=lambda x: x['ticker'])
-    else:
-        return []
+    def _entry(path):
+        ticker = filename_before_timestamp(path)
+        with open(path, 'r') as f:
+            data = json.load(f)
+            company = data['data']['Company']
+            return ticker, company['score']
 
-
-def _extract_row(path):
-    with open(path, 'r') as f:
-        data = json.load(f)
-        company = data['data']['Company']
-        scores = company['score']
-        return {
-            'ticker': company['data']['ticker_symbol'],
-            'scores': {
-                'value': scores['value'],
-                'future': scores['future'],
-                'past': scores['past'],
-                'health': scores['health'],
-                'dividend': scores['dividend'],
-            }
-        }
+    return dict(_entry(path) for path in all_files(raw_dir))
 
 
 # TODO gemini-flash doesn't seem to work, gemini-pro gets most urls right

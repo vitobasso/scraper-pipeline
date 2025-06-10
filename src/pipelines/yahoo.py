@@ -105,15 +105,9 @@ def validate_data(path: str):
 
 
 def to_spreadsheet():
-    return [_to_spreadsheet_row(path) for path in all_files(valid_data_dir(output_dir))]
+    def _entry(path):
+        ticker = filename_before_timestamp(path)
+        with open(path) as file:
+            return ticker, json.load(file)
 
-
-def _to_spreadsheet_row(path):
-    ticker = filename_before_timestamp(path)
-    with open(path) as file:
-        data = json.load(file)
-        analyst_rating = data.get('analyst_rating') or {}
-        price_forecast = data.get('price_forecast') or {}
-        return [ticker, None, None, None, None, None, analyst_rating.get('strong_buy'), analyst_rating.get('buy'),
-                analyst_rating.get('hold'), analyst_rating.get('underperform'), analyst_rating.get('sell'),
-                price_forecast.get('min'), price_forecast.get('avg'), price_forecast.get('max')]
+    return dict(_entry(path) for path in all_files(valid_data_dir(output_dir)))
