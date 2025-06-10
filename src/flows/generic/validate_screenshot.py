@@ -1,14 +1,13 @@
-import os, easyocr, warnings
+import os
 from pathlib import Path
 from src.core.util import mkdir
+from src.core.ocr import ocr
 
 ocr_min_lines = 50
 
 input_dir = lambda x: mkdir(f'{x}/screenshots/awaiting-validation')
 valid_dir = lambda x: mkdir(f'{x}/screenshots/awaiting-extraction')
 invalid_dir = lambda x: mkdir(f'{x}/screenshots/failed-validation')
-warnings.filterwarnings("ignore", message=".*pin_memory.*MPS.*")
-reader = easyocr.Reader(['en'])
 
 
 def validate_screenshot(image_path: str, output_dir: str):
@@ -18,7 +17,7 @@ def validate_screenshot(image_path: str, output_dir: str):
 
 
 def _validate(image_path: str):
-    lines = reader.readtext(image_path, detail=0)
+    lines = ocr().readtext(image_path, detail=0)
     is_error = any(line.find('error') > 0 for line in lines)
     is_short = len(lines) < ocr_min_lines
     return not is_error or not is_short
