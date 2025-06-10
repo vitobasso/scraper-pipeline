@@ -1,7 +1,7 @@
 import asyncio, sys
-from src.core.proxies import random_proxy
-from src.core.browser_session import page_goto, common_ancestor, error_name
-from src.core.util import mkdir, timestamp
+from src.services.proxies import random_proxy
+from src.services.browser import page_goto, common_ancestor, error_name
+from src.common.util import mkdir, timestamp
 
 after_load_timeout = 0
 

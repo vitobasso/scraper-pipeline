@@ -1,8 +1,8 @@
 import asyncio
 from src.config import output_root
-from src.core.util import timestamp
-from src.core.proxies import random_proxy
-from src.core.browser_session import page_goto, click_download
+from src.common.util import timestamp
+from src.services.proxies import random_proxy
+from src.services.browser import page_goto, click_download
 
 name = 'b3idiv'
 output_dir = f'{output_root}/{name}'

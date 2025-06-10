@@ -1,5 +1,5 @@
 from scheduler import schedule_next, report
-from src.flows import yahoo, tradingview, tipranks, simplywall, statusinvest
+from src.pipelines import yahoo, tradingview, tipranks, simplywall, statusinvest
 from src.spreadsheet.screening_sheet import create_spreadsheet
 
 acoes_br = 'input/ticker-list/acoes-br.csv'

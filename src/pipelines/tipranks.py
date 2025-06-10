@@ -1,13 +1,12 @@
 from src.config import output_root
-from src.flows.generic.extract_data import extract_json, input_dir as extract_data_input
-from src.flows.generic.screenshot import ss_common_ancestor
-from src.flows.generic.validate_data import validate, input_dir as validate_data_input
-from src.flows.generic.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
-from src.scheduler import Pipeline, line_task, file_task, line_progress
+from src.common.screenshot import ss_common_ancestor
+from src.scheduler import Pipeline, line_task, file_task
+from src.common.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
+from src.common.extract_data import extract_json, input_dir as extract_data_input
+from src.common.validate_data import validate, input_dir as validate_data_input
 
-name = 'tradingview'
+name = 'tipranks'
 output_dir = f'{output_root}/{name}'
-completed_dir = f'{output_dir}/data/ready'
 
 
 def pipeline(input_path: str) -> Pipeline:
@@ -18,28 +17,27 @@ def pipeline(input_path: str) -> Pipeline:
             file_task(lambda path: validate_screenshot(path, output_dir), validate_screenshot_input(output_dir)),
             file_task(extract_data, extract_data_input(output_dir)),
             file_task(validate_data, validate_data_input(output_dir)),
-        ],
-        'progress': line_progress(input_path, completed_dir)
+        ]
     }
 
 
+
 def screenshot(ticker: str):
-    ss_common_ancestor(ticker, f'https://tradingview.com/symbols/{ticker}/forecast',
-                       ['Price target', 'Analyst rating'], output_dir)
+    ss_common_ancestor(ticker, f'https://www.tipranks.com/stocks/{ticker}/forecast',
+                       ['Month Forecast', 'Analyst Ratings'], output_dir)
+
 
 
 def extract_data(image_path: str):
     prompt = f"""
     1. analyst_rating (int values):
-       - strong_buy
        - buy
        - hold
        - sell
-       - strong_sell
     2. price_forecast (float values)
-       - min
+       - min (aka low)
        - avg
-       - max
+       - max (aka high)
     """
     extract_json(image_path, prompt, output_dir)
 
@@ -47,11 +45,9 @@ def extract_data(image_path: str):
 def validate_data(path: str):
     schema = {
         'analyst_rating': {
-            'strong_buy': int,
             'buy': int,
             'hold': int,
             'sell': int,
-            'strong_sell': int,
         },
         'price_forecast': {
             'min': float,
