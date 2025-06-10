@@ -10,17 +10,17 @@ _proxies = None
 
 
 def random_proxy():
-    return random.choice(_get_proxies())
-
-
-def _get_proxies():
-    global _proxies
-    if not _proxies:
-        _proxies = _init()
-    return _proxies
+    return random.choice(_init())
 
 
 def _init():
+    global _proxies
+    if not _proxies:
+        _proxies = _refresh()
+    return _proxies
+
+
+def _refresh():
     if not _validate_latest_file():
         _download_list()
     if not _validate_latest_file():

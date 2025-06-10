@@ -80,6 +80,13 @@ def _find_input(input_path, output_dir):
     return list(set(all_lines) - set(progressed_lines))
 
 
+def seed_progress(completed_dir) -> Progress:
+    return {
+        'max': 1,
+        'current': 1 if len(all_files(completed_dir)) else 0,
+    }
+
+
 def line_progress(input_path, completed_dir) -> Progress:
     return {
         'max': len(file_lines(input_path)),
