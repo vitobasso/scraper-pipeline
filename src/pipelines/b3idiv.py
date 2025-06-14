@@ -1,11 +1,11 @@
 import asyncio
 from src.config import output_root
-from src.common.util import timestamp
+from src.common.util import timestamp, mkdir
 from src.services.proxies import random_proxy
 from src.services.browser import page_goto, click_download
 
 name = 'b3idiv'
-output_dir = f'{output_root}/{name}'
+output_dir = mkdir(f'{output_root}/{name}')
 
 
 def sync_download():

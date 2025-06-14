@@ -2,7 +2,7 @@ import re, asyncio, sys, json
 from src.config import output_root
 from src.scheduler import Pipeline, line_task, file_task, line_progress
 from src.services.browser import page_goto, click, error_name
-from src.common.util import all_files, filename_before_timestamp
+from src.common.util import all_files, filename_before_timestamp, mkdir
 from src.services.proxies import random_proxy
 from src.common.screenshot import output_path
 from src.common.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
@@ -10,8 +10,8 @@ from src.common.extract_data import extract_json, input_dir as extract_data_inpu
 from src.common.validate_data import valid_data_dir, validate, input_dir as validate_data_input
 
 name = 'yahoo'
-output_dir = f'{output_root}/{name}'
-completed_dir = f'{output_dir}/data/ready'
+output_dir = mkdir(f'{output_root}/{name}')
+completed_dir = mkdir(f'{output_dir}/data/ready')
 
 
 def pipeline(input_path: str) -> Pipeline:

@@ -1,4 +1,5 @@
 from src.config import output_root
+from src.common.util import mkdir
 from src.common.extract_data import extract_json, input_dir as extract_data_input
 from src.common.screenshot import ss_common_ancestor
 from src.common.validate_data import validate, input_dir as validate_data_input
@@ -6,8 +7,8 @@ from src.common.validate_screenshot import validate_screenshot, input_dir as val
 from src.scheduler import Pipeline, line_task, file_task, line_progress
 
 name = 'tradingview'
-output_dir = f'{output_root}/{name}'
-completed_dir = f'{output_dir}/data/ready'
+output_dir = mkdir(f'{output_root}/{name}')
+completed_dir = mkdir(f'{output_dir}/data/ready')
 
 
 def pipeline(input_path: str) -> Pipeline:
