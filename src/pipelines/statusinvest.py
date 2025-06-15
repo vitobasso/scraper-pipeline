@@ -47,10 +47,8 @@ def to_spreadsheet():
 
 
 def _clean_data(data):
-    return [
-        [_clean_numbers(value) for value in row]
-        for row in data
-    ]
+    return [[_clean_numbers(value) for value in row]
+            for row in data]
 
 
 def _clean_numbers(value):

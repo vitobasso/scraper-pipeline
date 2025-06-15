@@ -1,5 +1,5 @@
-import asyncio, sys, pandas
-from src.common.util import timestamp, mkdir
+import asyncio, sys, pandas, csv, re
+from src.common.util import timestamp, mkdir, all_files
 from src.config import output_root
 from src.scheduler import Pipeline, seed_task, seed_progress
 from src.services.browser import page_goto, error_name
@@ -34,8 +34,8 @@ async def _scrape(proxy: str, url: str, path: str):
             rows = await page.locator("#tabelaResultado tbody tr").all()
             data = [await _extract_row(row) for row in rows]
             headers = ['ticker', 'segmento', 'cotação', 'ffo yield', 'dividend yield', 'p/vp', 'valor de mercado',
-                          'liquidez', 'qtd de imóveis', 'preço do m2', 'aluguel por m2', 'cap rate', 'vacância média']
-            df = pandas.DataFrame(data, columns = headers)
+                       'liquidez', 'qtd de imóveis', 'preço do m2', 'aluguel por m2', 'cap rate', 'vacância média']
+            df = pandas.DataFrame(data, columns=headers)
             df.to_csv(path, index=False)
     except Exception as e:
         print(f'failed: {error_name(e)}', file=sys.stderr)
@@ -47,3 +47,19 @@ async def _extract_row(row):
         return [c.replace("%", "").replace(".", "").replace(",", ".").strip() for c in cells[:-1]]
     else:
         return None
+
+
+def to_spreadsheet():
+    files = all_files(output_dir)
+    if files:
+        with open(files[0]) as file:
+            return [[_convert_if_number(value) for value in row]
+                    for row in csv.reader(file)]
+    else:
+        return []
+
+
+def _convert_if_number(value):
+    if isinstance(value, str) and re.fullmatch(r'^-?\d+\.?\d*$', value):
+        return float(value)
+    return value
