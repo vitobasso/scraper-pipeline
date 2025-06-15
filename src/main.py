@@ -1,6 +1,6 @@
 from scheduler import schedule_next, report
 from src.pipelines import yahoo, tradingview, tipranks, simplywall, statusinvest, fundamentus_fiis
-from src.spreadsheet.screening_sheet import create_spreadsheet
+from src.spreadsheet import acoes_br as ss_acoes_br, fiis_br
 
 acoes_br = 'input/ticker-list/acoes-br.csv'
 
@@ -12,8 +12,9 @@ if __name__ == '__main__':
         # schedule_next(tipranks.pipeline('input/ticker-list/stocks-us.csv'))
         # schedule_next(statusinvest.pipeline())
     # schedule_next(statusinvest.pipeline())
-    schedule_next(fundamentus_fiis.pipeline())
-    # create_spreadsheet()
+    # schedule_next(fundamentus_fiis.pipeline())
+    # ss_acoes_br.create_spreadsheet()
+    fiis_br.create_spreadsheet()
 
     # report(yahoo.pipeline(acoes_br))
     # report(tradingview.pipeline(acoes_br))
