@@ -11,7 +11,7 @@ from src.common.validate_data import valid_data_dir, validate, input_dir as vali
 
 name = 'yahoo'
 output_dir = mkdir(f'{output_root}/{name}')
-completed_dir = mkdir(f'{output_dir}/data/ready')
+completed_dir = valid_data_dir(output_dir)
 
 
 def pipeline(input_path: str) -> Pipeline:
@@ -110,4 +110,4 @@ def to_spreadsheet():
         with open(path) as file:
             return ticker, json.load(file)
 
-    return dict(_entry(path) for path in all_files(valid_data_dir(output_dir)))
+    return dict(_entry(path) for path in all_files(completed_dir))
