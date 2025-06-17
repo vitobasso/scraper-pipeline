@@ -1,18 +1,19 @@
 import calendar
 from datetime import datetime
 from src.services.google_sheets import copy_file, find_worksheet_by_title
-from src.pipelines import yahoo, simplywall, statusinvest
+from src.pipelines import yahoo, simplywall, statusinvest, statusinvest_carteira_xlsx
 
 template_id = '1eWwqMZr4PeuH5siVoICz_XPcWVE8dGEgx_jKaarZ_4Y'  # TODO export to file and make it a local resource?
 
 
 def create_spreadsheet():
     timestamp = datetime.now().strftime('%Y-%m')
-    spreadsheet = copy_file(template_id, f'screening {timestamp}')
+    spreadsheet = copy_file(template_id, f'screening acoes-br {timestamp}')
     _populate_constants(spreadsheet)
     _populate_screening(spreadsheet)
     _populate_forecast(spreadsheet)
     _populate_statusinvest(spreadsheet)
+    _populate_carteira(spreadsheet)
 
 
 def _populate_constants(spreadsheet):
@@ -28,7 +29,7 @@ def _populate_screening(spreadsheet):
         worksheet.update("A3", tickers)
 
 
- # TODO tradingview, tipranks
+# TODO tradingview, tipranks
 def _populate_forecast(spreadsheet):
     ya_data = yahoo.to_spreadsheet()
     sw_data = simplywall.to_spreadsheet()
@@ -52,6 +53,12 @@ def _forecast_row(ticker, ya, sw):
 def _populate_statusinvest(spreadsheet):
     worksheet = find_worksheet_by_title(spreadsheet, 'statusinvest')
     data = statusinvest.to_spreadsheet()
+    worksheet.update(values=data)
+
+
+def _populate_carteira(spreadsheet):
+    worksheet = find_worksheet_by_title(spreadsheet, 'carteira')
+    data = statusinvest_carteira_xlsx.to_spreadsheet_acoes()
     worksheet.update(values=data)
 
 
