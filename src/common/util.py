@@ -1,4 +1,5 @@
 import os, re, datetime
+from unidecode import unidecode
 from pathlib import Path
 
 
@@ -23,3 +24,7 @@ def filename_before_timestamp(path: str):
 
 def timestamp():
     return datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
+
+
+def normalize(string: str):
+    return unidecode(string).lower()

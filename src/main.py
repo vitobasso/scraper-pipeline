@@ -6,17 +6,17 @@ from src.spreadsheet import acoes_br, fiis_br
 csv_acoes_br = 'input/ticker-list/acoes-br.csv'
 
 if __name__ == '__main__':
-    for i in range(100):
+    # for i in range(100):
         # schedule_next(yahoo.pipeline(csv_acoes_br))
         # schedule_next(tradingview.pipeline(csv_acoes_br))
         # schedule_next(simplywall.pipeline(csv_acoes_br))
         # schedule_next(tipranks.pipeline('input/ticker-list/stocks-us.csv'))
         # schedule_next(statusinvest.pipeline())
-        schedule_next(investidor10.pipeline(csv_acoes_br))
+        # schedule_next(investidor10.pipeline(csv_acoes_br))
     # schedule_next(statusinvest.pipeline())
     # schedule_next(fundamentus_fiis.pipeline())
     # statusinvest_carteira_xlsx.import_all()
-    # acoes_br.create_spreadsheet()
+    acoes_br.create_spreadsheet()
     # fiis_br.create_spreadsheet()
 
     # report(yahoo.pipeline(csv_acoes_br))

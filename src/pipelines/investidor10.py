@@ -1,3 +1,4 @@
+from src.common.spreadsheet import json_to_spreadsheet
 from src.config import output_root
 from src.scheduler import Pipeline, line_task, file_task, line_progress
 from src.common.util import mkdir
@@ -49,3 +50,12 @@ def validate_data(path: str):
         }
     }
     validate(path, schema, output_dir)
+
+
+def to_spreadsheet():
+    return json_to_spreadsheet(completed_dir)
+
+
+def get_sector_segment(data, ticker):
+    parent = data.get(ticker, {}).get('informacoes_sobre_a_empresa', {})
+    return parent.get('setor', None), parent.get('segmento', None)

@@ -1,7 +1,9 @@
 import calendar
 from datetime import datetime
+from src.common.util import file_lines, normalize
+from src.pipelines.investidor10 import get_sector_segment
 from src.services.google_sheets import copy_file, find_worksheet_by_title
-from src.pipelines import yahoo, simplywall, statusinvest, statusinvest_carteira_xlsx
+from src.pipelines import yahoo, simplywall, statusinvest, statusinvest_carteira_xlsx, investidor10
 
 template_id = '1eWwqMZr4PeuH5siVoICz_XPcWVE8dGEgx_jKaarZ_4Y'  # TODO export to file and make it a local resource?
 
@@ -23,10 +25,23 @@ def _populate_constants(spreadsheet):
 
 
 def _populate_screening(spreadsheet):
-    with open('input/ticker-list/acoes-br.csv', 'r') as file:
-        tickers = [[line.strip()] for line in file.readlines()]
-        worksheet = find_worksheet_by_title(spreadsheet, 'screening')
-        worksheet.update("A3", tickers)
+    tickers = file_lines('input/ticker-list/acoes-br.csv')
+    ticker_col = [[ticker] for ticker in sorted(tickers, key=_sector_order())]
+    worksheet = find_worksheet_by_title(spreadsheet, 'screening')
+    worksheet.update("A3", ticker_col)
+
+
+def _sector_order():
+    sectors = [normalize(line) for line in file_lines('input/ticker-list/acoes-br-setores.csv')]
+    i10_data = investidor10.to_spreadsheet()
+
+    def order(ticker):
+        (raw_sector, raw_segment) = get_sector_segment(i10_data, ticker)
+        sector = normalize(raw_sector)
+        sector_index = sectors.index(sector) if sector in sectors else len(sectors)
+        return sector_index, sector, normalize(raw_segment)
+
+    return order
 
 
 # TODO tradingview, tipranks

@@ -1,8 +1,9 @@
-import re, asyncio, sys, json
+import re, asyncio, sys
+from src.common.spreadsheet import json_to_spreadsheet
 from src.config import output_root
 from src.scheduler import Pipeline, line_task, file_task, line_progress
 from src.services.browser import page_goto, click, error_name
-from src.common.util import all_files, filename_before_timestamp, mkdir
+from src.common.util import mkdir
 from src.services.proxies import random_proxy
 from src.common.screenshot import output_path
 from src.common.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
@@ -105,9 +106,4 @@ def validate_data(path: str):
 
 
 def to_spreadsheet():
-    def _entry(path):
-        ticker = filename_before_timestamp(path)
-        with open(path) as file:
-            return ticker, json.load(file)
-
-    return dict(_entry(path) for path in all_files(completed_dir))
+    return json_to_spreadsheet(completed_dir)
