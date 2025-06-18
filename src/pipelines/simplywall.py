@@ -1,4 +1,5 @@
-import asyncio, sys, json, csv
+import asyncio, sys, csv
+from src.common.spreadsheet import json_to_spreadsheet
 from src.scheduler import Pipeline, line_task, file_task, line_progress
 from src.config import output_root
 from src.common.util import timestamp, mkdir, all_files, filename_before_timestamp
@@ -66,14 +67,8 @@ def get_url(ticker):
 
 
 def to_spreadsheet():
-    def _entry(path):
-        ticker = filename_before_timestamp(path)
-        with open(path, 'r') as f:
-            data = json.load(f)
-            company = data['data']['Company']
-            return ticker, company['score']
-
-    return dict(_entry(path) for path in all_files(raw_dir))
+    transform_data = lambda data: data['data']['Company']['score']
+    return json_to_spreadsheet(raw_dir, transform_data)
 
 
 # TODO gemini-flash doesn't seem to work, gemini-pro gets most urls right
@@ -82,16 +77,16 @@ def discover_urls(input_path):
     with open(input_path, 'r') as f:
         tickers = [line.strip() for line in f.readlines()]
         prompt = f"""
-    Find the url in simplywall.st for each ticker below:
-    {tickers}
-
-    Return as pure CSV with columns: ticker, url
-    Their urls are formated as follows: https://simplywall.st/stocks/br/<sector>/bovespa-<ticker>/<slug>
-    You'll need to find the sector and slug for each ticker in order to compose the url
-
-    E.g.: 
-    BBAS3,https://simplywall.st/stocks/br/banks/bovespa-bbas3/banco-do-brasil-shares
-    TAEE11,https://simplywall.st/stocks/br/utilities/bovespa-taee11/transmissora-alianca-de-energia-eletrica-shares
-    GGBR4,https://simplywall.st/stocks/br/materials/bovespa-ggbr4/gerdau-shares
-    """
+        Find the url in simplywall.st for each ticker below:
+        {tickers}
+    
+        Return as pure CSV with columns: ticker, url
+        Their urls are formated as follows: https://simplywall.st/stocks/br/<sector>/bovespa-<ticker>/<slug>
+        You'll need to find the sector and slug for each ticker in order to compose the url
+    
+        E.g.: 
+        BBAS3,https://simplywall.st/stocks/br/banks/bovespa-bbas3/banco-do-brasil-shares
+        TAEE11,https://simplywall.st/stocks/br/utilities/bovespa-taee11/transmissora-alianca-de-energia-eletrica-shares
+        GGBR4,https://simplywall.st/stocks/br/materials/bovespa-ggbr4/gerdau-shares
+        """
         ask(prompt, path)

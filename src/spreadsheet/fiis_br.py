@@ -1,5 +1,6 @@
 import calendar
 from datetime import datetime
+from src.common.util import file_lines
 from src.services.google_sheets import copy_file, find_worksheet_by_title
 from src.pipelines import fundamentus_fiis, statusinvest_carteira_xlsx
 
@@ -22,10 +23,9 @@ def _populate_constants(spreadsheet):
 
 
 def _populate_screening(spreadsheet):
-    with open('input/ticker-list/fiis-br.csv', 'r') as file:
-        tickers = [[line.strip()] for line in file.readlines()]
-        worksheet = find_worksheet_by_title(spreadsheet, 'screening')
-        worksheet.update("A3", tickers)
+    tickers = [[line] for line in file_lines('input/ticker-list/fiis-br.csv')]
+    worksheet = find_worksheet_by_title(spreadsheet, 'screening')
+    worksheet.update("A3", tickers)
 
 
 def _populate_fundamentus(spreadsheet):
