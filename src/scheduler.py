@@ -99,7 +99,7 @@ def _completed(output_dir):
 
 def _aborted(output_dir):
     return [Path(path).stem
-            for path in all_files(f'{output_dir}/logs') if len(file_lines(path)) > error_limit]
+            for path in all_files(f'{output_dir}/logs') if len(file_lines(path)) >= error_limit]
 
 
 def seed_progress(output_dir) -> Progress:
