@@ -26,7 +26,7 @@ def pipeline(input_path: str):
             file_task(extract_data, extract_data_input(output_dir)),
             file_task(validate_data, validate_data_input(output_dir)),
         ],
-        progress=line_progress(input_path, completed_dir)
+        progress=line_progress(input_path, output_dir)
     )
 
 

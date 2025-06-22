@@ -4,15 +4,15 @@ from src.common.logs import log
 from src.common.spreadsheet import json_to_spreadsheet
 from src.scheduler import Pipeline, line_task, file_task, line_progress
 from src.config import output_root
-from src.common.util import timestamp, mkdir, all_files, filename_before_timestamp
+from src.common.util import timestamp, mkdir
 from src.services.proxies import random_proxy
 from src.services.browser import new_page, error_name, expect_json_response
 from src.common.extract_data import ask
-from src.common.validate_data import validate, input_dir as validate_data_input
+from src.common.validate_data import validate, input_dir as validate_data_input, valid_data_dir
 
 name = 'simplywall'
 output_dir = mkdir(f'{output_root}/{name}')
-raw_dir = mkdir(f'{output_dir}/data/awaiting-extraction')
+completed_dir = valid_data_dir(output_dir)
 urls_path = 'input/simplywall/urls.csv'
 
 
@@ -23,7 +23,7 @@ def pipeline(input_path: str):
             line_task(scrape, input_path, output_dir),
             file_task(validate_data, validate_data_input(output_dir)),
         ],
-        progress=line_progress(input_path, raw_dir)
+        progress=line_progress(input_path, output_dir)
     )
 
 
@@ -31,7 +31,7 @@ def scrape(ticker):
     url = get_url(ticker)
     if not url:
         print(f'failed: simplywall.st url missing for {ticker}', file=sys.stderr)
-    path = f'{raw_dir}/{ticker}-{timestamp()}.json'
+    path = f'{completed_dir}/{ticker}-{timestamp()}.json'
     asyncio.run(_scrape(random_proxy(), url, path, ticker))
 
 
@@ -57,7 +57,7 @@ def validate_data(path: str):
             'dividend': int,
         }
     ]
-    validate(path, schema, raw_dir)
+    validate(path, schema, completed_dir)
 
 
 def get_url(ticker):
@@ -70,7 +70,7 @@ def get_url(ticker):
 
 def to_spreadsheet():
     transform_data = lambda data: data['data']['Company']['score']
-    return json_to_spreadsheet(raw_dir, transform_data)
+    return json_to_spreadsheet(completed_dir, transform_data)
 
 
 # TODO gemini-flash doesn't seem to work, gemini-pro gets most urls right

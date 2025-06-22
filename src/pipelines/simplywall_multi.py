@@ -10,7 +10,7 @@ name = 'simplywall_multi'
 input_path = 'input/simplywall/sectors.csv'
 output_dir = lambda country: mkdir(f'{output_root}/{name}/{country}')
 raw_dir = lambda country: mkdir(f'{output_dir(country)}/awaiting-extraction')
-aggregated_dir = lambda country: mkdir(f'{output_dir(country)}/aggregated')
+aggregated_dir = lambda country: mkdir(f'{output_dir(country)}/ready')
 
 
 def pipeline(country):
@@ -21,7 +21,7 @@ def pipeline(country):
             # file_task(validate_data, validate_data_input(output_dir(country)),
             aggregate_task(lambda: aggregate(country), input_path, output_dir(country), aggregated_dir(country)),
         ],
-        progress=line_progress(input_path, aggregated_dir)
+        progress=line_progress(input_path, output_dir)
     )
 
 

@@ -1,4 +1,5 @@
 from src.pipelines import *
+from src.scheduler import report
 from src.spreadsheet import *
 
 csv_acoes_br = 'input/ticker-list/acoes-br.csv'
@@ -17,9 +18,8 @@ if __name__ == '__main__':
         for p in pipes:
             p.schedule_next()
 
-    statusinvest_carteira_xlsx.import_all()
+    # statusinvest_carteira_xlsx.import_all()
     # acoes_br.create_spreadsheet()
     # fiis_br.create_spreadsheet()
 
-    for p in pipes:
-        p.report()
+    report(pipes)
