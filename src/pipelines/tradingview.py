@@ -11,17 +11,17 @@ output_dir = mkdir(f'{output_root}/{name}')
 completed_dir = mkdir(f'{output_dir}/data/ready')
 
 
-def pipeline(input_path: str) -> Pipeline:
-    return {
-        'name': name,
-        'tasks': [
+def pipeline(input_path: str):
+    return Pipeline(
+        name=name,
+        tasks=[
             line_task(screenshot, input_path, output_dir),
             file_task(lambda path: validate_screenshot(path, output_dir), validate_screenshot_input(output_dir)),
             file_task(extract_data, extract_data_input(output_dir)),
             file_task(validate_data, validate_data_input(output_dir)),
         ],
-        'progress': line_progress(input_path, completed_dir)
-    }
+        progress=line_progress(input_path, completed_dir)
+    )
 
 
 def screenshot(ticker: str):

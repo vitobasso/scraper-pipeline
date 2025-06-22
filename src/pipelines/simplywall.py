@@ -14,15 +14,15 @@ raw_dir = mkdir(f'{output_dir}/data/awaiting-extraction')
 urls_path = 'input/simplywall/urls.csv'
 
 
-def pipeline(input_path: str) -> Pipeline:
-    return {
-        'name': name,
-        'tasks': [
+def pipeline(input_path: str):
+    return Pipeline(
+        name=name,
+        tasks=[
             line_task(scrape, input_path, output_dir),
             file_task(validate_data, validate_data_input(output_dir)),
         ],
-        'progress': line_progress(input_path, raw_dir)
-    }
+        progress=line_progress(input_path, raw_dir)
+    )
 
 
 def scrape(ticker):

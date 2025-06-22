@@ -10,23 +10,21 @@ name = 'tipranks'
 output_dir = mkdir(f'{output_root}/{name}')
 
 
-def pipeline(input_path: str) -> Pipeline:
-    return {
-        'name': name,
-        'tasks': [
+def pipeline(input_path: str):
+    return Pipeline(
+        name=name,
+        tasks=[
             line_task(screenshot, input_path, output_dir),
             file_task(lambda path: validate_screenshot(path, output_dir), validate_screenshot_input(output_dir)),
             file_task(extract_data, extract_data_input(output_dir)),
             file_task(validate_data, validate_data_input(output_dir)),
         ]
-    }
-
+    )
 
 
 def screenshot(ticker: str):
     ss_common_ancestor(ticker, f'https://www.tipranks.com/stocks/{ticker}/forecast',
                        ['Month Forecast', 'Analyst Ratings'], output_dir)
-
 
 
 def extract_data(image_path: str):
