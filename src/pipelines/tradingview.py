@@ -26,7 +26,7 @@ def pipeline(input_path: str):
 
 def screenshot(ticker: str):
     ss_common_ancestor(ticker, f'https://tradingview.com/symbols/{ticker}/forecast',
-                       ['Price target', 'Analyst rating'], output_dir)
+                       ['Price target', 'Analyst rating'], output_dir, name)
 
 
 def extract_data(image_path: str):

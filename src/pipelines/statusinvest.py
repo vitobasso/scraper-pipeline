@@ -1,4 +1,6 @@
-import asyncio, csv, re, sys
+import asyncio, csv, re
+
+from src.common.logs import log
 from src.config import output_root
 from src.common.util import mkdir, timestamp, all_files
 from src.scheduler import Pipeline, seed_task, seed_progress
@@ -36,7 +38,7 @@ async def _download(proxy: str, path: str):
             await click(page, 'button', 'Buscar')
             await click_download(path, page, 'a', 'DOWNLOAD')
     except Exception as e:
-        print(f'failed: {error_name(e)}', file=sys.stderr)
+        log(error_name(e), name)
 
 
 def to_spreadsheet():

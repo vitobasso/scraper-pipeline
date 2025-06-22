@@ -45,7 +45,7 @@ async def _screenshot(proxy: str, url: str, path: str, ticker: str):
             await _dismiss_upgrade(page)
             await page.locator('div.cards-container').screenshot(path=path)
     except Exception as e:
-        log(name, ticker, error_name(e))
+        log(error_name(e), name, ticker)
 
 
 async def _reject_cookies(page):

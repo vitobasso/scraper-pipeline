@@ -24,7 +24,7 @@ def pipeline(input_path: str):
 
 def screenshot(ticker: str):
     ss_common_ancestor(ticker, f'https://www.tipranks.com/stocks/{ticker}/forecast',
-                       ['Month Forecast', 'Analyst Ratings'], output_dir)
+                       ['Month Forecast', 'Analyst Ratings'], output_dir, name)
 
 
 def extract_data(image_path: str):
