@@ -16,8 +16,10 @@ class Task:
 
 @dataclass
 class Progress:
-    max: int
-    current: int
+    total: int
+    done: int
+    progress: int
+    failed: int
 
 
 @dataclass
@@ -30,11 +32,6 @@ class Pipeline:
         for task in self.tasks[::-1]:
             if _try_task(task):
                 return
-
-    def report(self):
-        max = self.progress.max
-        current = self.progress.current
-        print(f'{self.name:<20} {f"{current}/{max}":>7}')
 
 
 def _try_task(task):
@@ -84,22 +81,49 @@ def aggregate_task(execute, input_path, output_dir, aggregate_dir) -> Task:
 
 def _find_input(input_path, output_dir):
     all_lines = [line.lower() for line in file_lines(input_path)]
-    progressed_lines = [filename_before_timestamp(path)
-                        for path in all_files(output_dir) if 'awaiting' in path or 'ready' in path]
-    aborted_lines = [Path(path).stem
-                     for path in all_files(f'{output_dir}/logs') if len(file_lines(path)) > error_limit]
-    return list(set(all_lines) - set(progressed_lines) - set(aborted_lines))
+    progressed_lines = _progressed(output_dir)
+    completed_lines = _completed(output_dir)
+    aborted_lines = _aborted(output_dir)
+    return list(set(all_lines) - set(progressed_lines) - set(completed_lines) - set(aborted_lines))
 
 
-def seed_progress(completed_dir) -> Progress:
+def _progressed(output_dir):
+    return [filename_before_timestamp(path)
+            for path in all_files(output_dir) if 'awaiting' in path]
+
+
+def _completed(output_dir):
+    return [filename_before_timestamp(path)
+            for path in all_files(output_dir) if 'ready' in path]
+
+
+def _aborted(output_dir):
+    return [Path(path).stem
+            for path in all_files(f'{output_dir}/logs') if len(file_lines(path)) > error_limit]
+
+
+def seed_progress(output_dir) -> Progress:
+    return _progress(None, output_dir)
+
+
+def line_progress(input_path, output_dir) -> Progress:
+    return _progress(input_path, output_dir)
+
+
+def _progress(input_path, output_dir) -> Progress:
     return Progress(
-        max=1,
-        current=1 if len(all_files(completed_dir)) else 0
+        total=len(file_lines(input_path)) if input_path else 1,
+        done=len(_completed(output_dir)),
+        progress=len(_progressed(output_dir)),
+        failed=len(_aborted(output_dir)),
     )
 
 
-def line_progress(input_path, completed_dir) -> Progress:
-    return Progress(
-        max=len(file_lines(input_path)),
-        current=len(all_files(completed_dir)),
-    )
+def report(pipelines: List[Pipeline]):
+    print(f'{"pipeline":<20} {"pending":>7} {"progress":>7} {"done":>7} {"failed":>7}')
+    for p in pipelines:
+        done = p.progress.done
+        progress = p.progress.progress
+        failed = p.progress.failed
+        pending = p.progress.total - done - progress - failed
+        print(f'{p.name:<20} {pending:>7} {progress:>7} {done:>7} {failed:>7}')
