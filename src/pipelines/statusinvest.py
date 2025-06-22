@@ -1,9 +1,9 @@
-import asyncio, csv, re
+import asyncio, csv, re, sys
 from src.config import output_root
 from src.common.util import mkdir, timestamp, all_files
 from src.scheduler import Pipeline, seed_task, seed_progress
 from src.services.proxies import random_proxy
-from src.services.browser import page_goto, click, click_download
+from src.services.browser import page_goto, click, click_download, error_name
 
 name = 'statusinvest'
 output_dir = mkdir(f'{output_root}/{name}')
@@ -26,14 +26,17 @@ def sync_download():
 async def download():
     path = f'{output_dir}/{timestamp()}.csv'
     proxy = random_proxy()
-    print(f'downloading csv, path: {path}, proxy: {proxy}')
     return await _download(proxy, path)
 
 
 async def _download(proxy: str, path: str):
-    async with page_goto(proxy, 'https://statusinvest.com.br/acoes/busca-avancada') as page:
-        await click(page, 'button', 'Buscar')
-        await click_download(path, page, 'a', 'DOWNLOAD')
+    print(f'downloading csv, path: {path}, proxy: {proxy}')
+    try:
+        async with page_goto(proxy, 'https://statusinvest.com.br/acoes/busca-avancada') as page:
+            await click(page, 'button', 'Buscar')
+            await click_download(path, page, 'a', 'DOWNLOAD')
+    except Exception as e:
+        print(f'failed: {error_name(e)}', file=sys.stderr)
 
 
 def to_spreadsheet():
