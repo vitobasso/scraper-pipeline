@@ -6,7 +6,7 @@ from src.config import output_root
 cache = dict()
 
 
-def log(pipeline: str, ticker: str, msg: str):
+def log(msg: str, pipeline: str, ticker: str = '_'):
     logger = _get_logger(pipeline, ticker)
     logger.error(f'{timestamp()}: {msg}')
 

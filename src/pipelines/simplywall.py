@@ -1,4 +1,6 @@
 import asyncio, sys, csv
+
+from src.common.logs import log
 from src.common.spreadsheet import json_to_spreadsheet
 from src.scheduler import Pipeline, line_task, file_task, line_progress
 from src.config import output_root
@@ -30,17 +32,17 @@ def scrape(ticker):
     if not url:
         print(f'failed: simplywall.st url missing for {ticker}', file=sys.stderr)
     path = f'{raw_dir}/{ticker}-{timestamp()}.json'
-    asyncio.run(_scrape(random_proxy(), url, path))
+    asyncio.run(_scrape(random_proxy(), url, path, ticker))
 
 
-async def _scrape(proxy: str, url: str, path: str):
+async def _scrape(proxy: str, url: str, path: str, ticker: str):
     print(f'scraping, url: {url}, path: {path}, proxy: {proxy}')
     try:
         async with new_page(proxy) as page:
             match_request = lambda r: "/graphql" in r.url and "CompanySummary" in (r.request.post_data or "")
             await expect_json_response(path, page, url, match_request)
     except Exception as e:
-        print(f'failed: {error_name(e)}', file=sys.stderr)
+        log(error_name(e), name, ticker)
 
 
 # TODO data/Company/data

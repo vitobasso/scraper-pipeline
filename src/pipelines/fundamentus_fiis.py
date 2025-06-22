@@ -1,4 +1,6 @@
-import asyncio, sys, pandas, csv, re
+import asyncio, pandas, csv, re
+
+from src.common.logs import log
 from src.common.util import timestamp, mkdir, all_files
 from src.config import output_root
 from src.scheduler import Pipeline, seed_task, seed_progress
@@ -36,7 +38,7 @@ async def _scrape(proxy: str, url: str, path: str):
             df = pandas.DataFrame(data, columns=headers)
             df.to_csv(path, index=False)
     except Exception as e:
-        print(f'failed: {error_name(e)}', file=sys.stderr)
+        log(error_name(e), name)
 
 
 async def _extract_row(row):
