@@ -1,4 +1,6 @@
-import re, asyncio, sys
+import re, asyncio
+
+from src.common.logs import log
 from src.common.spreadsheet import json_to_spreadsheet
 from src.config import output_root
 from src.scheduler import Pipeline, line_task, file_task, line_progress
@@ -32,10 +34,10 @@ def screenshot(ticker: str):
     url_ticker = f'{ticker}.sa' if re.match(r'\w{4}\d\d?', ticker) else ticker
     url = f'https://finance.yahoo.com/quote/{url_ticker}/analysis'
     path = output_path(output_dir, ticker)
-    asyncio.run(_screenshot(random_proxy(), url, path))
+    asyncio.run(_screenshot(random_proxy(), url, path, ticker))
 
 
-async def _screenshot(proxy: str, url: str, path: str):
+async def _screenshot(proxy: str, url: str, path: str, ticker: str):
     print(f'taking screenshot, url: {url}, path: {path}, proxy: {proxy}')
     try:
         async with page_goto(proxy, url, wait_until='domcontentloaded') as page:
@@ -43,7 +45,7 @@ async def _screenshot(proxy: str, url: str, path: str):
             await _dismiss_upgrade(page)
             await page.locator('div.cards-container').screenshot(path=path)
     except Exception as e:
-        print(f'failed: {error_name(e)}', file=sys.stderr)
+        log(name, ticker, error_name(e))
 
 
 async def _reject_cookies(page):

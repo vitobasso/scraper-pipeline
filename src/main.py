@@ -5,12 +5,12 @@ csv_acoes_br = 'input/ticker-list/acoes-br.csv'
 
 if __name__ == '__main__':
     pipes = [
-        fundamentus_fiis.pipeline(),
-        investidor10.pipeline(csv_acoes_br),
-        simplywall.pipeline(csv_acoes_br),
-        statusinvest.pipeline(),
-        # tipranks.pipeline('input/ticker-list/stocks-us.csv'),
-        tradingview.pipeline(csv_acoes_br),
+        # fundamentus_fiis.pipeline(),
+        # investidor10.pipeline(csv_acoes_br),
+        # simplywall.pipeline(csv_acoes_br),
+        # statusinvest.pipeline(),
+        # # tipranks.pipeline('input/ticker-list/stocks-us.csv'),
+        # tradingview.pipeline(csv_acoes_br),
         yahoo.pipeline(csv_acoes_br),
     ]
     for i in range(100):
@@ -23,4 +23,3 @@ if __name__ == '__main__':
 
     for p in pipes:
         p.report()
-    pass
