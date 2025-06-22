@@ -1,7 +1,10 @@
 import random
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Callable, List
+
 from src.common.util import filename_before_timestamp, all_files, file_lines
+from src.config import error_limit
 
 
 @dataclass
@@ -83,7 +86,9 @@ def _find_input(input_path, output_dir):
     all_lines = [line.lower() for line in file_lines(input_path)]
     progressed_lines = [filename_before_timestamp(path)
                         for path in all_files(output_dir) if 'awaiting' in path or 'ready' in path]
-    return list(set(all_lines) - set(progressed_lines))
+    aborted_lines = [Path(path).stem
+                     for path in all_files(f'{output_dir}/logs') if len(file_lines(path)) > error_limit]
+    return list(set(all_lines) - set(progressed_lines) - set(aborted_lines))
 
 
 def seed_progress(completed_dir) -> Progress:

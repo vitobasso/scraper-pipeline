@@ -9,3 +9,5 @@ output_root = "output/20250621"
 # visual_llm_model = "gemini-2.0-flash"
 visual_llm_model = "gemini-2.5-flash-preview-05-20"  # investidor10 works
 # model: "gemini-2.5-pro-preview-05-06"
+
+error_limit = 5
