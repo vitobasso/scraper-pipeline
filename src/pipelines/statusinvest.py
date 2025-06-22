@@ -9,14 +9,14 @@ name = 'statusinvest'
 output_dir = mkdir(f'{output_root}/{name}')
 
 
-def pipeline() -> Pipeline:
-    return {
-        'name': name,
-        'tasks': [
+def pipeline():
+    return Pipeline(
+        name=name,
+        tasks=[
             seed_task(sync_download, output_dir),
         ],
-        'progress': seed_progress(output_dir)
-    }
+        progress=seed_progress(output_dir)
+    )
 
 
 def sync_download():
