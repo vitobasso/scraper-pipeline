@@ -23,11 +23,15 @@ class Pipeline:
     tasks: List[Task]
     progress: Progress
 
+    def schedule_next(self):
+        for task in self.tasks[::-1]:
+            if _try_task(task):
+                return
 
-def schedule_next(pipeline: Pipeline):
-    for task in pipeline.tasks[::-1]:
-        if _try_task(task):
-            return
+    def report(self):
+        max = self.progress.max
+        current = self.progress.current
+        print(f'{self.name:<20} {f"{current}/{max}":>7}')
 
 
 def _try_task(task):
@@ -94,9 +98,3 @@ def line_progress(input_path, completed_dir) -> Progress:
         max=len(file_lines(input_path)),
         current=len(all_files(completed_dir)),
     )
-
-
-def report(pipeline: Pipeline):
-    max = pipeline.progress.max
-    current = pipeline.progress.current
-    print(f'{pipeline.name:<20} {f"{current}/{max}":>7}')
