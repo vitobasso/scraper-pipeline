@@ -17,9 +17,9 @@ class Task:
 @dataclass
 class Progress:
     total: int
-    done: int
+    complete: int
     progress: int
-    failed: int
+    aborted: int
 
 
 @dataclass
@@ -113,17 +113,17 @@ def line_progress(input_path, output_dir) -> Progress:
 def _progress(input_path, output_dir) -> Progress:
     return Progress(
         total=len(file_lines(input_path)) if input_path else 1,
-        done=len(_completed(output_dir)),
+        complete=len(_completed(output_dir)),
         progress=len(_progressed(output_dir)),
-        failed=len(_aborted(output_dir)),
+        aborted=len(_aborted(output_dir)),
     )
 
 
 def report(pipelines: List[Pipeline]):
-    print(f'{"pipeline":<20} {"pending":>7} {"progress":>7} {"done":>7} {"failed":>7}')
+    print(f'{"pipeline":<20} {"pending":>8} {"progress":>8} {"complete":>8} {"aborted":>8}')
     for p in pipelines:
-        done = p.progress.done
+        complete = p.progress.complete
         progress = p.progress.progress
-        failed = p.progress.failed
-        pending = p.progress.total - done - progress - failed
-        print(f'{p.name:<20} {pending:>7} {progress:>7} {done:>7} {failed:>7}')
+        aborted = p.progress.aborted
+        pending = p.progress.total - complete - progress - aborted
+        print(f'{p.name:<20} {pending:>8} {progress:>8} {complete:>8} {aborted:>8}')
