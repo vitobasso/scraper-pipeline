@@ -26,7 +26,7 @@ class Progress:
 class Pipeline:
     name: str
     tasks: List[Task]
-    progress: Progress
+    progress: Callable[[], Progress]
 
     def schedule_next(self):
         for task in self.tasks[::-1]:
@@ -102,16 +102,16 @@ def _aborted(output_dir):
             for path in all_files(f'{output_dir}/logs') if len(file_lines(path)) >= error_limit]
 
 
-def seed_progress(output_dir) -> Progress:
+def seed_progress(output_dir) -> Callable[[], Progress]:
     return _progress(None, output_dir)
 
 
-def line_progress(input_path, output_dir) -> Progress:
+def line_progress(input_path, output_dir) -> Callable[[], Progress]:
     return _progress(input_path, output_dir)
 
 
-def _progress(input_path, output_dir) -> Progress:
-    return Progress(
+def _progress(input_path, output_dir) -> Callable[[], Progress]:
+    return lambda: Progress(
         total=len(file_lines(input_path)) if input_path else 1,
         complete=len(_completed(output_dir)),
         progress=len(_progressed(output_dir)),
@@ -121,9 +121,10 @@ def _progress(input_path, output_dir) -> Progress:
 
 def report(pipelines: List[Pipeline]):
     print(f'{"pipeline":<20} {"pending":>8} {"progress":>8} {"complete":>8} {"aborted":>8}')
-    for p in pipelines:
-        complete = p.progress.complete
-        progress = p.progress.progress
-        aborted = p.progress.aborted
-        pending = p.progress.total - complete - progress - aborted
-        print(f'{p.name:<20} {pending:>8} {progress:>8} {complete:>8} {aborted:>8}')
+    for pipe in pipelines:
+        prog = pipe.progress()
+        complete = prog.complete
+        progress = prog.progress
+        aborted = prog.aborted
+        pending = prog.total - complete - progress - aborted
+        print(f'{pipe.name:<20} {pending:>8} {progress:>8} {complete:>8} {aborted:>8}')
