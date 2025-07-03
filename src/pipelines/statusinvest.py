@@ -1,6 +1,7 @@
 import asyncio, csv, re
 
 from src.common.logs import log
+from src.common.validate_data import valid_data_dir
 from src.config import output_root
 from src.common.util import mkdir, timestamp, all_files
 from src.scheduler import Pipeline, seed_task, seed_progress
@@ -9,13 +10,14 @@ from src.services.browser import page_goto, click, click_download, error_name
 
 name = 'statusinvest'
 output_dir = mkdir(f'{output_root}/{name}')
+completed_dir = valid_data_dir(output_dir)
 
 
 def pipeline():
     return Pipeline(
         name=name,
         tasks=[
-            seed_task(sync_download, output_dir),
+            seed_task(sync_download, completed_dir),
         ],
         progress=seed_progress(output_dir)
     )
@@ -26,7 +28,7 @@ def sync_download():
 
 
 async def download():
-    path = f'{output_dir}/{timestamp()}.csv'
+    path = f'{completed_dir}/{timestamp()}.csv'
     proxy = random_proxy()
     return await _download(proxy, path)
 
@@ -42,7 +44,7 @@ async def _download(proxy: str, path: str):
 
 
 def to_spreadsheet():
-    files = all_files(output_dir)
+    files = all_files(completed_dir)
     if files:
         with open(files[0]) as file:
             rows = [row for row in csv.reader(file, delimiter=';')]
