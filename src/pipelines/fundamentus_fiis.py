@@ -2,6 +2,7 @@ import asyncio, pandas, csv, re
 
 from src.common.logs import log
 from src.common.util import timestamp, mkdir, all_files
+from src.common.validate_data import valid_data_dir
 from src.config import output_root
 from src.scheduler import Pipeline, seed_task, seed_progress
 from src.services.browser import page_goto, error_name
@@ -9,19 +10,20 @@ from src.services.proxies import random_proxy
 
 name = 'fundamentus_fiis'
 output_dir = mkdir(f'{output_root}/{name}')
+completed_dir = valid_data_dir(output_dir)
 
 
 def pipeline():
     return Pipeline(
         name=name,
-        tasks=[seed_task(scrape, output_dir)],
+        tasks=[seed_task(scrape, completed_dir)],
         progress=seed_progress(output_dir)
     )
 
 
 def scrape():
     url = 'https://www.fundamentus.com.br/fii_resultado.php'
-    path = f'{output_dir}/{timestamp()}.csv'
+    path = f'{completed_dir}/{timestamp()}.csv'
     proxy = random_proxy()
     asyncio.run(_scrape(proxy, url, path))
 
@@ -50,7 +52,7 @@ async def _extract_row(row):
 
 
 def to_spreadsheet():
-    files = all_files(output_dir)
+    files = all_files(completed_dir)
     if files:
         with open(files[0]) as file:
             return [[_convert_if_number(value) for value in row]
