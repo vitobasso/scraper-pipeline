@@ -10,5 +10,6 @@ __pycache__
 .env
 gcp-secret.json
 client-secret.json
-input
+input/*
+!input/templates
 output

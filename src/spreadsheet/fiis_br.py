@@ -1,14 +1,14 @@
 import calendar
 from datetime import datetime
-from src.config import google_template_fiis
+from src.config import template_fiis
 from src.common.util import file_lines
-from src.services.google_sheets import copy_file, find_worksheet_by_title
+from src.services.google_sheets import new_file, find_worksheet_by_title
 from src.pipelines import fundamentus_fiis, statusinvest_carteira_xlsx
 
 
 def create_spreadsheet():
     timestamp = datetime.now().strftime('%Y-%m')
-    spreadsheet = copy_file(google_template_fiis, f'screening fiis-br {timestamp}')
+    spreadsheet = new_file(template_fiis, f'{timestamp} fiis-br')
     _populate_constants(spreadsheet)
     _populate_screening(spreadsheet)
     _populate_fundamentus(spreadsheet)

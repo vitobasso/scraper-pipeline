@@ -1,16 +1,15 @@
 import calendar
 from datetime import datetime
-
-from src.config import google_template_acoes
+from src.config import template_acoes
 from src.common.util import file_lines, normalize
 from src.pipelines.investidor10 import get_sector_segment
-from src.services.google_sheets import copy_file, find_worksheet_by_title
+from src.services.google_sheets import new_file, find_worksheet_by_title
 from src.pipelines import yahoo, simplywall, statusinvest, statusinvest_carteira_xlsx, investidor10
 
 
 def create_spreadsheet():
     timestamp = datetime.now().strftime('%Y-%m')
-    spreadsheet = copy_file(google_template_acoes, f'screening acoes-br {timestamp}')
+    spreadsheet = new_file(template_acoes, f'{timestamp} acoes-br')
     _populate_constants(spreadsheet)
     _populate_screening(spreadsheet)
     _populate_forecast(spreadsheet)
