@@ -10,12 +10,13 @@ from src.pipelines import yahoo, simplywall, statusinvest, statusinvest_carteira
 
 def create_spreadsheet():
     timestamp = datetime.now().strftime('%Y-%m')
-    spreadsheet = copy_file(google_template_acoes, f'screening acoes-br {timestamp} (test)')
+    spreadsheet = copy_file(google_template_acoes, f'screening acoes-br {timestamp}')
     _populate_constants(spreadsheet)
     _populate_screening(spreadsheet)
     _populate_forecast(spreadsheet)
     _populate_statusinvest(spreadsheet)
     _populate_carteira(spreadsheet)
+    print(f'created: {spreadsheet.url}')
 
 
 def _populate_constants(spreadsheet):

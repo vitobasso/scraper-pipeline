@@ -13,6 +13,7 @@ def create_spreadsheet():
     _populate_screening(spreadsheet)
     _populate_fundamentus(spreadsheet)
     _populate_carteira(spreadsheet)
+    print(f'created: {spreadsheet.url}')
 
 
 def _populate_constants(spreadsheet):
