@@ -1,7 +1,7 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from googleapiclient import discovery
-from src.config import google_dir
+from googleapiclient import discovery, http
+from src.config import gdrive_dir
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 _sheet = None
@@ -27,16 +27,15 @@ def _get_drive():
     return _drive
 
 
-def copy_file(original_id, new_name: str):
-    files = _get_drive().files()
-    copied_file = files.copy(fileId=original_id, body={'name': new_name}).execute()
-    files.update(
-        fileId=copied_file['id'],
-        addParents=google_dir,
-        removeParents='root',
-        fields='id, parents'
+def new_file(template: str, file_name: str):
+    file_metadata = {'name': file_name, 'parents': [gdrive_dir], 'mimeType': 'application/vnd.google-apps.spreadsheet'}
+    media = http.MediaFileUpload(template, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    new_file = _get_drive().files().create(
+        body=file_metadata,
+        media_body=media,
+        fields='id'
     ).execute()
-    return _get_sheet().open_by_key(copied_file['id'])
+    return _get_sheet().open_by_key(new_file['id'])
 
 
 def find_worksheet_by_title(spreadsheet, title: str):
