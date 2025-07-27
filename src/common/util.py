@@ -27,4 +27,4 @@ def timestamp():
 
 
 def normalize(string: str):
-    return unidecode(string).lower()
+    return unidecode(string).lower() if string else None

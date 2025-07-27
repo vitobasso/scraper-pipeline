@@ -1,15 +1,14 @@
 import calendar
 from datetime import datetime
+from src.config import google_template_fiis
 from src.common.util import file_lines
 from src.services.google_sheets import copy_file, find_worksheet_by_title
 from src.pipelines import fundamentus_fiis, statusinvest_carteira_xlsx
 
-template_id = '1RIajiids3rYC_b_p0J26GD9hEimbzaw5Zg8ZkSwYPq8'  # TODO export to file and make it a local resource?
-
 
 def create_spreadsheet():
     timestamp = datetime.now().strftime('%Y-%m')
-    spreadsheet = copy_file(template_id, f'screening fiis-br {timestamp}')
+    spreadsheet = copy_file(google_template_fiis, f'screening fiis-br {timestamp}')
     _populate_constants(spreadsheet)
     _populate_screening(spreadsheet)
     _populate_fundamentus(spreadsheet)
