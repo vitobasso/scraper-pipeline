@@ -1,16 +1,16 @@
 import calendar
 from datetime import datetime
+
+from src.config import google_template_acoes
 from src.common.util import file_lines, normalize
 from src.pipelines.investidor10 import get_sector_segment
 from src.services.google_sheets import copy_file, find_worksheet_by_title
 from src.pipelines import yahoo, simplywall, statusinvest, statusinvest_carteira_xlsx, investidor10
 
-template_id = '1eWwqMZr4PeuH5siVoICz_XPcWVE8dGEgx_jKaarZ_4Y'  # TODO export to file and make it a local resource?
-
 
 def create_spreadsheet():
     timestamp = datetime.now().strftime('%Y-%m')
-    spreadsheet = copy_file(template_id, f'screening acoes-br {timestamp}')
+    spreadsheet = copy_file(google_template_acoes, f'screening acoes-br {timestamp} (test)')
     _populate_constants(spreadsheet)
     _populate_screening(spreadsheet)
     _populate_forecast(spreadsheet)
