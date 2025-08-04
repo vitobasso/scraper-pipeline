@@ -4,7 +4,7 @@ from src.config import output_root
 from src.common.util import mkdir, timestamp, all_files
 from src.services.proxies import random_proxy
 from src.services.browser import new_page, error_name, expect_json_response
-from src.common.validate_data import validate
+from src.common.validate_data import validate_schema
 
 name = 'simplywall_multi'
 input_path = 'input/simplywall/sectors.csv'
@@ -51,7 +51,7 @@ def validate_data(country: str, path: str):
             'income': int,
         }
     ]
-    validate(path, schema, output_dir(country))
+    validate_schema(path, schema, output_dir(country))
 
 
 def aggregate(country):

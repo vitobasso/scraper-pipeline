@@ -2,7 +2,7 @@ from src.config import output_root
 from src.common.util import mkdir
 from src.common.extract_data import extract_json, input_dir as extract_data_input
 from src.common.screenshot import ss_common_ancestor
-from src.common.validate_data import validate, input_dir as validate_data_input, valid_data_dir
+from src.common.validate_data import validate_schema, input_dir as validate_data_input, valid_data_dir
 from src.common.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
 from src.scheduler import Pipeline, line_task, file_task, line_progress
 
@@ -60,4 +60,4 @@ def validate_data(path: str):
             'max': float,
         }
     }
-    validate(path, schema, output_dir)
+    validate_schema(path, schema, output_dir)

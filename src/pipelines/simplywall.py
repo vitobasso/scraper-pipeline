@@ -8,7 +8,7 @@ from src.common.util import timestamp, mkdir
 from src.services.proxies import random_proxy
 from src.services.browser import new_page, error_name, expect_json_response
 from src.common.extract_data import ask
-from src.common.validate_data import validate, input_dir as validate_data_input, valid_data_dir
+from src.common.validate_data import validate_schema, input_dir as validate_data_input, valid_data_dir
 
 name = 'simplywall'
 output_dir = mkdir(f'{output_root}/{name}')
@@ -57,7 +57,7 @@ def validate_data(path: str):
             'dividend': int,
         }
     ]
-    validate(path, schema, completed_dir)
+    validate_schema(path, schema, completed_dir)
 
 
 def get_url(ticker):
