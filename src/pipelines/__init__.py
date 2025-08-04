@@ -9,4 +9,5 @@ __all__ = [
     "tipranks",
     "tradingview",
     "yahoo",
+    "yahoo_chart",
 ]

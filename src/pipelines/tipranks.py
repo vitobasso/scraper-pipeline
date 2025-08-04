@@ -4,7 +4,7 @@ from src.scheduler import Pipeline, line_task, file_task
 from src.common.util import mkdir
 from src.common.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
 from src.common.extract_data import extract_json, input_dir as extract_data_input
-from src.common.validate_data import validate, input_dir as validate_data_input
+from src.common.validate_data import validate_schema, input_dir as validate_data_input
 
 name = 'tipranks'
 output_dir = mkdir(f'{output_root}/{name}')
@@ -54,4 +54,4 @@ def validate_data(path: str):
             'max': float,
         }
     }
-    validate(path, schema, output_dir)
+    validate_schema(path, schema, output_dir)

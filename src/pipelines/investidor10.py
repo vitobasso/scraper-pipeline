@@ -5,7 +5,7 @@ from src.common.util import mkdir
 from src.common.screenshot import ss_full_page
 from src.common.validate_screenshot import validate_screenshot, input_dir as validate_screenshot_input
 from src.common.extract_data import extract_json, input_dir as extract_data_input
-from src.common.validate_data import valid_data_dir, validate, input_dir as validate_data_input
+from src.common.validate_data import valid_data_dir, validate_schema, input_dir as validate_data_input
 
 name = 'investidor10'
 output_dir = mkdir(f'{output_root}/{name}')
@@ -50,7 +50,7 @@ def validate_data(path: str):
             'segmento': str,
         }
     }
-    validate(path, schema, output_dir)
+    validate_schema(path, schema, output_dir)
 
 
 def to_spreadsheet():
