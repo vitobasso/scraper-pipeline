@@ -23,18 +23,12 @@ def pipeline(input_path: str):
     )
 
 
-# from datetime import datetime, timedelta
-# month_ago = (datetime.today() - timedelta(days=30)).strftime('%Y-%m-%d')
-# year_ago = (datetime.today() - timedelta(days=365)).strftime('%Y-%m-%d')
-# today = datetime.today().strftime('%Y-%m-%d')
-
 def call_api(ticker):
     proxy = random_proxy()
     path = f'{data_dir}/{ticker}-{timestamp()}.json'
     print(f'scraping, ticker: {ticker}, path: {path}, proxy: {proxy}')
     try:
-        # TODO change period to 1 month?
-        result = yfinance.Ticker(f'{ticker}.SA').history(period="5y", interval="1wk", proxy=proxy)
+        result = yfinance.Ticker(f'{ticker}.SA').history(period="5y", interval="1d", proxy=proxy)
         data = result["Close"].tolist()
         with open(path, 'w') as f:
             json.dump(data, f)
