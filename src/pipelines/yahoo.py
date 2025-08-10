@@ -1,7 +1,6 @@
 import re, asyncio
 
 from src.common.logs import log
-from src.common.spreadsheet import json_to_spreadsheet
 from src.config import output_root
 from src.scheduler import Pipeline, line_task, file_task, line_progress
 from src.services.browser import page_goto, click, error_name
@@ -105,7 +104,3 @@ def validate_data(path: str):
         }
     }
     validate_schema(path, schema, output_dir)
-
-
-def to_spreadsheet():
-    return json_to_spreadsheet(completed_dir)

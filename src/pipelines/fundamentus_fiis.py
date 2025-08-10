@@ -1,7 +1,8 @@
-import asyncio, pandas, csv, re
+import asyncio
+import pandas
 
 from src.common.logs import log
-from src.common.util import timestamp, mkdir, all_files
+from src.common.util import timestamp, mkdir
 from src.common.validate_data import valid_data_dir
 from src.config import output_root
 from src.scheduler import Pipeline, seed_task, seed_progress
@@ -49,19 +50,3 @@ async def _extract_row(row):
         return [c.replace("%", "").replace(".", "").replace(",", ".").strip() for c in cells[:-1]]
     else:
         return None
-
-
-def to_spreadsheet():
-    files = all_files(completed_dir)
-    if files:
-        with open(files[0]) as file:
-            return [[_convert_if_number(value) for value in row]
-                    for row in csv.reader(file)]
-    else:
-        return []
-
-
-def _convert_if_number(value):
-    if isinstance(value, str) and re.fullmatch(r'^-?\d+\.?\d*$', value):
-        return float(value)
-    return value
