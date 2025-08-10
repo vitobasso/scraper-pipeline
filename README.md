@@ -2,9 +2,24 @@
 
 ### Install dependencies
 
+#### MacOS
 ```
 brew install python3 poetry
 poetry install --no-root
+playwright install
+```
+
+#### Debian
+```
+sudo apt update
+sudo apt install git
+git clone git@github.com:vitobasso/stocks-scraper.git
+cd stocks-scraper
+
+curl -sSL https://install.python-poetry.org | python3 -
+source ~/.profile
+poetry install --no-root
+
 playwright install
 ```
 
@@ -34,6 +49,7 @@ To avoid conflicts between project lib and system libs
 ```
 python3 -m venv .venv
 source .venv/bin/activate
+PYTHONPATH=. python3 src/main.py
 ```
 
 ## References
