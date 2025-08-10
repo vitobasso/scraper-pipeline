@@ -1,9 +1,6 @@
 import os
 from pathlib import Path
 from src.common.util import mkdir
-from src.services.ocr import ocr
-
-ocr_min_lines = 50
 
 input_dir = lambda x: mkdir(f'{x}/screenshots/awaiting-validation')
 valid_dir = lambda x: mkdir(f'{x}/screenshots/awaiting-extraction')
@@ -17,7 +14,4 @@ def validate_screenshot(image_path: str, output_dir: str):
 
 
 def _validate(image_path: str):
-    lines = ocr().readtext(image_path, detail=0)
-    is_error = any(line.find('error') > 0 for line in lines)
-    is_short = len(lines) < ocr_min_lines
-    return not is_error or not is_short
+    return True  # removed ocr as it was too resource hungry

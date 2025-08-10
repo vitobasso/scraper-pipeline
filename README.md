@@ -5,6 +5,7 @@
 #### MacOS
 ```
 brew install python3 poetry
+poetry config virtualenvs.in-project true
 poetry install --no-root
 playwright install
 ```
