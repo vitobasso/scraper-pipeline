@@ -11,31 +11,11 @@ playwright install
 
 ### Secrets
 
-#### 1. Google AI
+#### Google AI
 
 To call Gemini LLM Api and extract data from screenshots.  
 [Api Keys](https://aistudio.google.com/apikey),
 Add the `GOOGLE_GENAI_API_KEY` var in the `.env` file at the project root.
-
-#### 2. Google Drive - Oauth Client ID
-
-To create new files in a user's personal Google Drive.  
-[Apis and Services, Credentials](https://console.cloud.google.com/apis/credentials?inv=1&invt=Ab35cQ&project=api-project-168147909795),
-Create credentials, OAuth Client ID, Desktop app, download it, name `client-secret.json` and place at the project
-root.  
-[Oauth consent screen, Audience](https://console.cloud.google.com/auth/audience?inv=1&invt=Ab35cQ&project=api-project-168147909795),
-Test users, add your email.
-
-#### 3. Google Sheets - Service account
-
-To add data to Google Sheets files.  
-[IAM and admin, Service accounts, Keys](https://console.cloud.google.com/iam-admin/serviceaccounts/details/113244814507907976994;edit=true/keys?inv=1&invt=AbzKDA&project=api-project-168147909795).  
-Add key, JSON, download it, name `gcp-secret.json` and place at the project root.
-
-### Dependency on Google Sheets
-
-A folder shared with the service account. New sheets will be automatically created in there.  
-`config.google_dir` holds the folder id.
 
 ### Input files
 - ticker-list

@@ -1,6 +1,5 @@
 from src.pipelines import *
 from src.scheduler import report
-from src.spreadsheet import *
 
 csv_acoes_br = 'input/ticker-list/acoes-br.csv'
 
@@ -24,6 +23,4 @@ if __name__ == '__main__':
     report(pipes)
 
     # statusinvest_carteira_xlsx.import_all()
-    # acoes_br.create_spreadsheet()
-    # fiis_br.create_spreadsheet()
 

@@ -1,7 +1,6 @@
 import asyncio, sys, csv
 
 from src.common.logs import log
-from src.common.spreadsheet import json_to_spreadsheet
 from src.scheduler import Pipeline, line_task, file_task, line_progress
 from src.config import output_root
 from src.common.util import timestamp, mkdir
@@ -66,12 +65,6 @@ def get_url(ticker):
             if row[0].lower() == ticker.lower():
                 return row[1]
     return None
-
-
-def to_spreadsheet():
-    transform_data = lambda data: data['data']['Company']['score']
-    return json_to_spreadsheet(completed_dir, transform_data)
-
 
 # TODO gemini-flash doesn't seem to work, gemini-pro gets most urls right
 def discover_urls(input_path):

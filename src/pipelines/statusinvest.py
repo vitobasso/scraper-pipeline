@@ -1,12 +1,12 @@
-import asyncio, csv, re
+import asyncio
 
 from src.common.logs import log
+from src.common.util import mkdir, timestamp
 from src.common.validate_data import valid_data_dir
 from src.config import output_root
-from src.common.util import mkdir, timestamp, all_files
 from src.scheduler import Pipeline, seed_task, seed_progress
-from src.services.proxies import random_proxy
 from src.services.browser import page_goto, click, click_download, error_name
+from src.services.proxies import random_proxy
 
 name = 'statusinvest'
 output_dir = mkdir(f'{output_root}/{name}')
@@ -41,29 +41,3 @@ async def _download(proxy: str, path: str):
             await click_download(path, page, 'a', 'DOWNLOAD')
     except Exception as e:
         log(error_name(e), name)
-
-
-def to_spreadsheet():
-    files = all_files(completed_dir)
-    if files:
-        with open(files[0]) as file:
-            rows = [row for row in csv.reader(file, delimiter=';')]
-            return _clean_data(rows)
-    else:
-        return []
-
-
-def _clean_data(data):
-    return [[_clean_numbers(value) for value in row]
-            for row in data]
-
-
-def _clean_numbers(value):
-    replaced = str(value).replace(".", "").replace(",", ".")
-    return _convert_if_number(replaced)
-
-
-def _convert_if_number(value):
-    if isinstance(value, str) and re.fullmatch(r'^-?\d+\.?\d*$', value):
-        return float(value)
-    return value
