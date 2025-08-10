@@ -19,8 +19,10 @@ cd stocks-scraper
 
 curl -sSL https://install.python-poetry.org | python3 -
 source ~/.profile
+poetry config virtualenvs.in-project true
 poetry install --no-root
 
+playwright install-deps
 playwright install
 ```
 
