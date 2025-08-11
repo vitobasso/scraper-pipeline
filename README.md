@@ -47,12 +47,19 @@ Add the `GOOGLE_GENAI_API_KEY` var in the `.env` file at the project root.
 
 ### Running from CLI (no IDE)
 
+#### Scraper
+
 To avoid conflicts between project lib and system libs
 
 ```
-python3 -m venv .venv
 source .venv/bin/activate
 PYTHONPATH=. python3 src/main.py
+```
+
+#### Rest API
+```
+source .venv/bin/activate
+uvicorn src.api.api:app
 ```
 
 ## References
