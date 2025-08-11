@@ -1,8 +1,12 @@
-import re, json
+import json
+import re
+from contextlib import asynccontextmanager
+from typing import Literal
+
 from playwright._impl._errors import TimeoutError, Error as PlaywrightError
 from playwright.async_api import async_playwright, ProxySettings, ViewportSize
-from typing import Literal
-from contextlib import asynccontextmanager
+
+from src.config import use_proxies
 
 load_timeout = 60000
 
@@ -14,7 +18,7 @@ async def new_page(proxy: str):
 
         browser = await playwright.chromium.launch(
             headless=True,
-            proxy=proxy_settings,
+            proxy=proxy_settings if use_proxies else None,
             args=[
                 '--disable-blink-features=AutomationControlled',
                 '--no-sandbox',
