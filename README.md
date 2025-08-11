@@ -26,7 +26,6 @@ playwright install-deps
 playwright install
 ```
 
-
 ### Secrets
 
 #### Google AI
@@ -60,6 +59,47 @@ PYTHONPATH=. python3 src/main.py
 ```
 source .venv/bin/activate
 uvicorn src.api.api:app --host 0.0.0.0 --port 8000
+```
+
+## Prod Setup
+
+### Domain Name setup
+
+In order for the frontent (which uses https) to accept the backend call, it needs to be https.
+Enabling https requires a certificate and domain name.
+We need nginx to handle https before redirecting to uvicorn on https.
+```aiignore
+sudo apt install nginx certbot python3-certbot-nginx
+sudo certbot --nginx -d monitor-de-acoes.duckdns.org
+# Certificate is saved at: /etc/letsencrypt/live/monitor-de-acoes.duckdns.org/fullchain.pem
+# Key is saved at:         /etc/letsencrypt/live/monitor-de-acoes.duckdns.org/privkey.pem
+# Successfully deployed certificate for monitor-de-acoes.duckdns.org to /etc/nginx/sites-enabled/default
+# This certificate expires on 2025-11-09.
+sudo tee /etc/nginx/sites-enabled/monitor-de-acoes.duckdns.org.conf > /dev/null <<'EOF'
+server {
+    listen 80;
+    server_name monitor-de-acoes.duckdns.org;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name monitor-de-acoes.duckdns.org;
+
+    ssl_certificate /etc/letsencrypt/live/monitor-de-acoes.duckdns.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/monitor-de-acoes.duckdns.org/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;  # your uvicorn app port
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+EOF
+# Clear any conflicting conf at /etc/nginx/sites-enabled/default.conf (certbot adds some lines to match our domain name)
+
+sudo systemctl restart nginx
+uvicorn src.api.api:app --host 127.0.0.1 --port 8000
 ```
 
 ## References
