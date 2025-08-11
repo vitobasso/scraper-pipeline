@@ -1,6 +1,6 @@
 import os, glob, sys, time, datetime, random, re, urllib.request
 from pathlib import Path
-from src.config import output_root, proxies_url as download_url
+from src.config import output_root, proxies_url as download_url, use_proxies
 
 list_dir = f'{output_root}/proxy-list'
 timestamp_format = '%Y%m%dT%H%M%S'
@@ -10,7 +10,7 @@ _proxies = None
 
 
 def random_proxy():
-    return random.choice(_init())
+    return random.choice(_init()) if use_proxies else None
 
 
 def _init():

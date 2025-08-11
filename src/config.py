@@ -1,5 +1,7 @@
 output_root = "output/20250803"
 
+use_proxies = True
+
 error_limit = 8
 
 
