@@ -120,11 +120,12 @@ def _progress(input_path, output_dir) -> Callable[[], Progress]:
 
 
 def report(pipelines: List[Pipeline]):
-    print(f'{"pipeline":<20} {"pending":>8} {"progress":>8} {"complete":>8} {"aborted":>8}')
+    print(f'# {"pipeline":<20} {"pending":>8} {"progress":>8} {"complete":>8} {"aborted":>8}')
     for pipe in pipelines:
         prog = pipe.progress()
         complete = prog.complete
         progress = prog.progress
         aborted = prog.aborted
         pending = prog.total - complete - progress - aborted
-        print(f'{pipe.name:<20} {pending:>8} {progress:>8} {complete:>8} {aborted:>8}')
+        print(f'{pipe.name:<22} {pending:>8} {progress:>8} {complete:>8} {aborted:>8}')
+    print()

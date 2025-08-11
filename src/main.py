@@ -1,9 +1,12 @@
+from src import config
 from src.pipelines import *
 from src.scheduler import report
 
 csv_acoes_br = 'input/ticker-list/acoes-br.csv'
 
 if __name__ == '__main__':
+    config.print_me()
+
     pipes = [
         fundamentus_fiis.pipeline(),
         investidor10.pipeline(csv_acoes_br),
@@ -20,6 +23,7 @@ if __name__ == '__main__':
     for i in range(200):
         for p in pipes:
             p.schedule_next()
+    print()
     report(pipes)
 
     # statusinvest_carteira_xlsx.import_all()
