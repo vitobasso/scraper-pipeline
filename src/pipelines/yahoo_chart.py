@@ -30,7 +30,7 @@ def call_api(ticker):
     path = f'{data_dir}/{ticker}-{timestamp()}.json'
     print(f'scraping, ticker: {ticker}, path: {path}, proxy: {proxy}')
     try:
-        result = yfinance.Ticker(f'{ticker}.SA').history(period="5y", interval="1d", proxy=proxy)
+        result = yfinance.Ticker(f'{ticker}.SA').history(period="5y", interval="1d", proxy=proxy, raise_errors=True)
         data = result["Close"].tolist()
         with open(path, 'w') as f:
             json.dump(data, f)

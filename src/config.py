@@ -4,7 +4,7 @@ template_acoes = "input/templates/acoes-br.xlsx"
 
 template_fiis = "input/templates/fiis-br.xlsx"
 
-error_limit = 40
+error_limit = 8
 
 
 # external dependencies
