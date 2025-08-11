@@ -17,3 +17,10 @@ proxies_url = "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies
 visual_llm_model = "gemini-2.5-flash-preview-05-20"  # investidor10 works
 # visual_llm_model = "gemini-2.5-pro-preview-05-06"
 
+
+def print_me():
+    print("# config")
+    for k, v in globals().items():
+        if not k.startswith("__") and k != "print_me":
+            print(k, v)
+    print()
