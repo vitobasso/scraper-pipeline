@@ -59,7 +59,7 @@ PYTHONPATH=. python3 src/main.py
 #### Rest API
 ```
 source .venv/bin/activate
-uvicorn src.api.api:app
+uvicorn src.api.api:app --host 0.0.0.0 --port 8000
 ```
 
 ## References
@@ -79,3 +79,7 @@ https://github.com/proxifly/free-proxy-list # socks proxies work
 https://httpbin.org/ip # url to test a proxy
 https://proxyscrape.com/free-proxy-list # most are broken
 https://free-proxy-list.net/ # most are broken
+
+### Domain name
+https://www.duckdns.org/ # reserved: monitor-de-acoes.duckdns.org -> 34.42.227.37
+https://freedns.afraid.org/ # get subdomains from random people's domains
