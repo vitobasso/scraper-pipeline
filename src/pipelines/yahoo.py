@@ -85,7 +85,7 @@ def extract_data(path: str):
        - avg
        - max
     """
-    extract_json(path, prompt, output_dir)
+    extract_json(path, prompt, output_dir, name)
 
 
 def validate_data(path: str):
