@@ -39,7 +39,7 @@ def extract_data(image_path: str):
     
     All keys should be lower_snake_case in portuguese without special characters.
     """
-    extract_json(image_path, prompt, output_dir)
+    extract_json(image_path, prompt, output_dir, name)
 
 
 def validate_data(path: str):

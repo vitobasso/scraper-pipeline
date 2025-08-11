@@ -38,7 +38,7 @@ def extract_data(image_path: str):
        - avg
        - max (aka high)
     """
-    extract_json(image_path, prompt, output_dir)
+    extract_json(image_path, prompt, output_dir, name)
 
 
 def validate_data(path: str):
