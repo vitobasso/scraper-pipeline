@@ -52,7 +52,7 @@ To avoid conflicts between project lib and system libs
 
 ```
 source .venv/bin/activate
-PYTHONPATH=. python3 src/main.py
+python3 -m scraper
 ```
 
 #### Rest API
