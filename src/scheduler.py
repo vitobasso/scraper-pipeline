@@ -21,6 +21,9 @@ class Progress:
     progress: int
     aborted: int
 
+    def pending(self):
+        return self.total - self.complete - self.progress - self.aborted
+
 
 @dataclass
 class Pipeline:
@@ -28,10 +31,13 @@ class Pipeline:
     tasks: List[Task]
     progress: Callable[[], Progress]
 
-    def schedule_next(self):
+    def run_next(self):
         for task in self.tasks[::-1]:
             if _try_task(task):
                 return
+
+    def is_done(self):
+        return self.progress().pending() <= 0
 
 
 def _try_task(task):
@@ -123,9 +129,5 @@ def report(pipelines: List[Pipeline]):
     print(f'# {"pipeline":<20} {"pending":>8} {"progress":>8} {"complete":>8} {"aborted":>8}')
     for pipe in pipelines:
         prog = pipe.progress()
-        complete = prog.complete
-        progress = prog.progress
-        aborted = prog.aborted
-        pending = prog.total - complete - progress - aborted
-        print(f'{pipe.name:<22} {pending:>8} {progress:>8} {complete:>8} {aborted:>8}')
+        print(f'{pipe.name:<22} {prog.pending() :>8} {prog.progress :>8} {prog.complete :>8} {prog.aborted :>8}')
     print()
