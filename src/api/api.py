@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 import json
-import csv
+from src.pipelines.statusinvest import normalize_data as normalize_statusinvest
 
 app = FastAPI()
 
@@ -53,42 +53,7 @@ def get_data():
 
 def statusinvest():
     file_path = pick_latest_file(root_dir / "statusinvest/data/ready")
-    return parse_statusinvest(file_path) if file_path else {}
-
-
-statusinvest_header_map = {
-    "LIQUIDEZ MEDIA DIARIA": "liquidezMediaDiaria",
-    "MARG. LIQUIDA": "margem",
-    "DIV. LIQ. / PATRI.": "divida",
-    "LIQ. CORRENTE": "liquidezCorrente",
-    "CAGR LUCROS 5 ANOS": "lucro",
-}
-
-
-def parse_statusinvest(file_path: Path):
-    data = {}
-    with file_path.open(encoding="utf-8") as f:
-        reader = csv.reader(f, delimiter=";")
-        headers = next(reader)
-        headers = [
-            statusinvest_header_map.get(h.strip(), h.strip())
-            for h in headers
-        ]
-        for row in reader:
-            ticker, *rest = row
-            values = {
-                headers[i + 1]: try_convert_number(rest[i])
-                for i in range(len(rest))
-            }
-            data[ticker] = values
-    return data
-
-
-def try_convert_number(value: str):
-    try:
-        return float(value.replace(".", "").replace(",", "."))
-    except ValueError:
-        return value
+    return normalize_statusinvest(file_path) if file_path else {}
 
 
 def yahoo_scraped():

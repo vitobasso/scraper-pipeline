@@ -1,4 +1,9 @@
 import asyncio
+import csv
+import re
+from pathlib import Path
+
+import unicodedata
 
 from src.common.logs import log
 from src.common.util import mkdir, timestamp
@@ -41,3 +46,42 @@ async def _download(proxy: str, path: str):
             await click_download(path, page, 'a', 'DOWNLOAD')
     except Exception as e:
         log(error_name(e), name)
+
+
+def normalize_data(file_path: Path):
+    data = {}
+    with file_path.open(encoding="utf-8") as f:
+        reader = csv.reader(f, delimiter=";")
+        headers = next(reader)
+        headers = [
+            normalize_header(h.strip())
+            for h in headers
+        ]
+        for row in reader:
+            ticker, *rest = row
+            values = {
+                headers[i + 1]: _try_convert_number(rest[i])
+                for i in range(len(rest))
+            }
+            data[ticker] = values
+    return data
+
+
+def normalize_header(header: str) -> str:
+    header = header.lower()
+    # remove accents
+    header = ''.join(
+        c for c in unicodedata.normalize('NFKD', header)
+        if not unicodedata.combining(c)
+    )
+    # replace symbols with space
+    header = re.sub(r'[^a-z0-9]+', ' ', header)
+    # trim and replace spaces with underscores
+    return "_".join(header.strip().split())
+
+
+def _try_convert_number(value: str):
+    try:
+        return float(value.replace(".", "").replace(",", "."))
+    except ValueError:
+        return value
