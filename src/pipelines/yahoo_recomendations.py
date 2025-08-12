@@ -1,9 +1,11 @@
-import json, yfinance
-from src.config import output_root
+import json
+import yfinance
+
+from src.common.logs import log
 from src.common.util import mkdir, timestamp
 from src.common.validate_data import validate_schema, input_dir as validate_data_input, valid_data_dir
+from src.config import output_root
 from src.scheduler import Pipeline, line_task, file_task, line_progress
-
 from src.services.proxies import random_proxy
 
 name = 'yahoo_recommendations'
@@ -33,7 +35,7 @@ def call_api(ticker):
         with open(path, 'w') as f:
             json.dump(data, f)
     except Exception as e:
-        return [str(e)]
+        log(str(e), name, ticker)
 
 
 def validate_data(path: str):
