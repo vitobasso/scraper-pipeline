@@ -28,42 +28,53 @@ root_dir = Path(config.output_root)
 
 @app.get("/api/scraped")
 def get_data():
-    chart = yahoo_chart()
-    funds = statusinvest()
-    yahoo_scrape = yahoo_scraped()
-    yahoo_api_rec = yahoo_api_recom()
-    simplywall_data = simplywall()
+    yahoo_chart = get_yahoo_chart()
+    statusinvest = get_statusinvest()
+    yahoo_scraped = get_yahoo_scraped()
+    yahoo_api_rec = get_yahoo_api_recom()
+    tradingview = get_tradingview()
+    simplywall = get_simplywall()
 
-    tickers = set(funds) | set(yahoo_scrape)
+    tickers = set(statusinvest) | set(yahoo_scraped)
     rows = {}
 
     for ticker in tickers:
         rows[ticker] = {
-            **prefix_dict(funds.get(ticker), "statusinvest"),
-            **prefix_dict(simplywall_data.get(ticker), "simplywallst"),
+            **prefix_dict(statusinvest.get(ticker), "statusinvest"),
+            **prefix_dict(simplywall.get(ticker), "simplywallst"),
             **prefix_dict(
-                yahoo_scrape.get(ticker, {}).get("analyst_rating"), "yahoo_rating"
+                yahoo_scraped.get(ticker, {}).get("analyst_rating"), "yahoo_rating"
             ),
             **prefix_dict(
-                yahoo_scrape.get(ticker, {}).get("price_forecast"), "yahoo_forecast"
+                yahoo_scraped.get(ticker, {}).get("price_forecast"), "yahoo_forecast"
+            ),
+            **prefix_dict(
+                tradingview.get(ticker, {}).get("analyst_rating"), "tradingview_rating"
+            ),
+            **prefix_dict(
+                tradingview.get(ticker, {}).get("price_forecast"), "tradingview_forecast"
             ),
             **prefix_dict(yahoo_api_rec.get(ticker), "yahoo_api_rating"),
-            **prefix_dict(chart.get(ticker), "yahoo_chart"),
+            **prefix_dict(yahoo_chart.get(ticker), "yahoo_chart"),
         }
 
     return JSONResponse(rows)
 
 
-def statusinvest():
+def get_statusinvest():
     path = pick_latest_file(root_dir / "statusinvest/data/ready")
-    return load_csv(path)
+    return load_csv_all_tickers(path)
 
 
-def yahoo_scraped():
+def get_yahoo_scraped():
     return extract_json_per_ticker("yahoo/data/ready", lambda d: d)
 
 
-def yahoo_chart():
+def get_tradingview():
+    return extract_json_per_ticker("tradingview/data/ready", lambda d: d)
+
+
+def get_yahoo_chart():
     return extract_json_per_ticker(
         "yahoo_chart/data/ready",
         lambda arr: {
@@ -74,7 +85,7 @@ def yahoo_chart():
     )
 
 
-def yahoo_api_recom():
+def get_yahoo_api_recom():
     return extract_json_per_ticker(
         "yahoo_recommendations/data/ready",
         lambda d: {
@@ -87,7 +98,7 @@ def yahoo_api_recom():
     )
 
 
-def simplywall():
+def get_simplywall():
     return extract_json_per_ticker(
         "simplywall/data/ready",
         lambda d: d.get("data", {}).get("Company", {}).get("score"),
@@ -107,7 +118,7 @@ def extract_json_per_ticker(subpath: str, extract_fn):
     return result
 
 
-def load_csv(path: Path):
+def load_csv_all_tickers(path: Path):
     data = {}
     with path.open(encoding="utf-8") as f:
         reader = csv.reader(f, delimiter=";")
