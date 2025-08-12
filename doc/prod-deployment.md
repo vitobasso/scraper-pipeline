@@ -129,7 +129,12 @@ sudo systemctl start uvicorn
 
 #### 8. Schedule the Scraper periodically
 
-[//]: # (TODO)
+Cronjob to run scraper daily.
+Note: `crontab -l 2` is to include already existing jobs.
+
+```bash
+(echo "0 2 * * * /home/vitobasso/stocks-scraper/.venv/bin/python -m scraper >> /home/vitobasso/scraper.log 2>&1") | crontab -
+```
 
 ## Research
 
@@ -151,6 +156,7 @@ I believe the downside of VM instance would be bad scalability, but we don't hav
 - https://dashboard.render.com/cron/new
 - https://replit.com/ # free trial
 - https://railway.com/ # no longer has free tier
+- http://www.pythonanywhere.com/ # free tier has 500MB storage only
 - https://vercel.com/ # node.js only. has a beta python managed service but can't do long-running job with starage.
 
 ### Domain name
