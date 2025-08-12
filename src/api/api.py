@@ -1,9 +1,12 @@
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pathlib import Path
+import csv
 import json
-from src.pipelines.statusinvest import normalize_data as normalize_statusinvest
+from pathlib import Path
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from src import config
 
 app = FastAPI()
 
@@ -20,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-root_dir = Path("../stocks-scraper/output/20250803")
+root_dir = Path(config.output_root)
 
 
 @app.get("/api/scraped")
@@ -52,8 +55,8 @@ def get_data():
 
 
 def statusinvest():
-    file_path = pick_latest_file(root_dir / "statusinvest/data/ready")
-    return normalize_statusinvest(file_path) if file_path else {}
+    path = pick_latest_file(root_dir / "statusinvest/data/ready")
+    return load_csv(path)
 
 
 def yahoo_scraped():
@@ -102,6 +105,20 @@ def extract_json_per_ticker(subpath: str, extract_fn):
             content = json.load(f)
         result[ticker] = extract_fn(content)
     return result
+
+
+def load_csv(path: Path):
+    data = {}
+    with path.open(encoding="utf-8") as f:
+        reader = csv.reader(f, delimiter=";")
+        headers = next(reader)
+        for row in reader:
+            ticker, *rest = row
+            values = {
+                headers[i + 1]: rest[i] for i in range(len(rest))
+            }
+            data[ticker] = values
+    return data
 
 
 def pick_latest_file(dir_path: Path) -> Path | None:
