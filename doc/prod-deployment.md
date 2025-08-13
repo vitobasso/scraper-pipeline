@@ -72,6 +72,8 @@ Configure Nginx to listen on our domain name and use the certificate.
 
 ```bash
 sudo tee /etc/nginx/sites-enabled/monitor-de-acoes.duckdns.org.conf > /dev/null <<'EOF'
+limit_req_zone $binary_remote_addr zone=one:10m rate=10r/m;
+
 server {
     listen 80;
     server_name monitor-de-acoes.duckdns.org;
@@ -86,6 +88,7 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/monitor-de-acoes.duckdns.org/privkey.pem;
 
     location / {
+        limit_req zone=one burst=5 nodelay;
         proxy_pass http://127.0.0.1:8000;  # your uvicorn app port
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -93,6 +96,8 @@ server {
 }
 EOF
 ```
+
+Remove /etc/nginx/sites-enabled/default to reduce attack surface
 
 #### 6. Restart Nginx and run Uvicorn
 
