@@ -1,5 +1,6 @@
 import json
 import re
+from asyncio import wait_for
 from contextlib import asynccontextmanager
 from typing import Literal
 
@@ -8,7 +9,8 @@ from playwright.async_api import async_playwright, ProxySettings, ViewportSize
 
 from src.config import use_proxies
 
-load_timeout = 60000
+load_timeout = 60000 # millis
+asyncio_timeout = 30 # seconds
 
 
 @asynccontextmanager
@@ -21,9 +23,10 @@ async def new_page(proxy: str):
             proxy=proxy_settings if use_proxies else None,
             args=[
                 '--disable-blink-features=AutomationControlled',
-                '--no-sandbox',
-                # '--disable-dev-shm-usage',
-                # '--disable-web-security',
+                '--no-sandbox', # loosen this security feature to avoid incompatibility with kernel
+                '--disable-gpu', # avoid hanging if chrome attempts graphic acceleration, but it's not available in VM
+                # '--disable-dev-shm-usage', # avoid /dev/shm if short on RAM. use /tmp, i.e. disk, instead
+                # '--disable-web-security', # bypass CORS
                 # '--disable-extensions'
             ]
         )
@@ -76,8 +79,8 @@ async def click_download(file_path: str, page, selector: str, button_text: str):
 
 async def expect_json_response(file_path: str, page, url: str, condition):
     async with page.expect_response(condition) as response_info:
-        await page.goto(url, timeout=load_timeout, wait_until='domcontentloaded')
-    response = await response_info.value
+        await wait_for(page.goto(url, timeout=load_timeout, wait_until='domcontentloaded'), asyncio_timeout)
+    response = await wait_for(response_info.value, asyncio_timeout)
     data = await response.json()
     with open(file_path, 'w') as f:
         json.dump(data, f)
