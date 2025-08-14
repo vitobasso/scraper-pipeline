@@ -138,7 +138,7 @@ Cronjob to run scraper daily.
 Note: `crontab -l 2` is to include already existing jobs.
 
 ```bash
-(echo "0 2 * * * /home/vitobasso/stocks-scraper/.venv/bin/python -m scraper >> /home/vitobasso/scraper.log 2>&1") | crontab -
+(echo "0 2 * * * cd /home/vitobasso/stocks-scraper && .venv/bin/python3 -u -m scraper 2>&1 | tee -a /home/vitobasso/scraper.log") | crontab -
 ```
 
 ## Research
