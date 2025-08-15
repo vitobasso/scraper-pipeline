@@ -22,7 +22,7 @@ class Progress:
     aborted: int
 
     def pending(self):
-        return self.total - self.complete - self.progress - self.aborted
+        return self.total - self.complete - self.aborted
 
 
 @dataclass
@@ -103,6 +103,7 @@ def _completed(output_dir):
             for path in all_files(output_dir) if 'ready' in path]
 
 
+# FIXME also count /data/failed-validation/{ticker}-{timestamp}.json
 def _aborted(output_dir):
     return [Path(path).stem
             for path in all_files(f'{output_dir}/logs') if len(file_lines(path)) >= error_limit]
