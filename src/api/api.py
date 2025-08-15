@@ -2,7 +2,7 @@ import csv
 import json
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -23,17 +23,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-root_dir = Path(config.output_root)
+root_dir = Path("output")
 
 
 @app.get("/api/scraped")
-def get_data():
-    yahoo_chart = get_yahoo_chart()
-    statusinvest = get_statusinvest()
-    yahoo_scraped = get_yahoo_scraped()
-    yahoo_api_rec = get_yahoo_api_recom()
-    tradingview = get_tradingview()
-    simplywall = get_simplywall()
+def list_versions():
+    if not root_dir.exists():
+        return []
+    return sorted([p.name for p in root_dir.iterdir() if p.is_dir()])
+
+
+@app.get("/api/scraped/{version}")
+def get_data(version: str):
+    base_dir = root_dir / version
+    if not base_dir.exists():
+        raise HTTPException(status_code=404)
+    yahoo_chart = get_yahoo_chart(base_dir)
+    statusinvest = get_statusinvest(base_dir)
+    yahoo_scraped = get_yahoo_scraped(base_dir)
+    yahoo_api_rec = get_yahoo_api_recom(base_dir)
+    tradingview = get_tradingview(base_dir)
+    simplywall = get_simplywall(base_dir)
 
     tickers = set(statusinvest) | set(yahoo_scraped)
     rows = {}
@@ -61,22 +71,22 @@ def get_data():
     return JSONResponse(rows)
 
 
-def get_statusinvest():
-    path = pick_latest_file(root_dir / "statusinvest/data/ready")
+def get_statusinvest(base_dir: Path):
+    path = pick_latest_file(base_dir / "statusinvest/data/ready")
     return load_csv_all_tickers(path)
 
 
-def get_yahoo_scraped():
-    return extract_json_per_ticker("yahoo/data/ready", lambda d: d)
+def get_yahoo_scraped(base_dir: Path):
+    return extract_json_per_ticker(base_dir / "yahoo/data/ready", lambda d: d)
 
 
-def get_tradingview():
-    return extract_json_per_ticker("tradingview/data/ready", lambda d: d)
+def get_tradingview(base_dir: Path):
+    return extract_json_per_ticker(base_dir / "tradingview/data/ready", lambda d: d)
 
 
-def get_yahoo_chart():
+def get_yahoo_chart(base_dir: Path):
     return extract_json_per_ticker(
-        "yahoo_chart/data/ready",
+        base_dir / "yahoo_chart/data/ready",
         lambda arr: {
             "1mo": arr[-21:],
             "1y": [v for i, v in enumerate(arr[-252:]) if i % 5 == 0],
@@ -85,9 +95,9 @@ def get_yahoo_chart():
     )
 
 
-def get_yahoo_api_recom():
+def get_yahoo_api_recom(base_dir: Path):
     return extract_json_per_ticker(
-        "yahoo_recommendations/data/ready",
+        base_dir / "yahoo_recommendations/data/ready",
         lambda d: {
             "strongBuy": d.get("strongBuy", {}).get("0"),
             "buy": d.get("buy", {}).get("0"),
@@ -98,16 +108,15 @@ def get_yahoo_api_recom():
     )
 
 
-def get_simplywall():
+def get_simplywall(base_dir: Path):
     return extract_json_per_ticker(
-        "simplywall/data/ready",
+        base_dir / "simplywall/data/ready",
         lambda d: d.get("data", {}).get("Company", {}).get("score"),
     )
 
 
-def extract_json_per_ticker(subpath: str, extract_fn):
-    dir_path = root_dir / subpath
-    if not dir_path.exists():
+def extract_json_per_ticker(dir_path: Path, extract_fn):
+    if not dir_path or not dir_path.exists():
         return {}
     result = {}
     for file in dir_path.iterdir():
