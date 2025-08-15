@@ -119,6 +119,8 @@ def extract_json_per_ticker(subpath: str, extract_fn):
 
 
 def load_csv_all_tickers(path: Path):
+    if not path.exists():
+        return {}
     data = {}
     with path.open(encoding="utf-8") as f:
         reader = csv.reader(f, delimiter=";")
