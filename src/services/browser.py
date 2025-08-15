@@ -9,8 +9,8 @@ from playwright.async_api import async_playwright, ProxySettings, ViewportSize
 
 from src.config import use_proxies
 
-load_timeout = 60000 # millis
-asyncio_timeout = 30 # seconds
+timeout_millis = 60000
+timeout_secs = 60
 
 
 @asynccontextmanager
@@ -58,7 +58,7 @@ async def new_page(proxy: str):
 async def page_goto(proxy: str, url: str,
                     wait_until: Literal['commit', 'domcontentloaded', 'load', 'networkidle'] = 'domcontentloaded'):
     async with new_page(proxy) as page:
-        await page.goto(url, timeout=load_timeout, wait_until=wait_until)
+        await page.goto(url, timeout=timeout_millis, wait_until=wait_until)
         yield page
 
 
@@ -78,9 +78,9 @@ async def click_download(file_path: str, page, selector: str, button_text: str):
 
 
 async def expect_json_response(file_path: str, page, url: str, condition):
-    async with page.expect_response(condition) as response_info:
-        await wait_for(page.goto(url, timeout=load_timeout, wait_until='domcontentloaded'), asyncio_timeout)
-    response = await wait_for(response_info.value, asyncio_timeout)
+    async with page.expect_response(condition, timeout=timeout_millis) as response_info:
+        await wait_for(page.goto(url, timeout=timeout_millis, wait_until='domcontentloaded'), timeout_secs)
+    response = await wait_for(response_info.value, timeout_secs)
     data = await response.json()
     with open(file_path, 'w') as f:
         json.dump(data, f)
