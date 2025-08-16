@@ -45,6 +45,7 @@ async def new_page(proxy: str):
         })
 
         page = await context.new_page()
+        # await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
         try:
             yield page
