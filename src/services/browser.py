@@ -79,9 +79,9 @@ async def click_download(file_path: str, page, selector: str, button_text: str):
 
 async def expect_json_response(file_path: str, page, url: str, condition):
     async with page.expect_response(condition, timeout=timeout_millis) as response_info:
-        await wait_for(page.goto(url, timeout=timeout_millis, wait_until='domcontentloaded'), timeout_secs)
+        await page.goto(url, timeout=timeout_millis, wait_until='domcontentloaded')
     response = await wait_for(response_info.value, timeout_secs)
-    data = await response.json()
+    data = await wait_for(response.json(), timeout_secs)
     with open(file_path, 'w') as f:
         json.dump(data, f)
 
