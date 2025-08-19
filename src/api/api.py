@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from src import config
+from src.api import schemas
 
 app = FastAPI()
 
@@ -27,7 +27,14 @@ root_dir = Path("output")
 
 
 @app.get("/api/scraped")
-def list_versions():
+def get_meta():
+    return {
+        "versions": get_versions(),
+        "schema": schemas.all
+    }
+
+
+def get_versions():
     if not root_dir.exists():
         return []
     return sorted([p.name for p in root_dir.iterdir() if p.is_dir()])
@@ -52,18 +59,10 @@ def get_data(version: str):
         rows[ticker] = {
             **prefix_dict(statusinvest.get(ticker), "statusinvest"),
             **prefix_dict(simplywall.get(ticker), "simplywallst"),
-            **prefix_dict(
-                yahoo_scraped.get(ticker, {}).get("analyst_rating"), "yahoo_rating"
-            ),
-            **prefix_dict(
-                yahoo_scraped.get(ticker, {}).get("price_forecast"), "yahoo_forecast"
-            ),
-            **prefix_dict(
-                tradingview.get(ticker, {}).get("analyst_rating"), "tradingview_rating"
-            ),
-            **prefix_dict(
-                tradingview.get(ticker, {}).get("price_forecast"), "tradingview_forecast"
-            ),
+            **prefix_dict(yahoo_scraped.get(ticker, {}).get("analyst_rating"), "yahoo_rating"),
+            **prefix_dict(yahoo_scraped.get(ticker, {}).get("price_forecast"), "yahoo_forecast"),
+            **prefix_dict(tradingview.get(ticker, {}).get("analyst_rating"), "tradingview_rating"),
+            **prefix_dict(tradingview.get(ticker, {}).get("price_forecast"), "tradingview_forecast"),
             **prefix_dict(yahoo_api_rec.get(ticker), "yahoo_api_rating"),
             **prefix_dict(yahoo_chart.get(ticker), "yahoo_chart"),
         }
