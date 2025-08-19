@@ -137,10 +137,17 @@ def load_csv_all_tickers(path: Path):
         for row in reader:
             ticker, *rest = row
             values = {
-                headers[i + 1]: rest[i] for i in range(len(rest))
+                headers[i + 1]: try_float(rest[i]) for i in range(len(rest))
             }
             data[ticker] = values
     return data
+
+
+def try_float(val):
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return val
 
 
 def pick_latest_file(dir_path: Path) -> Path | None:
