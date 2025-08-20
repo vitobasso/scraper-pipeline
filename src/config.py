@@ -1,7 +1,10 @@
-output_root = "output/20250803"
+output_root = "output/20250820"
+timestamp_format = '%Y%m%dT%H%M%S'
 
 use_proxies = True
+only_requested_tickers = True
 
+refresh_days = 30
 error_limit = 8
 
 

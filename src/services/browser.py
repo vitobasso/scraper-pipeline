@@ -2,6 +2,7 @@ import json
 import re
 from asyncio import wait_for
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Literal
 
 from playwright._impl._errors import TimeoutError, Error as PlaywrightError
@@ -62,13 +63,18 @@ async def page_goto(proxy: str, url: str,
         yield page
 
 
+async def goto(page, url: str,
+               wait_until: Literal['commit', 'domcontentloaded', 'load', 'networkidle'] = 'domcontentloaded'):
+    await page.goto(url, timeout=timeout_millis, wait_until=wait_until)
+
+
 async def click(page, selector: str, button_text: str = '', timeout=None):
     button = page.locator(selector, has_text=button_text)
     await button.wait_for(state="visible", timeout=timeout)
     await button.click()
 
 
-async def click_download(file_path: str, page, selector: str, button_text: str):
+async def click_download(file_path: Path, page, selector: str, button_text: str):
     button = page.locator(selector, has_text=button_text)
     await button.wait_for(state="visible")
     async with page.expect_download() as download_info:
@@ -77,13 +83,12 @@ async def click_download(file_path: str, page, selector: str, button_text: str):
     await download.save_as(file_path)
 
 
-async def expect_json_response(file_path: str, page, url: str, condition):
+async def expect_json_response(page, url: str, condition):
     async with page.expect_response(condition, timeout=timeout_millis) as response_info:
         await page.goto(url, timeout=timeout_millis, wait_until='domcontentloaded')
     response = await wait_for(response_info.value, timeout_secs)
     data = await wait_for(response.json(), timeout_secs)
-    with open(file_path, 'w') as f:
-        json.dump(data, f)
+    return data
 
 
 def common_ancestor(page, texts: list[str]):

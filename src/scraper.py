@@ -11,5 +11,3 @@ if __name__ == '__main__':
     while pending:
         p = random.choice(pending)
         p.run_next() if not p.is_done() else pending.remove(p)
-
-    # statusinvest_carteira_xlsx.import_all()

@@ -1,35 +1,34 @@
 import asyncio
+from pathlib import Path
+
 import pandas
 
-from src.common.logs import log
-from src.common.util import timestamp, mkdir
-from src.common.validate_data import valid_data_dir
-from src.config import output_root
-from src.scheduler import Pipeline, seed_task, seed_progress
+from src.core import paths
+from src.core.logs import log
+from src.core.scheduler import Pipeline
+from src.core.tasks import global_task
+from src.core.util import timestamp
 from src.services.browser import page_goto, error_name
 from src.services.proxies import random_proxy
 
 name = 'fundamentus_fiis'
-output_dir = mkdir(f'{output_root}/{name}')
-completed_dir = valid_data_dir(output_dir)
 
 
 def pipeline():
     return Pipeline(
         name=name,
-        tasks=[seed_task(scrape, completed_dir)],
-        progress=seed_progress(output_dir)
+        tasks=[global_task(name, scrape)],  # TODO normalize, like statusinvest
     )
 
 
 def scrape():
     url = 'https://www.fundamentus.com.br/fii_resultado.php'
-    path = f'{completed_dir}/{timestamp()}.csv'
+    path = paths.stage_dir_for("_global", name, "ready") / f'{timestamp()}.csv'
     proxy = random_proxy()
     asyncio.run(_scrape(proxy, url, path))
 
 
-async def _scrape(proxy: str, url: str, path: str):
+async def _scrape(proxy: str, url: str, path: Path):
     print(f'scraping html, url: {url}, path: {path}, proxy: {proxy}')
     try:
         async with page_goto(proxy, url, wait_until='domcontentloaded') as page:
@@ -41,7 +40,7 @@ async def _scrape(proxy: str, url: str, path: str):
             df = pandas.DataFrame(data, columns=headers)
             df.to_csv(path, index=False)
     except Exception as e:
-        log(error_name(e), name)
+        log(error_name(e), '_global', name)
 
 
 async def _extract_row(row):

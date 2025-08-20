@@ -3,6 +3,7 @@
 ### Install dependencies
 
 #### MacOS
+
 ```
 brew install python3 poetry
 poetry config virtualenvs.in-project true
@@ -11,6 +12,7 @@ playwright install
 ```
 
 #### Debian (GCP VM)
+
 ```
 sudo apt update
 sudo apt install git
@@ -35,16 +37,22 @@ To call Gemini LLM Api and extract data from screenshots.
 Add the `GOOGLE_GENAI_API_KEY` var in the `.env` file at the project root.
 
 ### Input files
+
 - ticker-list
-  - `acoes-br.csv`: one column of tickers, e.g. "bbas3"
-  - `acoes-br-setores.csv`: (optional) one column of sectors, e.g. "Financeiro". Used to order rows in the spreadsheet. 
-  - `fiis-br`: one column of tickers, e.g. "alzr11"
-- statusinvest
-  - `carteira-patrimonio-export.xls`: downloaded from https://statusinvest.com.br/carteira/patrimonio
-- simplywall
-  - `urls.csv`: ticker on column 1, url on column 2
+    - `acoes-br.csv`: one column of tickers, e.g. "bbas3"
+    - `acoes-br-setores.csv`: (optional) one column of sectors, e.g. "Financeiro". Used to order rows in the
+      spreadsheet.
+    - `fiis-br`: one column of tickers, e.g. "alzr11"
 
 ### Running from CLI (no IDE)
+
+#### Migrate DB
+
+Run once to setup `output/.../db.sqlite`
+
+```
+python3 -m src.migrate_db
+```
 
 #### Scraper
 
@@ -52,10 +60,11 @@ To avoid conflicts between project lib and system libs
 
 ```
 source .venv/bin/activate
-python3 -m scraper
+python3 -m src.scraper
 ```
 
 #### Rest API
+
 ```
 source .venv/bin/activate
 uvicorn src.api.api:app --host 0.0.0.0 --port 8000

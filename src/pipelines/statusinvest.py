@@ -1,34 +1,31 @@
 import asyncio
 import csv
-import os
+import json
 import re
+import unicodedata
 from pathlib import Path
 
-import unicodedata
-
-from src.common.logs import log
-from src.common.util import mkdir, timestamp
-from src.common.validate_data import valid_data_dir
-from src.config import output_root
-from src.scheduler import Pipeline, seed_task, seed_progress, file_task
+from src.config import only_requested_tickers
+from src.core import paths
+from src.core.logs import log
+from src.core.scheduler import Pipeline
+from src.core.tasks import global_task, intermediate_task
+from src.core.util import timestamp
 from src.services.browser import page_goto, click, click_download, error_name
 from src.services.proxies import random_proxy
+from src.services.repository import query_all_tickers
 
 name = 'statusinvest'
-output_dir = mkdir(f'{output_root}/{name}')
-awaiting_dir = mkdir(f'{output_dir}/data/awaiting_normalization')
-consumed_dir = mkdir(f'{output_dir}/data/consumed')
-ready_dir = valid_data_dir(output_dir)
+pipe_dir = paths.pipeline_dir("_global", name)
 
 
 def pipeline():
     return Pipeline(
         name=name,
         tasks=[
-            seed_task(sync_download, f'{output_dir}/data'),
-            file_task(normalize_data, awaiting_dir),
+            global_task(name, sync_download),
+            intermediate_task(normalize_data, name, "normalization"),
         ],
-        progress=seed_progress(output_dir)
     )
 
 
@@ -37,47 +34,50 @@ def sync_download():
 
 
 async def download():
-    path = f'{awaiting_dir}/{timestamp()}.csv'
-    proxy = random_proxy()
-    return await _download(proxy, path)
+    path = paths.stage_dir(pipe_dir, "normalization") / f'{timestamp()}.csv'
+    return await _download(random_proxy(), path)
 
 
-async def _download(proxy: str, path: str):
-    print(f'downloading csv, path: {path}, proxy: {proxy}')
+async def _download(proxy: str, path: Path):
+    url = 'https://statusinvest.com.br/acoes/busca-avancada'
+    print(f'downloading csv, url: {url}, path: {path}, proxy: {proxy}')
     try:
-        async with page_goto(proxy, 'https://statusinvest.com.br/acoes/busca-avancada') as page:
+        async with page_goto(proxy, url) as page:
             await click(page, 'button', 'Buscar')
             await click_download(path, page, 'a', 'DOWNLOAD')
     except Exception as e:
-        log(error_name(e), name)
+        log(error_name(e), '_global', name)
 
 
-def normalize_data(path: str):
-    print(f'normalizing csv, path: {path}')
+def normalize_data(path: Path):
+    print(f'normalizing, path: {path}')
     try:
-        input_path = Path(path)
-        ready_path = Path(ready_dir, input_path.name)
-        _normalize_data(input_path, ready_path)
-        consumed_path = Path(consumed_dir) / input_path.name
-        os.rename(str(input_path), str(consumed_path))
+        _normalize_data(path)
+        consumed_path = paths.processed_dir(pipe_dir) / path.name
+        path.rename(consumed_path)
     except Exception as e:
-        log(str(e), name)
+        log(str(e), '_global', name)
 
 
-def _normalize_data(file_path: Path, output_path: Path):
-    with file_path.open(encoding="utf-8") as f:
+def _normalize_data(input_file: Path):
+    requested_tickers = set(query_all_tickers())
+    with input_file.open(encoding="utf-8") as f:
         reader = csv.reader(f, delimiter=";")
         headers = next(reader)
         headers = [_normalize_header(h) for h in headers]
-        rows = []
+
         for row in reader:
             ticker, *rest = row
+            if only_requested_tickers and ticker not in requested_tickers:
+                continue
             values = [_normalize_value(v) for v in rest]
-            rows.append([ticker] + values)
-    with output_path.open("w", encoding="utf-8", newline="") as f_out:
-        writer = csv.writer(f_out, delimiter=";")
-        writer.writerow(headers)
-        writer.writerows(rows)
+            data = dict(zip(headers, [ticker] + values))
+            out_path = paths.stage_dir_for(ticker, name, "ready") / f"{input_file.stem}.json"
+            with out_path.open("w", encoding="utf-8") as out:
+                json.dump(data, out, ensure_ascii=False, indent=2)
+
+    stamp = paths.stage_dir(pipe_dir, "ready") / f"{input_file.stem}.stamp"
+    stamp.touch()
 
 
 def _normalize_header(header: str) -> str:
@@ -94,6 +94,8 @@ def _normalize_header(header: str) -> str:
 
 
 def _normalize_value(value: str):
+    if value.strip() == "":
+        return None
     try:
         return float(value.replace(".", "").replace(",", "."))
     except ValueError:
