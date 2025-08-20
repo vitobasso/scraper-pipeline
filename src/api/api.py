@@ -71,8 +71,7 @@ def get_data(version: str):
 
 
 def get_statusinvest(base_dir: Path):
-    path = pick_latest_file(base_dir / "statusinvest/data/ready")
-    return load_csv_all_tickers(path)
+    return extract_json_per_ticker(base_dir / "statusinvest/data/ready", lambda d: d)
 
 
 def get_yahoo_scraped(base_dir: Path):
@@ -124,36 +123,6 @@ def extract_json_per_ticker(dir_path: Path, extract_fn):
             content = json.load(f)
         result[ticker] = extract_fn(content)
     return result
-
-
-def load_csv_all_tickers(path: Path):
-    if not path or not path.exists():
-        return {}
-    data = {}
-    with path.open(encoding="utf-8") as f:
-        reader = csv.reader(f, delimiter=";")
-        headers = next(reader)
-        for row in reader:
-            ticker, *rest = row
-            values = {
-                headers[i + 1]: try_float(rest[i]) for i in range(len(rest))
-            }
-            data[ticker] = values
-    return data
-
-
-def try_float(val):
-    try:
-        return float(val)
-    except (ValueError, TypeError):
-        return val
-
-
-def pick_latest_file(dir_path: Path) -> Path | None:
-    if not dir_path.exists():
-        return None
-    files = sorted(dir_path.iterdir())
-    return files[-1] if files else None
 
 
 def prefix_dict(d: dict, prefix: str):

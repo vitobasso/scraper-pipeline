@@ -1,11 +1,12 @@
 import asyncio
-from src.config import output_root
-from src.common.util import timestamp, mkdir
-from src.services.proxies import random_proxy
+from pathlib import Path
+
+from src.core import paths
+from src.core.util import timestamp
 from src.services.browser import page_goto, click_download
+from src.services.proxies import random_proxy
 
 name = 'b3idiv'
-output_dir = mkdir(f'{output_root}/{name}')
 
 
 def sync_download():
@@ -13,12 +14,12 @@ def sync_download():
 
 
 async def download():
-    path = f'{output_dir}/downloads/b3idiv-{timestamp()}.csv'
+    path = paths.stage_dir_for("_global", name, "normalization") / f'{timestamp()}.csv'
     proxy = random_proxy()
     print(f'downloading csv, path: {path}, proxy: {proxy}')
     return await _download(proxy, path)
 
 
-async def _download(proxy: str, path: str):
+async def _download(proxy: str, path: Path):
     async with page_goto(proxy, 'https://sistemaswebb3-listados.b3.com.br/indexPage/day/IDIV') as page:
         await click_download(path, page, 'a', 'Download')
