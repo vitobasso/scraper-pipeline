@@ -1,5 +1,4 @@
-import re
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 
 from src.config import timestamp_format
@@ -10,10 +9,6 @@ def mkdir(path: Path):
     return path
 
 
-def all_files(dir_path: Path):
-    return [f for f in dir_path.rglob('*') if f.is_file()]
-
-
 def last_file(dir_path: Path) -> Path | None:
     if not dir_path.exists():
         return None
@@ -21,21 +16,19 @@ def last_file(dir_path: Path) -> Path | None:
     return max(files) if files else None
 
 
-def file_lines(path: Path):
-    with open(path, 'r') as file:
-        return [line.strip() for line in file.readlines()]
-
-
-def filename_before_timestamp(file: Path):
-    search = re.search(r'.*/(.*)[~-]', str(file))
-    return search.group(1) if search else None
+def date_from_filename(file: Path) -> date:
+    return datetime_from(file.stem).date()
 
 
 def datetime_from_filename(file: Path) -> datetime:
-    return to_datetime(file.stem)
+    return datetime_from(file.stem)
 
 
-def to_datetime(timestamp_str: str):
+def date_from(timestamp_str: str) -> date:
+    return datetime_from(timestamp_str).date()
+
+
+def datetime_from(timestamp_str: str):
     return datetime.strptime(timestamp_str, timestamp_format)
 
 

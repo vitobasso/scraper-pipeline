@@ -1,6 +1,7 @@
-from src.core.screenshot import ss_common_ancestor
-from src.core.tasks import validate_json, extract_json, source_task
+from src.core import normalization
 from src.core.scheduler import Pipeline
+from src.core.screenshot import ss_common_ancestor
+from src.core.tasks import validate_json, extract_json, source_task, normalize_json
 
 name = 'tipranks'
 
@@ -12,6 +13,7 @@ def pipeline():
             source_task(name, screenshot),
             extract_json(name, prompt),
             validate_json(name, schema),
+            normalize_json(name, normalize),
         ]
     )
 
@@ -32,7 +34,6 @@ prompt = f"""
        - max (aka high)
     """
 
-
 schema = {
     'analyst_rating': {
         'buy': int,
@@ -45,3 +46,8 @@ schema = {
         'max': float,
     }
 }
+
+normalize = normalization.rename_keys({
+    "price_forecast": "forecast",
+    "analyst_rating": "rating",
+})

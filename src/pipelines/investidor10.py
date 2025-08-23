@@ -1,6 +1,7 @@
+from src.core import normalization
 from src.core.scheduler import Pipeline
 from src.core.screenshot import ss_full_page
-from src.core.tasks import validate_json, extract_json, source_task
+from src.core.tasks import validate_json, extract_json, source_task, normalize_json
 
 name = 'investidor10'
 
@@ -12,6 +13,7 @@ def pipeline():
             source_task(name, screenshot),
             extract_json(name, prompt),
             validate_json(name, schema),
+            normalize_json(name, normalize),
         ],
     )
 
@@ -36,3 +38,12 @@ schema = {
         'segmento': str,
     }
 }
+
+normalize = normalization.rename_keys({
+    "indicadores_fundamentalistas": "fundamentos",
+    "dados_sobre_a_empresa": "cadastral",
+    "informacoes_sobre_a_empresa": "financeiro",
+    "rentabilidade": "rent",
+    "rentabilidade_nominal": "nominal",
+    "rentabilidade_real": "real",
+})

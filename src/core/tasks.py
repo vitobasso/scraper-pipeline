@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Callable
 
-from src.core import progress, validation, extraction
+from src.core import progress, validation, extraction, normalization
 from src.core.scheduler import Task
 from src.services.repository import query_all_tickers
 
@@ -37,7 +37,7 @@ def extract_json(pipeline: str, prompt: str, next_stage: str = "validation") -> 
     return intermediate_task(execute, pipeline, "extraction")
 
 
-def validate_json(pipeline: str, arg, next_stage: str = "ready") -> Task:
+def validate_json(pipeline: str, arg, next_stage: str = "normalization") -> Task:
     if isinstance(arg, dict):
         return _validate_json_schema(pipeline, arg, next_stage)
     elif callable(arg):
@@ -54,3 +54,8 @@ def _validate_json_schema(pipeline: str, schema, next_stage: str) -> Task:
 def _validate_json_callable(pipeline: str, validator: Callable[[str], list], next_stage: str) -> Task:
     execute = lambda path: validation.validate_json(path, validator, next_stage)
     return intermediate_task(execute, pipeline, "validation")
+
+
+def normalize_json(pipeline: str, function: Callable, next_stage: str = "ready") -> Task:
+    execute = lambda path: normalization.normalize_json(path, function, next_stage)
+    return intermediate_task(execute, pipeline, "normalization")

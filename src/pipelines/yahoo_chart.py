@@ -5,7 +5,7 @@ import yfinance
 from src.core import paths
 from src.core.logs import log
 from src.core.scheduler import Pipeline
-from src.core.tasks import validate_json, source_task
+from src.core.tasks import validate_json, source_task, normalize_json
 from src.core.util import timestamp
 from src.services.proxies import random_proxy
 
@@ -17,7 +17,8 @@ def pipeline():
         name=name,
         tasks=[
             source_task(name, call_api),
-            validate_json(name, validator),
+            validate_json(name, validator, "normalization"),
+            normalize_json(name, normalize),
         ],
     )
 
@@ -36,3 +37,9 @@ def call_api(ticker):
 
 
 validator = lambda data: ["array is empty"] if not data else []
+
+normalize = lambda raw: {
+    "1mo": raw[-21:],
+    "1y": [v for i, v in enumerate(raw[-252:]) if i % 5 == 0],
+    "5y": [v for i, v in enumerate(raw) if i % 20 == 0],
+}

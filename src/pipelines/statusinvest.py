@@ -24,7 +24,7 @@ def pipeline():
         name=name,
         tasks=[
             global_task(name, sync_download),
-            intermediate_task(normalize_data, name, "normalization"),
+            intermediate_task(normalize, name, "normalization"),
         ],
     )
 
@@ -49,17 +49,18 @@ async def _download(proxy: str, path: Path):
         log(error_name(e), '_global', name)
 
 
-def normalize_data(path: Path):
+def normalize(path: Path):
     print(f'normalizing, path: {path}')
     try:
-        _normalize_data(path)
-        consumed_path = paths.processed_dir(pipe_dir) / path.name
-        path.rename(consumed_path)
+        _normalize(path)
+        output, _, processed = paths.split_files(path, "normalization", "ready", "stamp")
+        path.rename(processed)
+        output.touch()
     except Exception as e:
         log(str(e), '_global', name)
 
 
-def _normalize_data(input_file: Path):
+def _normalize(input_file: Path):
     requested_tickers = set(query_all_tickers())
     with input_file.open(encoding="utf-8") as f:
         reader = csv.reader(f, delimiter=";")
@@ -72,12 +73,10 @@ def _normalize_data(input_file: Path):
                 continue
             values = [_normalize_value(v) for v in rest]
             data = dict(zip(headers, [ticker] + values))
+
             out_path = paths.stage_dir_for(ticker, name, "ready") / f"{input_file.stem}.json"
             with out_path.open("w", encoding="utf-8") as out:
                 json.dump(data, out, ensure_ascii=False, indent=2)
-
-    stamp = paths.stage_dir(pipe_dir, "ready") / f"{input_file.stem}.stamp"
-    stamp.touch()
 
 
 def _normalize_header(header: str) -> str:

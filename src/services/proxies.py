@@ -50,11 +50,11 @@ def _load_list(path: Path):
 
 def _download_list():
     timestamp = datetime.datetime.now().strftime(config.timestamp_format)
-    download_url = config.proxies_url
-    name = _extract_name(download_url)
+    url = config.proxies_url
+    name = _extract_name(url)
     path = list_dir / f'proxify-{name}-{timestamp}.txt'
-    print(f'downloading proxy list, url: {download_url}, path: {path}')
-    urllib.request.urlretrieve(download_url, path)
+    print(f'downloading proxy list, url: {url}, path: {path}')
+    urllib.request.urlretrieve(url, path)
 
 
 def _extract_name(path):
