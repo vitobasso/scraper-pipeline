@@ -2,10 +2,11 @@ import asyncio
 import re
 from pathlib import Path
 
+from src.core import normalization
 from src.core.logs import log
 from src.core.scheduler import Pipeline
 from src.core.screenshot import output_path
-from src.core.tasks import extract_json, validate_json, source_task
+from src.core.tasks import extract_json, validate_json, source_task, normalize_json
 from src.services.browser import page_goto, click, error_name
 from src.services.proxies import random_proxy
 
@@ -19,6 +20,7 @@ def pipeline():
             source_task(name, screenshot),
             extract_json(name, prompt),
             validate_json(name, schema),
+            normalize_json(name, normalize),
         ],
     )
 
@@ -93,3 +95,10 @@ schema = {
         'max': float,
     }
 }
+
+normalize = normalization.rename_keys({
+    "price_forecast": "forecast",
+    "analyst_rating": "rating",
+    "underperform": "sell",
+    "sell": "strong_sell",
+})

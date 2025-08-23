@@ -57,6 +57,15 @@ def processed_dir(pipe_dir: Path):
     return mkdir(pipe_dir / "debug" / "processed")
 
 
+def split_files(input_path: Path, current_stage: str, next_stage: str, out_ext: str | None = None) -> List[Path]:
+    pipe_dir = pipeline_dir_for(input_path)
+    output_file = f'{input_path.stem}.{out_ext}' if out_ext else input_path.name
+    output = stage_dir(pipe_dir, next_stage) / output_file
+    failed = failed_dir(pipe_dir, current_stage) / input_path.name
+    processed = processed_dir(pipe_dir) / input_path.name
+    return [output, failed, processed]
+
+
 def latest_file(ticker: str, pipeline: str, stage: str) -> Path | None:
     stage = stage_dir(pipeline_dir(ticker, pipeline), stage)
     files = [f for f in stage.glob("*") if f.is_file()]

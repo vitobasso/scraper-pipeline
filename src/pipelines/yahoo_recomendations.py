@@ -5,7 +5,7 @@ import yfinance
 from src.core import paths
 from src.core.logs import log
 from src.core.scheduler import Pipeline
-from src.core.tasks import validate_json, source_task
+from src.core.tasks import validate_json, source_task, normalize_json
 from src.core.util import timestamp
 from src.services.proxies import random_proxy
 
@@ -18,6 +18,7 @@ def pipeline():
         tasks=[
             source_task(name, call_api),
             validate_json(name, schema),
+            normalize_json(name, normalize),
         ],
     )
 
@@ -54,4 +55,12 @@ schema = {
     "strongSell": {
         "0": int,
     }
+}
+
+normalize = lambda raw: {
+    "strong_buy": raw.get("strongBuy", {}).get("0"),
+    "buy": raw.get("buy", {}).get("0"),
+    "hold": raw.get("hold", {}).get("0"),
+    "sell": raw.get("sell", {}).get("0"),
+    "strong_sell": raw.get("strongSell", {}).get("0"),
 }

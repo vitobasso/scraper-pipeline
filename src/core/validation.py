@@ -1,5 +1,4 @@
 import json
-import os
 import re
 from pathlib import Path
 from typing import Callable
@@ -13,15 +12,14 @@ def validate_schema(path: Path, schema: dict, next_stage: str):
 
 
 def validate_json(path: Path, validator: Callable[[str], list], next_stage: str):
-    pipe_dir = paths.pipeline_dir_for(path)
     if _is_extraction_error(path):
-        failed_path = paths.failed_dir(pipe_dir, "extraction") / path.name
-        path.rename(failed_path)
+        _, failed, _ = paths.split_files(path, "extraction", next_stage)
+        path.rename(failed)
     else:
         errors = _validate_json(path, validator)
-        dest_dir = paths.failed_dir(pipe_dir, "validation") if errors else paths.stage_dir(pipe_dir, next_stage)
-        dest_path = dest_dir / path.name
-        os.rename(path, dest_path)
+        output, failed, _ = paths.split_files(path, "validation", next_stage)
+        dest_path = failed if errors else output
+        path.rename(dest_path)
         if errors:
             _append_errors(dest_path, errors)
 

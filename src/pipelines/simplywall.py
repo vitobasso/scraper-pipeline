@@ -5,13 +5,12 @@ from pathlib import Path
 from src.core import paths
 from src.core.logs import log
 from src.core.scheduler import Pipeline
-from src.core.tasks import source_task
+from src.core.tasks import source_task, validate_json, normalize_json
 from src.core.util import timestamp
 from src.services import browser
 from src.services.proxies import random_proxy
 
 name = 'simplywall'
-urls_path = Path('input/simplywall/urls.csv')
 
 
 def pipeline():
@@ -19,14 +18,15 @@ def pipeline():
         name=name,
         tasks=[
             source_task(name, scrape),
-            # validate_json(name, schema),
+            normalize_json(name, normalize, "validation"),
+            validate_json(name, schema, "ready"),
         ],
     )
 
 
 def scrape(ticker):
     url = f"https://simplywall.st/stock/bovespa/{ticker.lower()}"
-    path = paths.stage_dir_for(ticker, name, "ready") / f'{timestamp()}.json'  # TODO send to waiting/validation
+    path = paths.stage_dir_for(ticker, name, "normalization") / f'{timestamp()}.json'
     proxy = random_proxy()
     asyncio.run(_scrape(proxy, url, path, ticker))
 
@@ -55,14 +55,12 @@ async def _intercept_company_summary(page, url: str, path: Path):
         json.dump(data, f)
 
 
-# TODO data/Company/data
-schema = [
-    {
-        'ticker': str,
-        'value': int,
-        'future': int,
-        'past': int,
-        'health': int,
-        'dividend': int,
-    }
-]
+normalize = lambda raw: raw.get("data", {}).get("Company", {}).get("score")
+
+schema = {
+    'value': int,
+    'future': int,
+    'past': int,
+    'health': int,
+    'dividend': int,
+}

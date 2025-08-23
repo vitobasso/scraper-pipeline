@@ -1,12 +1,13 @@
-import csv
 import json
+from datetime import timedelta, date
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
-from src.api import schemas
+from src import config
+from src.api import schema
+from src.core import util
 
 app = FastAPI()
 
@@ -23,109 +24,73 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-root_dir = Path("output")
+root_dir = Path(config.output_root)
 
 
-@app.get("/api/scraped")
+@app.get("/schema")
 def get_meta():
     return {
-        "versions": get_versions(),
-        "schema": schemas.all
+        "schema": schema.all
     }
 
 
-def get_versions():
-    if not root_dir.exists():
-        return []
-    return sorted([p.name for p in root_dir.iterdir() if p.is_dir()])
+def default_start(end: date = None):
+    return (end or date.today()) - timedelta(days=30)
 
 
-@app.get("/api/scraped/{version}")
-def get_data(version: str):
-    base_dir = root_dir / version
-    if not base_dir.exists():
-        raise HTTPException(status_code=404)
-    yahoo_chart = get_yahoo_chart(base_dir)
-    statusinvest = get_statusinvest(base_dir)
-    yahoo_scraped = get_yahoo_scraped(base_dir)
-    yahoo_api_rec = get_yahoo_api_recom(base_dir)
-    tradingview = get_tradingview(base_dir)
-    simplywall = get_simplywall(base_dir)
-
-    tickers = set(statusinvest) | set(yahoo_scraped)
-    rows = {}
-
-    for ticker in tickers:
-        rows[ticker] = {
-            **prefix_dict(statusinvest.get(ticker), "statusinvest"),
-            **prefix_dict(simplywall.get(ticker), "simplywallst"),
-            **prefix_dict(yahoo_scraped.get(ticker, {}).get("analyst_rating"), "yahoo_rating"),
-            **prefix_dict(yahoo_scraped.get(ticker, {}).get("price_forecast"), "yahoo_forecast"),
-            **prefix_dict(tradingview.get(ticker, {}).get("analyst_rating"), "tradingview_rating"),
-            **prefix_dict(tradingview.get(ticker, {}).get("price_forecast"), "tradingview_forecast"),
-            **prefix_dict(yahoo_api_rec.get(ticker), "yahoo_api_rating"),
-            **prefix_dict(yahoo_chart.get(ticker), "yahoo_chart"),
-        }
-
-    return JSONResponse(rows)
+@app.get("/data")
+def get_data(
+        tickers: str = Query(..., description="Comma-separated tickers"),
+        start: date = Query(default_factory=default_start, description="Start of date range"),
+        end: date = Query(date.today(), description="End of the date range"),
+):
+    results = {}
+    for ticker in tickers.split(","):
+        ticker_data = _get_ticker_data(ticker, start, end)
+        if ticker_data:
+            results[ticker] = ticker_data
+    return results
 
 
-def get_statusinvest(base_dir: Path):
-    return extract_json_per_ticker(base_dir / "statusinvest/data/ready", lambda d: d)
+def _get_ticker_data(ticker: str, start: date, end: date):
+    ticker_path = root_dir / ticker
+    if not ticker_path.exists():
+        return None
+    pipelines = {}
+    for pipeline_dir in ticker_path.iterdir():
+        pipeline_data = _get_pipeline_data(pipeline_dir, start, end)
+        if pipeline_data:
+            pipelines[pipeline_dir.name] = pipeline_data
+    if not pipelines:
+        return None
+    return _flatten(pipelines)
 
 
-def get_yahoo_scraped(base_dir: Path):
-    return extract_json_per_ticker(base_dir / "yahoo/data/ready", lambda d: d)
+def _get_pipeline_data(pipeline_dir: Path, start: date, end: date):
+    ready_dir = pipeline_dir / "ready"
+    if not ready_dir.exists():
+        return None
+    file = _select_file(ready_dir, start, end)
+    if not file:
+        return None
+    with file.open(encoding="utf-8") as f:
+        return json.load(f)
 
 
-def get_tradingview(base_dir: Path):
-    return extract_json_per_ticker(base_dir / "tradingview/data/ready", lambda d: d)
+def _select_file(ready_dir: Path, start: date, end: date):
+    candidates = [
+        f for f in ready_dir.glob("*.json")
+        if start <= util.date_from_filename(f) <= end
+    ]
+    return max(candidates, key=util.date_from_filename) if candidates else None
 
 
-def get_yahoo_chart(base_dir: Path):
-    return extract_json_per_ticker(
-        base_dir / "yahoo_chart/data/ready",
-        lambda arr: {
-            "1mo": arr[-21:],
-            "1y": [v for i, v in enumerate(arr[-252:]) if i % 5 == 0],
-            "5y": [v for i, v in enumerate(arr) if i % 20 == 0],
-        },
-    )
-
-
-def get_yahoo_api_recom(base_dir: Path):
-    return extract_json_per_ticker(
-        base_dir / "yahoo_recommendations/data/ready",
-        lambda d: {
-            "strongBuy": d.get("strongBuy", {}).get("0"),
-            "buy": d.get("buy", {}).get("0"),
-            "hold": d.get("hold", {}).get("0"),
-            "sell": d.get("sell", {}).get("0"),
-            "strongSell": d.get("strongSell", {}).get("0"),
-        },
-    )
-
-
-def get_simplywall(base_dir: Path):
-    return extract_json_per_ticker(
-        base_dir / "simplywall/data/ready",
-        lambda d: d.get("data", {}).get("Company", {}).get("score"),
-    )
-
-
-def extract_json_per_ticker(dir_path: Path, extract_fn):
-    if not dir_path or not dir_path.exists():
-        return {}
-    result = {}
-    for file in dir_path.iterdir():
-        ticker = file.name.split("-")[0].upper()
-        with file.open(encoding="utf-8") as f:
-            content = json.load(f)
-        result[ticker] = extract_fn(content)
-    return result
-
-
-def prefix_dict(d: dict, prefix: str):
-    if not d:
-        return {}
-    return {f"{prefix}.{k}": v for k, v in d.items()}
+def _flatten(d, parent_key=""):
+    items = {}
+    for k, v in d.items():
+        new_key = f"{parent_key}.{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.update(_flatten(v, new_key))
+        else:
+            items[new_key] = v
+    return items
