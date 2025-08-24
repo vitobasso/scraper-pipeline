@@ -3,13 +3,13 @@ from typing import Callable
 
 from src.core import progress, validation, extraction, normalization
 from src.core.scheduler import Task
-from src.services.repository import query_all_tickers
+from src.services.repository import query_tickers
 
 
 def source_task(pipeline: str, execute: Callable[[str], any]) -> Task:
     return Task(
-        find_input=lambda: progress.progress(pipeline, set(query_all_tickers())).available(),
-        progress=lambda: progress.progress(pipeline, set(query_all_tickers())),
+        find_input=lambda: progress.progress(pipeline, set(query_tickers())).available(),
+        progress=lambda: progress.progress(pipeline, set(query_tickers())),
         execute=execute,
     )
 
