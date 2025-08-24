@@ -7,7 +7,7 @@ from src.core import paths
 from src.core.logs import timestamp_from_log
 from src.core.scheduler import Progress, Pipeline
 from src.core.util import datetime_from_filename
-from src.services.repository import query_all_tickers
+from src.services.repository import query_tickers
 
 
 def progress(pipeline: str, input_domain: Set[str]) -> Progress:
@@ -22,7 +22,7 @@ def progress(pipeline: str, input_domain: Set[str]) -> Progress:
 def intermediate_input(pipeline: str, stage: str) -> Set[Path]:
     return {
         file
-        for ticker in query_all_tickers() + ["_global"]
+        for ticker in query_tickers() + ["_global"]
         for file in paths.waiting_files(ticker, pipeline, stage)
     }
 
@@ -32,8 +32,12 @@ def has_recent_files(ticker: str, pipeline: str, stage: str) -> bool:
     return latest and datetime_from_filename(latest) > datetime.now() - timedelta(days=config.refresh_days)
 
 
-def _count_total_recent_failures(ticker, pipeline: str) -> int:
+def _count_total_recent_failures(ticker: str, pipeline: str) -> int:
     return _count_recent_failed_files(ticker, pipeline) + _count_recent_error_logs(ticker, pipeline)
+
+
+def should_abort(ticker: str, pipeline: str) -> bool:
+    return _count_total_recent_failures(ticker, pipeline) >= config.error_limit
 
 
 def _count_recent_failed_files(ticker: str, pipeline: str) -> int:
@@ -74,6 +78,6 @@ def _ready(pipeline: str, all_tickers: Set[str]) -> Set[str]:
 def _aborted(pipeline: str, all_tickers: Set[str]) -> Set[str]:
     return {
         ticker for ticker in all_tickers
-        if _count_total_recent_failures(ticker, pipeline) >= config.error_limit
+        if should_abort(ticker, pipeline)
     }
 

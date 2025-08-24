@@ -81,12 +81,12 @@ def waiting_files(ticker: str, pipeline: str, stage: str) -> List[Path]:
 
 def has_waiting_files(ticker: str, pipeline: str) -> bool:
     waiting = pipeline_dir(ticker, pipeline) / "waiting"
-    return any(f.is_file() for f in waiting.glob("**/*"))
+    return any(f.is_file() for f in waiting.rglob("*"))
 
 
 def failed_files(ticker: str, pipeline: str) -> List[Path]:
-    failed = pipeline_dir(ticker, pipeline) / "failed"
-    return failed.glob("*") if failed.exists() else []
+    failed = pipeline_dir(ticker, pipeline) / "debug" / "failed"
+    return [f for f in failed.rglob("*") if f.is_file()] if failed.exists() else []
 
 
 def errors_log(pipeline, ticker):

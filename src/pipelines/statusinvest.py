@@ -13,7 +13,7 @@ from src.core.tasks import global_task, intermediate_task
 from src.core.util import timestamp
 from src.services.browser import page_goto, click, click_download, error_name
 from src.services.proxies import random_proxy
-from src.services.repository import query_all_tickers
+from src.services.repository import query_tickers
 
 name = 'statusinvest'
 pipe_dir = paths.pipeline_dir("_global", name)
@@ -61,7 +61,7 @@ def normalize(path: Path):
 
 
 def _normalize(input_file: Path):
-    requested_tickers = set(query_all_tickers())
+    requested_tickers = set(query_tickers())
     with input_file.open(encoding="utf-8") as f:
         reader = csv.reader(f, delimiter=";")
         headers = next(reader)

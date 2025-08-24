@@ -10,7 +10,8 @@ cache = dict()
 
 def log(msg: str, ticker: str, pipeline: str):
     logger = _get_logger(ticker, pipeline)
-    logger.error(f'{timestamp()}: {msg}')
+    safe_msg = msg.strip().replace("\n", "\\n")
+    logger.error(f'{timestamp()}: {safe_msg}')
 
 
 def timestamp_from_log(log_line: str):

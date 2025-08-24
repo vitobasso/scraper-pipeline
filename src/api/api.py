@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src import config
 from src.api import schema
 from src.core import util
+from src.services import repository, ipc_signal
 
 app = FastAPI()
 
@@ -44,8 +45,15 @@ def get_data(
         start: date = Query(default_factory=default_start, description="Start of date range"),
         end: date = Query(date.today(), description="End of the date range"),
 ):
+    tickers_list = tickers.split(",")
+    repository.upsert_tickers(tickers_list)
+    ipc_signal.wake_scraper()
+    return _load_data(tickers_list, start, end)
+
+
+def _load_data(tickers, start, end):
     results = {}
-    for ticker in tickers.split(","):
+    for ticker in tickers:
         ticker_data = _get_ticker_data(ticker, start, end)
         if ticker_data:
             results[ticker] = ticker_data
