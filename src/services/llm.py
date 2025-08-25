@@ -1,19 +1,17 @@
-import os, google.generativeai as genai
+import os
+from functools import cache
+
+import google.generativeai as genai
 from dotenv import load_dotenv
+
 from src.config import visual_llm_model as model_name
 
-_model = None
 
-
+@cache
 def llm():
-    if not _model:
-        _init()
-    return _model
-
-
-def _init():
     load_dotenv()
-    api_key = os.getenv('GOOGLE_GENAI_API_KEY')
+    api_key = os.getenv("GOOGLE_GENAI_API_KEY")
+    if not api_key:
+        raise ValueError("GOOGLE_GENAI_API_KEY not found")
     genai.configure(api_key=api_key)
-    global _model
-    _model = genai.GenerativeModel(model_name)
+    return genai.GenerativeModel(model_name)

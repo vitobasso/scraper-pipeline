@@ -30,6 +30,7 @@ prompt = f"""
     5. informações sobre a empresa
     
     All keys should be lower_snake_case in portuguese without special characters.
+    Replace "/" with "_". E.g.: "P/L" becomes "p_l"
     """
 
 schema = {

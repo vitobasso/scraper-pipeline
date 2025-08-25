@@ -9,7 +9,8 @@ from src.core.logs import log
 def normalize_json(input_path: Path, function: Callable, next_stage: str):
     print(f'normalizing, path: {input_path}')
     try:
-        data = _extract(input_path, function)
+        with input_path.open(encoding="utf-8") as f:
+            data = function(json.load(f))
         output, _, processed = paths.split_files(input_path, "normalization", next_stage)
         with output.open(mode="w", encoding="utf-8") as f:
             json.dump(data, f)
@@ -17,12 +18,6 @@ def normalize_json(input_path: Path, function: Callable, next_stage: str):
     except Exception as e:
         ticker, pipeline = paths.extract_ticker_pipeline(input_path)
         log(str(e), ticker, pipeline)
-
-
-def _extract(input_path: Path, function: Callable):
-    with input_path.open(encoding="utf-8") as f:
-        raw = json.load(f)
-        return function(raw)
 
 
 def rename_keys(rename_dict):

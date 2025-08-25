@@ -8,7 +8,7 @@ _pipes = [
     tradingview,
     yahoo,
     yahoo_chart,
-    yahoo_recomendations,
+    yahoo_recommendations,
 ]
 
 pipes = [p.pipeline() for p in _pipes]

@@ -31,18 +31,26 @@ def extract(image_path: Path, prompt: str, next_stage: str):
     print(f'extracting data, path: {image_path}')
     output, failed, processed = paths.split_files(image_path, this_stage, next_stage, "json")
     try:
-        image = Image.open(image_path)
-        response = llm().generate_content([prompt, image])
-        with output.open(mode="w", encoding="utf-8") as f:
-            f.write(response.text)
-        image_path.rename(processed) if config.keep_debug_images else image_path.unlink()
+        with Image.open(image_path) as image:
+            response = llm().generate_content([prompt, image])
+            with output.open(mode="w", encoding="utf-8") as f:
+                f.write(response.text)
+        discard(image_path, processed)
     except Exception as e:
         ticker, pipeline = extract_ticker_pipeline(image_path)
         log(str(e), ticker, pipeline)
-        image_path.rename(failed) if config.keep_debug_images else (image_path.unlink() and failed.with_stem("stamp").touch())
+        discard(image_path, failed)
 
 
 def ask(prompt: str, output_path: Path):
     response = llm().generate_content(prompt)
     with open(output_path, "w") as file:
         file.write(response.text)
+
+
+def discard(input_path, dest_path):
+    if config.keep_debug_images:
+        input_path.rename(dest_path)
+    else:
+        input_path.unlink()
+        dest_path.with_stem("stamp").touch()

@@ -8,5 +8,5 @@ __all__ = [
     "tradingview",
     "yahoo",
     "yahoo_chart",
-    "yahoo_recomendations",
+    "yahoo_recommendations",
 ]
