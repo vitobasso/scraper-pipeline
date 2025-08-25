@@ -11,8 +11,12 @@ refresh_seconds = 2 * 60 * 60
 _proxies = None
 
 
-def random_proxy():
-    return random.choice(_init()) if config.use_proxies else None
+def random_proxy(pipeline):
+    return random.choice(_init()) if _is_enabled_for(pipeline) else None
+
+
+def _is_enabled_for(pipeline):
+    return config.use_proxies_for_pipeline.get(pipeline, config.use_proxies)
 
 
 def _init():

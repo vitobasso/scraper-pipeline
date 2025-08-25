@@ -24,7 +24,7 @@ def pipeline():
 
 
 def call_api(ticker):
-    proxy = random_proxy()
+    proxy = random_proxy(name)
     path = paths.stage_dir_for(ticker, name, "validation") / f'{timestamp()}.json'
     print(f'scraping, path: {path}, proxy: {proxy}')
     try:

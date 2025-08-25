@@ -15,7 +15,7 @@ def sync_download():
 
 async def download():
     path = paths.stage_dir_for("_global", name, "normalization") / f'{timestamp()}.csv'
-    proxy = random_proxy()
+    proxy = random_proxy(name)
     print(f'downloading csv, path: {path}, proxy: {proxy}')
     return await _download(proxy, path)
 

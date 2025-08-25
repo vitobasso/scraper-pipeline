@@ -12,12 +12,12 @@ after_load_timeout = 0
 
 def ss_full_page(ticker: str, pipeline: str, url: str):
     path = output_path(ticker, pipeline)
-    asyncio.run(_screenshot_full_page(random_proxy(), url, path, pipeline, ticker))
+    asyncio.run(_screenshot_full_page(random_proxy(pipeline), url, path, pipeline, ticker))
 
 
 def ss_common_ancestor(ticker: str, pipeline: str, url: str, texts):
     path = output_path(ticker, pipeline)
-    asyncio.run(_screenshot_common_ancestor(random_proxy(), url, texts, path, pipeline, ticker))
+    asyncio.run(_screenshot_common_ancestor(random_proxy(pipeline), url, texts, path, pipeline, ticker))
 
 
 def output_path(ticker: str, pipeline: str):
