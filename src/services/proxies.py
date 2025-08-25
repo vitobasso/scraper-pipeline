@@ -49,13 +49,24 @@ def _load_list(path: Path):
 
 
 def _download_list():
+    for url in config.proxy_urls:
+        path = _file_path(url)
+        print(f'downloading proxy list, url: {url}, path: {path}')
+        if data := _download_url(url):
+            path.write_bytes(data)
+            break
+
+
+def _download_url(url: str):
+    with urllib.request.urlopen(url) as r:
+        return r.read()
+
+
+def _file_path(url: str) -> Path:
     timestamp = datetime.datetime.now().strftime(config.timestamp_format)
-    url = config.proxies_url
-    name = _extract_name(url)
-    path = list_dir / f'proxify-{name}-{timestamp}.txt'
-    print(f'downloading proxy list, url: {url}, path: {path}')
-    urllib.request.urlretrieve(url, path)
+    name = _name_from_url(url)
+    return list_dir / f'proxify-{name}-{timestamp}.txt'
 
 
-def _extract_name(path):
+def _name_from_url(path):
     return re.search('/(\\w+)/data.txt', path).group(1)
