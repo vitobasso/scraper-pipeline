@@ -1,6 +1,7 @@
 import json
 from datetime import timedelta, date
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,23 +36,21 @@ def get_meta():
     }
 
 
-def default_start(end: date = None):
-    return (end or date.today()) - timedelta(days=30)
-
-
 @app.get("/data")
 def get_data(
         tickers: str = Query(..., description="Comma-separated tickers"),
-        start: date = Query(default_factory=default_start, description="Start of date range"),
-        end: date = Query(date.today(), description="End of the date range"),
-):
+        start: date | None = Query(None, description="Start of date range"),
+        end: date | None = Query(None, description="End of date range"),
+) -> dict[str, Any]:
+    end = end or date.today()
+    start = start or end - timedelta(days=30)
     tickers_list = tickers.split(",")
     repository.upsert_tickers(tickers_list)
     ipc_signal.wake_scraper()
     return _load_data(tickers_list, start, end)
 
 
-def _load_data(tickers, start, end):
+def _load_data(tickers, start, end) -> dict[str, Any]:
     results = {}
     for ticker in tickers:
         ticker_data = _get_ticker_data(ticker, start, end)
@@ -60,7 +59,7 @@ def _load_data(tickers, start, end):
     return results
 
 
-def _get_ticker_data(ticker: str, start: date, end: date):
+def _get_ticker_data(ticker: str, start: date, end: date) -> dict[str, Any] | None:
     ticker_path = root_dir / ticker
     if not ticker_path.exists():
         return None
@@ -85,7 +84,7 @@ def _get_pipeline_data(pipeline_dir: Path, start: date, end: date):
         return json.load(f)
 
 
-def _select_file(ready_dir: Path, start: date, end: date):
+def _select_file(ready_dir: Path, start: date, end: date) -> Path | None:
     candidates = [
         f for f in ready_dir.glob("*.json")
         if start <= util.date_from_filename(f) <= end
@@ -93,7 +92,7 @@ def _select_file(ready_dir: Path, start: date, end: date):
     return max(candidates, key=util.date_from_filename) if candidates else None
 
 
-def _flatten(d, parent_key=""):
+def _flatten(d, parent_key="") -> dict[str, Any]:
     items = {}
     for k, v in d.items():
         new_key = f"{parent_key}.{k}" if parent_key else k

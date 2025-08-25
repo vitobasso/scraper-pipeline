@@ -1,17 +1,14 @@
-import json
 import re
 from asyncio import wait_for
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 
-from playwright._impl._errors import TimeoutError, Error as PlaywrightError
-from playwright.async_api import async_playwright, ProxySettings, ViewportSize
-
-from src.config import use_proxies
+from playwright.async_api import async_playwright, ProxySettings, ViewportSize, TimeoutError, Error
 
 timeout_millis = 60000
-timeout_secs = 60
+timeout_secs = timeout_millis // 1000
+WaitUntil = Literal['commit', 'domcontentloaded', 'load', 'networkidle']
 
 
 @asynccontextmanager
@@ -24,8 +21,8 @@ async def new_page(proxy: str):
             proxy=proxy_settings,
             args=[
                 '--disable-blink-features=AutomationControlled',
-                '--no-sandbox', # loosen this security feature to avoid incompatibility with kernel
-                '--disable-gpu', # avoid hanging if chrome attempts graphic acceleration, but it's not available in VM
+                '--no-sandbox',  # loosen this security feature to avoid incompatibility with kernel
+                '--disable-gpu',  # avoid hanging if chrome attempts graphic acceleration, but it's not available in VM
                 # '--disable-dev-shm-usage', # avoid /dev/shm if short on RAM. use /tmp, i.e. disk, instead
                 # '--disable-web-security', # bypass CORS
                 # '--disable-extensions'
@@ -49,22 +46,18 @@ async def new_page(proxy: str):
 
         try:
             yield page
-        except Exception:
-            raise
         finally:
             await browser.close()
 
 
 @asynccontextmanager
-async def page_goto(proxy: str, url: str,
-                    wait_until: Literal['commit', 'domcontentloaded', 'load', 'networkidle'] = 'domcontentloaded'):
+async def page_goto(proxy: str, url: str, wait_until: WaitUntil = 'domcontentloaded'):
     async with new_page(proxy) as page:
         await page.goto(url, timeout=timeout_millis, wait_until=wait_until)
         yield page
 
 
-async def goto(page, url: str,
-               wait_until: Literal['commit', 'domcontentloaded', 'load', 'networkidle'] = 'domcontentloaded'):
+async def goto(page, url: str, wait_until: WaitUntil = 'domcontentloaded'):
     await page.goto(url, timeout=timeout_millis, wait_until=wait_until)
 
 
@@ -96,14 +89,14 @@ def common_ancestor(page, texts: list[str]):
     return page.locator(f"""xpath=//*[{children}]""").last
 
 
-def _xpath_contains(text: str):
+def _xpath_contains(text: str) -> str:
     return f".//text()[contains(., '{text}')]"
 
 
-def error_name(e: Exception):
+def error_name(e: Exception) -> str:
     if isinstance(e, TimeoutError):
         return type(e).__name__
-    if isinstance(e, PlaywrightError):
+    if isinstance(e, Error):
         match = re.search(r'ERR_\w+', str(e))
         return match.group(0) if match else str(e)
     else:
