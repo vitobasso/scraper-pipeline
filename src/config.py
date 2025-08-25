@@ -17,7 +17,7 @@ timestamp_format = '%Y%m%dT%H%M%S'
 
 output_root = env_str("CONFIG_OUTPUT_ROOT", "output")
 
-use_proxies = env_bool("CONFIG_USE_PROXIES", "false")
+use_proxies = env_bool("CONFIG_USE_PROXIES", "false") #TODO allow override per pipeline because satusinvest & simplywall seem to block the VM
 
 # if True, global pipelines will throw away non-requested tickers
 only_requested_tickers = env_bool("CONFIG_ONLY_REQUESTED_TICKERS", "false")
@@ -34,9 +34,13 @@ error_limit = 8
 
 # external dependencies
 
-proxies_url = "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks4/data.txt"
-# proxies_url = "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks5/data.txt"
-# proxies_url = "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries/US/data.txt"
+proxy_urls = [
+    "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks4/data.txt",
+    "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks5/data.txt",
+    "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries/US/data.txt",
+    "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/http/data.txt",
+    "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/all/data.txt",
+]
 
 # visual_llm_model = "gemini-1.5-flash"
 # visual_llm_model = "gemini-2.0-flash-lite" # tradingview and tipranks work
