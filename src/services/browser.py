@@ -17,11 +17,11 @@ timeout_secs = 60
 @asynccontextmanager
 async def new_page(proxy: str):
     async with async_playwright() as playwright:
-        proxy_settings: ProxySettings = {'server': f'{proxy}'}
+        proxy_settings: ProxySettings | None = {'server': f'{proxy}'} if proxy else None
 
         browser = await playwright.chromium.launch(
             headless=True,
-            proxy=proxy_settings if use_proxies else None,
+            proxy=proxy_settings,
             args=[
                 '--disable-blink-features=AutomationControlled',
                 '--no-sandbox', # loosen this security feature to avoid incompatibility with kernel

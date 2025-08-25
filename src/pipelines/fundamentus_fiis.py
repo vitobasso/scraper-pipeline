@@ -24,7 +24,7 @@ def pipeline():
 def scrape():
     url = 'https://www.fundamentus.com.br/fii_resultado.php'
     path = paths.stage_dir_for("_global", name, "ready") / f'{timestamp()}.csv'
-    proxy = random_proxy()
+    proxy = random_proxy(name)
     asyncio.run(_scrape(proxy, url, path))
 
 

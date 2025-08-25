@@ -29,7 +29,7 @@ def screenshot(ticker: str):
     url_ticker = f'{ticker}.sa' if re.match(r'\w{4}\d\d?', ticker) else ticker
     url = f'https://finance.yahoo.com/quote/{url_ticker}/analysis'
     path = output_path(ticker, name)
-    asyncio.run(_screenshot(random_proxy(), url, path, ticker))
+    asyncio.run(_screenshot(random_proxy(name), url, path, ticker))
 
 
 async def _screenshot(proxy: str, url: str, path: Path, ticker: str):
