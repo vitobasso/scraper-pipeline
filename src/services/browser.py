@@ -4,43 +4,50 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 
-from playwright.async_api import async_playwright, ProxySettings, ViewportSize, TimeoutError, Error
+from playwright.async_api import Error, ProxySettings, TimeoutError, ViewportSize, async_playwright
 
 timeout_millis = 60000
 timeout_secs = timeout_millis // 1000
-WaitUntil = Literal['commit', 'domcontentloaded', 'load', 'networkidle']
+WaitUntil = Literal["commit", "domcontentloaded", "load", "networkidle"]
 
 
 @asynccontextmanager
 async def new_page(proxy: str):
     async with async_playwright() as playwright:
-        proxy_settings: ProxySettings | None = {'server': f'{proxy}'} if proxy else None
+        proxy_settings: ProxySettings | None = {"server": f"{proxy}"} if proxy else None
 
         browser = await playwright.chromium.launch(
             headless=True,
             proxy=proxy_settings,
             args=[
-                '--disable-blink-features=AutomationControlled',
-                '--no-sandbox',  # loosen this security feature to avoid incompatibility with kernel
-                '--disable-gpu',  # avoid hanging if chrome attempts graphic acceleration, but it's not available in VM
+                "--disable-blink-features=AutomationControlled",
+                "--no-sandbox",  # loosen this security feature to avoid incompatibility with kernel
+                "--disable-gpu",  # avoid hanging if chrome attempts graphic acceleration, but it's not available in VM
                 # '--disable-dev-shm-usage', # avoid /dev/shm if short on RAM. use /tmp, i.e. disk, instead
                 # '--disable-web-security', # bypass CORS
                 # '--disable-extensions'
-            ]
+            ],
         )
 
-        viewport: ViewportSize = {'width': 1280, 'height': 720}
+        viewport: ViewportSize = {"width": 1280, "height": 720}
         context = await browser.new_context(
-            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/91.0.4472.124 "
+                "Safari/537.36"
+            ),
             viewport=viewport,
             ignore_https_errors=True,  # avoids ERR_CERT_AUTHORITY_INVALID, risks getting data tampered by MIM
             bypass_csp=True,
         )
 
-        await context.set_extra_http_headers({
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://www.google.com/'
-        })
+        await context.set_extra_http_headers(
+            {
+                "Accept-Language": "en-US,en;q=0.9",
+                "Referer": "https://www.google.com/",
+            }
+        )
 
         page = await context.new_page()
 
@@ -51,17 +58,17 @@ async def new_page(proxy: str):
 
 
 @asynccontextmanager
-async def page_goto(proxy: str, url: str, wait_until: WaitUntil = 'domcontentloaded'):
+async def page_goto(proxy: str, url: str, wait_until: WaitUntil = "domcontentloaded"):
     async with new_page(proxy) as page:
         await page.goto(url, timeout=timeout_millis, wait_until=wait_until)
         yield page
 
 
-async def goto(page, url: str, wait_until: WaitUntil = 'domcontentloaded'):
+async def goto(page, url: str, wait_until: WaitUntil = "domcontentloaded"):
     await page.goto(url, timeout=timeout_millis, wait_until=wait_until)
 
 
-async def click(page, selector: str, button_text: str = '', timeout=None):
+async def click(page, selector: str, button_text: str = "", timeout=None):
     button = page.locator(selector, has_text=button_text)
     await button.wait_for(state="visible", timeout=timeout)
     await button.click()
@@ -78,14 +85,14 @@ async def click_download(file_path: Path, page, selector: str, button_text: str)
 
 async def expect_json_response(page, url: str, condition):
     async with page.expect_response(condition, timeout=timeout_millis) as response_info:
-        await page.goto(url, timeout=timeout_millis, wait_until='domcontentloaded')
+        await page.goto(url, timeout=timeout_millis, wait_until="domcontentloaded")
     response = await wait_for(response_info.value, timeout_secs)
     data = await wait_for(response.json(), timeout_secs)
     return data
 
 
 def common_ancestor(page, texts: list[str]):
-    children = ' and '.join([_xpath_contains(text) for text in texts])
+    children = " and ".join([_xpath_contains(text) for text in texts])
     return page.locator(f"""xpath=//*[{children}]""").last
 
 
@@ -97,7 +104,7 @@ def error_name(e: Exception) -> str:
     if isinstance(e, TimeoutError):
         return type(e).__name__
     if isinstance(e, Error):
-        match = re.search(r'ERR_\w+', str(e))
+        match = re.search(r"ERR_\w+", str(e))
         return match.group(0) if match else str(e)
     else:
         return str(e)

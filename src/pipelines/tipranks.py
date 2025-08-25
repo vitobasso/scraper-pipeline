@@ -1,9 +1,9 @@
 from src.core import normalization
 from src.core.scheduler import Pipeline
 from src.core.screenshot import ss_common_ancestor
-from src.core.tasks import validate_json, extract_json, source_task, normalize_json
+from src.core.tasks import extract_json, normalize_json, source_task, validate_json
 
-name = 'tipranks'
+name = "tipranks"
 
 
 def pipeline():
@@ -14,16 +14,17 @@ def pipeline():
             extract_json(name, prompt),
             validate_json(name, schema),
             normalize_json(name, normalize),
-        ]
+        ],
     )
 
 
 def screenshot(ticker: str):
-    ss_common_ancestor(ticker, name, f'https://www.tipranks.com/stocks/{ticker}/forecast',
-                       ['Month Forecast', 'Analyst Ratings'])
+    ss_common_ancestor(
+        ticker, name, f"https://www.tipranks.com/stocks/{ticker}/forecast", ["Month Forecast", "Analyst Ratings"]
+    )
 
 
-prompt = f"""
+prompt = """
     1. analyst_rating (int values):
        - buy
        - hold
@@ -35,19 +36,21 @@ prompt = f"""
     """
 
 schema = {
-    'analyst_rating': {
-        'buy': int,
-        'hold': int,
-        'sell': int,
+    "analyst_rating": {
+        "buy": int,
+        "hold": int,
+        "sell": int,
     },
-    'price_forecast': {
-        'min': float,
-        'avg': float,
-        'max': float,
-    }
+    "price_forecast": {
+        "min": float,
+        "avg": float,
+        "max": float,
+    },
 }
 
-normalize = normalization.rename_keys({
-    "price_forecast": "forecast",
-    "analyst_rating": "rating",
-})
+normalize = normalization.rename_keys(
+    {
+        "price_forecast": "forecast",
+        "analyst_rating": "rating",
+    }
+)

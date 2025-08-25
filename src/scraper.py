@@ -1,11 +1,10 @@
 import random
 
-from src.active_pipes import pipes
-
 from src import config
+from src.active_pipes import pipes
 from src.services import ipc_signal
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     config.print_me()
 
     while True:

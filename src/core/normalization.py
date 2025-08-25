@@ -1,13 +1,13 @@
 import json
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from src.core import paths
 from src.core.logs import log
 
 
 def normalize_json(input_path: Path, function: Callable, next_stage: str):
-    print(f'normalizing, path: {input_path}')
+    print(f"normalizing, path: {input_path}")
     try:
         with input_path.open(encoding="utf-8") as f:
             data = function(json.load(f))

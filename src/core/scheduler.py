@@ -1,20 +1,20 @@
 import random
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, List, Set
 
 
 @dataclass
 class Progress:
-    full_domain: Set[str]
-    ready: Set[str]
-    waiting: Set[str]
-    aborted: Set[str]
+    full_domain: set[str]
+    ready: set[str]
+    waiting: set[str]
+    aborted: set[str]
 
-    def available(self) -> Set[str]:
+    def available(self) -> set[str]:
         return self.full_domain - self.waiting - self.ready - self.aborted
 
-    def pending(self) -> Set[str]:
+    def pending(self) -> set[str]:
         return self.full_domain - self.ready - self.aborted
 
     def is_done(self) -> bool:
@@ -23,7 +23,7 @@ class Progress:
 
 @dataclass
 class Task:
-    find_input: Callable[[], Set[str | Path] | bool]
+    find_input: Callable[[], set[str | Path] | bool]
     progress: Callable[[], Progress] | None
     execute: Callable
 
@@ -31,7 +31,7 @@ class Task:
 @dataclass
 class Pipeline:
     name: str
-    tasks: List[Task]
+    tasks: list[Task]
 
     def run_next(self):
         for task in self.tasks[::-1]:

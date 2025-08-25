@@ -1,7 +1,7 @@
 import json
 import re
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from src.core import paths
 
@@ -27,7 +27,7 @@ def validate_json(path: Path, validator: Callable[[str], list], next_stage: str)
 def _is_extraction_error(path: Path):
     with open(path) as f:
         first_line = f.readline()
-        return re.search(r'^\w', first_line) and not re.search(r'[{}]', first_line)
+        return re.search(r"^\w", first_line) and not re.search(r"[{}]", first_line)
 
 
 def _validate_json(path: Path, validator: Callable[[str], list]):
@@ -38,10 +38,8 @@ def _validate_json(path: Path, validator: Callable[[str], list]):
         return [str(e)]
 
 
-def _validate_dict(data, schema, path: str = '') -> list:
-    return [error
-            for key, rule in schema.items()
-            for error in _validate_field(data, key, rule, path)]
+def _validate_dict(data, schema, path: str = "") -> list:
+    return [error for key, rule in schema.items() for error in _validate_field(data, key, rule, path)]
 
 
 def _validate_field(data, key: str, rule, parent_path: str) -> list:
@@ -56,18 +54,19 @@ def _validate_field(data, key: str, rule, parent_path: str) -> list:
 
 def _validate_type(actual, expected, path: str):
     if isinstance(expected, dict):
-        return _validate_dict(actual, expected, path) if isinstance(actual, dict) \
-            else [_invalid_type(actual, dict, path)]
+        return (
+            _validate_dict(actual, expected, path) if isinstance(actual, dict) else [_invalid_type(actual, dict, path)]
+        )
     else:
         return [] if isinstance(actual, expected) else [_invalid_type(actual, expected, path)]
 
 
 def _invalid_type(actual, expected, path: str):
-    actual_type = 'null' if actual is None else type(actual).__name__
+    actual_type = "null" if actual is None else type(actual).__name__
     return f"{path}: expected {expected.__name__}, got {actual_type}"
 
 
 def _append_errors(path: Path, errors):
     with open(path, "a") as f:
-        f.write('\n\n')
+        f.write("\n\n")
         f.writelines([e + "\n" for e in errors])

@@ -1,11 +1,17 @@
-import os, sys, time, datetime, random, re, urllib.request
+import datetime
+import os
+import random
+import re
+import sys
+import time
+import urllib.request
 from pathlib import Path
 
 from src import config
 from src.core import util
 from src.core.util import mkdir
 
-list_dir = mkdir(Path(config.output_root) / '_proxy-list')
+list_dir = mkdir(Path(config.output_root) / "_proxy-list")
 refresh_seconds = 2 * 60 * 60
 
 _proxies = None
@@ -30,7 +36,7 @@ def _refresh():
     if not _validate_latest_file():
         _download_list()
     if not _validate_latest_file():
-        print('failed to download proxy lists', file=sys.stderr)
+        print("failed to download proxy lists", file=sys.stderr)
         sys.exit(1)
     file = util.last_file(list_dir)
     return _load_list(file)
@@ -55,7 +61,7 @@ def _load_list(path: Path):
 def _download_list():
     for url in config.proxy_urls:
         path = _file_path(url)
-        print(f'downloading proxy list, url: {url}, path: {path}')
+        print(f"downloading proxy list, url: {url}, path: {path}")
         if data := _download_url(url):
             path.write_bytes(data)
             break
@@ -69,8 +75,8 @@ def _download_url(url: str):
 def _file_path(url: str) -> Path:
     timestamp = datetime.datetime.now().strftime(config.timestamp_format)
     name = _name_from_url(url)
-    return list_dir / f'proxify-{name}-{timestamp}.txt'
+    return list_dir / f"proxify-{name}-{timestamp}.txt"
 
 
 def _name_from_url(path):
-    return re.search('/(\\w+)/data.txt', path).group(1)
+    return re.search("/(\\w+)/data.txt", path).group(1)

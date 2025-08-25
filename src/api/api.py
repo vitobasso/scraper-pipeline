@@ -1,5 +1,5 @@
 import json
-from datetime import timedelta, date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src import config
 from src.api import schema
 from src.core import util
-from src.services import repository, ipc_signal
+from src.services import ipc_signal, repository
 
 app = FastAPI()
 
@@ -26,28 +26,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+optional = Query(None)
+
 root_dir = Path(config.output_root)
 
 
 @app.get("/schema")
 def get_meta():
-    return {
-        "schema": schema.all
-    }
+    return {"schema": schema.all}
 
 
 @app.get("/data")
 def get_data(
-        tickers: str = Query(..., description="Comma-separated tickers"),
-        start: date | None = Query(None, description="Start of date range"),
-        end: date | None = Query(None, description="End of date range"),
+    tickers: str,
+    start: date | None = optional,
+    end: date | None = optional,
 ) -> dict[str, Any]:
     end = end or date.today()
     start = start or end - timedelta(days=30)
-    tickers_list = tickers.split(",")
-    repository.upsert_tickers(tickers_list)
+    tickers = tickers.split(",")
+    repository.upsert_tickers(tickers)
     ipc_signal.wake_scraper()
-    return _load_data(tickers_list, start, end)
+    return _load_data(tickers, start, end)
 
 
 def _load_data(tickers, start, end) -> dict[str, Any]:
@@ -85,10 +85,7 @@ def _get_pipeline_data(pipeline_dir: Path, start: date, end: date):
 
 
 def _select_file(ready_dir: Path, start: date, end: date) -> Path | None:
-    candidates = [
-        f for f in ready_dir.glob("*.json")
-        if start <= util.date_from_filename(f) <= end
-    ]
+    candidates = [f for f in ready_dir.glob("*.json") if start <= util.date_from_filename(f) <= end]
     return max(candidates, key=util.date_from_filename) if candidates else None
 
 

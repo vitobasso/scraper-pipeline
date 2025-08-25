@@ -1,16 +1,15 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Set
 
 from src import config
 from src.core import paths
 from src.core.logs import timestamp_from_log
-from src.core.scheduler import Progress, Pipeline
+from src.core.scheduler import Progress
 from src.core.util import datetime_from_filename
 from src.services.repository import query_tickers
 
 
-def progress(pipeline: str, input_domain: Set[str]) -> Progress:
+def progress(pipeline: str, input_domain: set[str]) -> Progress:
     return Progress(
         full_domain=input_domain,
         ready=_ready(pipeline, input_domain),
@@ -19,12 +18,8 @@ def progress(pipeline: str, input_domain: Set[str]) -> Progress:
     )
 
 
-def intermediate_input(pipeline: str, stage: str) -> Set[Path]:
-    return {
-        file
-        for ticker in query_tickers() + ["_global"]
-        for file in paths.waiting_files(ticker, pipeline, stage)
-    }
+def intermediate_input(pipeline: str, stage: str) -> set[Path]:
+    return {file for ticker in query_tickers() + ["_global"] for file in paths.waiting_files(ticker, pipeline, stage)}
 
 
 def has_recent_files(ticker: str, pipeline: str, stage: str) -> bool:
@@ -42,11 +37,7 @@ def should_abort(ticker: str, pipeline: str) -> bool:
 
 def _count_recent_failed_files(ticker: str, pipeline: str) -> int:
     cutoff = datetime.now() - timedelta(days=config.refresh_days)
-    return sum(
-        1
-        for file in paths.failed_files(ticker, pipeline)
-        if datetime_from_filename(file) > cutoff
-    )
+    return sum(1 for file in paths.failed_files(ticker, pipeline) if datetime_from_filename(file) > cutoff)
 
 
 def _count_recent_error_logs(ticker: str, pipeline: str) -> int:
@@ -55,29 +46,16 @@ def _count_recent_error_logs(ticker: str, pipeline: str) -> int:
         return 0
     cutoff = datetime.now() - timedelta(days=config.refresh_days)
     with errors.open() as file:
-        return sum(
-            1 for line in file
-            if timestamp_from_log(line) > cutoff
-        )
+        return sum(1 for line in file if timestamp_from_log(line) > cutoff)
 
 
-def _waiting(pipeline: str, all_tickers: Set[str]) -> Set[str]:
-    return {
-        ticker for ticker in all_tickers
-        if paths.has_waiting_files(ticker, pipeline)
-    }
+def _waiting(pipeline: str, all_tickers: set[str]) -> set[str]:
+    return {ticker for ticker in all_tickers if paths.has_waiting_files(ticker, pipeline)}
 
 
-def _ready(pipeline: str, all_tickers: Set[str]) -> Set[str]:
-    return {
-        ticker for ticker in all_tickers
-        if has_recent_files(ticker, pipeline, "ready")
-    }
+def _ready(pipeline: str, all_tickers: set[str]) -> set[str]:
+    return {ticker for ticker in all_tickers if has_recent_files(ticker, pipeline, "ready")}
 
 
-def _aborted(pipeline: str, all_tickers: Set[str]) -> Set[str]:
-    return {
-        ticker for ticker in all_tickers
-        if should_abort(ticker, pipeline)
-    }
-
+def _aborted(pipeline: str, all_tickers: set[str]) -> set[str]:
+    return {ticker for ticker in all_tickers if should_abort(ticker, pipeline)}

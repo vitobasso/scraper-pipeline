@@ -1,9 +1,9 @@
 from src.core import normalization
 from src.core.scheduler import Pipeline
 from src.core.screenshot import ss_common_ancestor
-from src.core.tasks import validate_json, extract_json, source_task, normalize_json
+from src.core.tasks import extract_json, normalize_json, source_task, validate_json
 
-name = 'tradingview'
+name = "tradingview"
 
 
 def pipeline():
@@ -19,11 +19,12 @@ def pipeline():
 
 
 def screenshot(ticker: str):
-    ss_common_ancestor(ticker, name, f'https://tradingview.com/symbols/{ticker}/forecast',
-                       ['Price target', 'Analyst rating'])
+    ss_common_ancestor(
+        ticker, name, f"https://tradingview.com/symbols/{ticker}/forecast", ["Price target", "Analyst rating"]
+    )
 
 
-prompt = f"""
+prompt = """
     1. analyst_rating (int values):
        - strong_buy
        - buy
@@ -37,21 +38,23 @@ prompt = f"""
     """
 
 schema = {
-    'analyst_rating': {
-        'strong_buy': int,
-        'buy': int,
-        'hold': int,
-        'sell': int,
-        'strong_sell': int,
+    "analyst_rating": {
+        "strong_buy": int,
+        "buy": int,
+        "hold": int,
+        "sell": int,
+        "strong_sell": int,
     },
-    'price_forecast': {
-        'min': float,
-        'avg': float,
-        'max': float,
-    }
+    "price_forecast": {
+        "min": float,
+        "avg": float,
+        "max": float,
+    },
 }
 
-normalize = normalization.rename_keys({
-    "price_forecast": "forecast",
-    "analyst_rating": "rating",
-})
+normalize = normalization.rename_keys(
+    {
+        "price_forecast": "forecast",
+        "analyst_rating": "rating",
+    }
+)

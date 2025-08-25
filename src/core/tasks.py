@@ -1,7 +1,7 @@
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
-from src.core import progress, validation, extraction, normalization
+from src.core import extraction, normalization, progress, validation
 from src.core.scheduler import Task
 from src.services.repository import query_tickers
 
@@ -17,7 +17,7 @@ def source_task(pipeline: str, execute: Callable[[str], any]) -> Task:
 def intermediate_task(execute: Callable[[Path], any], pipeline: str, stage: str) -> Task:
     return Task(
         find_input=lambda: progress.intermediate_input(pipeline, stage),
-        progress=None, # pipeline progress is based on the source task
+        progress=None,  # pipeline progress is based on the source task
         execute=execute,
     )
 

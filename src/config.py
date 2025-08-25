@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def env_str(name: str, default: str) -> str:
     return os.environ.get(name, default)
 
@@ -13,7 +14,7 @@ def env_bool(name: str, default: str) -> bool:
     return os.environ.get(name, default).lower() in ("1", "true", "yes")
 
 
-timestamp_format = '%Y%m%dT%H%M%S'
+timestamp_format = "%Y%m%dT%H%M%S"
 
 output_root = env_str("CONFIG_OUTPUT_ROOT", "output")
 
