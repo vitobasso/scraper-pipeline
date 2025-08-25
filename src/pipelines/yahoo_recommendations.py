@@ -5,11 +5,11 @@ import yfinance
 from src.core import paths
 from src.core.logs import log
 from src.core.scheduler import Pipeline
-from src.core.tasks import validate_json, source_task, normalize_json
+from src.core.tasks import normalize_json, source_task, validate_json
 from src.core.util import timestamp
 from src.services.proxies import random_proxy
 
-name = 'yahoo_recommendations'
+name = "yahoo_recommendations"
 
 
 def pipeline():
@@ -25,12 +25,12 @@ def pipeline():
 
 def call_api(ticker):
     proxy = random_proxy(name)
-    path = paths.stage_dir_for(ticker, name, "validation") / f'{timestamp()}.json'
-    print(f'scraping, path: {path}, proxy: {proxy}')
+    path = paths.stage_dir_for(ticker, name, "validation") / f"{timestamp()}.json"
+    print(f"scraping, path: {path}, proxy: {proxy}")
     try:
-        ticker_obj = yfinance.Ticker(f'{ticker}.SA')
+        ticker_obj = yfinance.Ticker(f"{ticker}.SA")
         data = ticker_obj.get_recommendations(proxy=proxy).to_dict()
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(data, f)
     except Exception as e:
         log(str(e), ticker, name)
@@ -54,7 +54,7 @@ schema = {
     },
     "strongSell": {
         "0": int,
-    }
+    },
 }
 
 normalize = lambda raw: {

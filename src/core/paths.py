@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 from src.config import output_root
 from src.core.util import mkdir
@@ -21,7 +20,7 @@ Path structure per ticker and pipeline:
                 normalization/
             processed/
             errors.log
-        
+
 - waiting: input for intermediate pipeline stages
 - ready: final output, ready to be consumed via api
 - debug: can be discarded or optionally kept for debug purposes
@@ -57,9 +56,9 @@ def processed_dir(pipe_dir: Path):
     return mkdir(pipe_dir / "debug" / "processed")
 
 
-def split_files(input_path: Path, current_stage: str, next_stage: str, out_ext: str | None = None) -> List[Path]:
+def split_files(input_path: Path, current_stage: str, next_stage: str, out_ext: str | None = None) -> list[Path]:
     pipe_dir = pipeline_dir_for(input_path)
-    output_file = f'{input_path.stem}.{out_ext}' if out_ext else input_path.name
+    output_file = f"{input_path.stem}.{out_ext}" if out_ext else input_path.name
     output = stage_dir(pipe_dir, next_stage) / output_file
     failed = failed_dir(pipe_dir, current_stage) / input_path.name
     processed = processed_dir(pipe_dir) / input_path.name
@@ -74,7 +73,7 @@ def latest_file(ticker: str, pipeline: str, stage: str) -> Path | None:
     return max(files, key=lambda f: f.stem)
 
 
-def waiting_files(ticker: str, pipeline: str, stage: str) -> List[Path]:
+def waiting_files(ticker: str, pipeline: str, stage: str) -> list[Path]:
     stage = pipeline_dir(ticker, pipeline) / "waiting" / stage
     return stage.glob("*") if stage.exists() else []
 
@@ -84,7 +83,7 @@ def has_waiting_files(ticker: str, pipeline: str) -> bool:
     return any(f.is_file() for f in waiting.rglob("*"))
 
 
-def failed_files(ticker: str, pipeline: str) -> List[Path]:
+def failed_files(ticker: str, pipeline: str) -> list[Path]:
     failed = pipeline_dir(ticker, pipeline) / "debug" / "failed"
     return [f for f in failed.rglob("*") if f.is_file()] if failed.exists() else []
 

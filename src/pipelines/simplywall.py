@@ -5,12 +5,12 @@ from pathlib import Path
 from src.core import paths
 from src.core.logs import log
 from src.core.scheduler import Pipeline
-from src.core.tasks import source_task, validate_json, normalize_json
+from src.core.tasks import normalize_json, source_task, validate_json
 from src.core.util import timestamp
 from src.services import browser
 from src.services.proxies import random_proxy
 
-name = 'simplywall'
+name = "simplywall"
 
 
 def pipeline():
@@ -26,13 +26,13 @@ def pipeline():
 
 def scrape(ticker):
     url = f"https://simplywall.st/stock/bovespa/{ticker.lower()}"
-    path = paths.stage_dir_for(ticker, name, "normalization") / f'{timestamp()}.json'
+    path = paths.stage_dir_for(ticker, name, "normalization") / f"{timestamp()}.json"
     proxy = random_proxy(name)
     asyncio.run(_scrape(proxy, url, path, ticker))
 
 
 async def _scrape(proxy: str, url: str, path: Path, ticker: str):
-    print(f'scraping json, url: {url}, path: {path}, proxy: {proxy}')
+    print(f"scraping json, url: {url}, path: {path}, proxy: {proxy}")
     try:
         async with browser.new_page(proxy) as page:
             analysis_path = await _extract_href(page, url)
@@ -51,16 +51,16 @@ async def _extract_href(page, url) -> str:
 async def _intercept_company_summary(page, url: str, path: Path):
     match_request = lambda r: "/graphql" in r.url and "CompanySummary" in (r.request.post_data or "")
     data = await browser.expect_json_response(page, url, match_request)
-    with open(path, 'w') as f:
+    with open(path, "w") as f:
         json.dump(data, f)
 
 
 normalize = lambda raw: raw.get("data", {}).get("Company", {}).get("score")
 
 schema = {
-    'value': int,
-    'future': int,
-    'past': int,
-    'health': int,
-    'dividend': int,
+    "value": int,
+    "future": int,
+    "past": int,
+    "health": int,
+    "dividend": int,
 }

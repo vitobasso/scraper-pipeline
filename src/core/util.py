@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from pathlib import Path
 
 from src.config import timestamp_format

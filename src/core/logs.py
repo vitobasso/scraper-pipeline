@@ -11,7 +11,7 @@ cache = dict()
 def log(msg: str, ticker: str, pipeline: str):
     logger = _get_logger(ticker, pipeline)
     safe_msg = msg.strip().replace("\n", "\\n")
-    logger.error(f'{timestamp()}: {safe_msg}')
+    logger.error(f"{timestamp()}: {safe_msg}")
 
 
 def timestamp_from_log(log_line: str):
@@ -20,7 +20,7 @@ def timestamp_from_log(log_line: str):
 
 
 def _get_logger(ticker: str, pipeline: str):
-    name = f'{ticker}-{pipeline}'
+    name = f"{ticker}-{pipeline}"
     if name in cache:
         return cache[name]
     cache[name] = _create_logger(ticker, pipeline)
@@ -28,11 +28,10 @@ def _get_logger(ticker: str, pipeline: str):
 
 
 def _create_logger(ticker: str, pipeline: str):
-    name = f'{ticker}-{pipeline}'
+    name = f"{ticker}-{pipeline}"
     path = errors_log(pipeline, ticker)
     path.parent.mkdir(parents=True, exist_ok=True)
     handler = logging.FileHandler(path)
     logger = logging.getLogger(name)
     logger.addHandler(handler)
     return logger
-

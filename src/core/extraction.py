@@ -16,11 +16,11 @@ def extract_json(image_path: Path, prompt_json_properties: str, next_stage: str)
     Extract the following data as raw JSON.
     Do not use any markdown formatting or backticks.
     Partial data is okay.
-    
+
     {prompt_json_properties}
-    
+
     If extraction fails entirely, give concise feedback instead:
-    E.g. "A popup was blocking the view" 
+    E.g. "A popup was blocking the view"
       or "Error: 404 not found"
       or "Found no price forecast data"
     """
@@ -28,7 +28,7 @@ def extract_json(image_path: Path, prompt_json_properties: str, next_stage: str)
 
 
 def extract(image_path: Path, prompt: str, next_stage: str):
-    print(f'extracting data, path: {image_path}')
+    print(f"extracting data, path: {image_path}")
     output, failed, processed = paths.split_files(image_path, this_stage, next_stage, "json")
     try:
         with Image.open(image_path) as image:

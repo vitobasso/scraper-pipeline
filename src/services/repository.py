@@ -1,7 +1,6 @@
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
 from cachetools.func import ttl_cache
 
@@ -12,7 +11,7 @@ db_file = mkdir(Path(output_root)) / "db.sqlite"
 
 
 def run_script(filename: str):
-    with open(filename, "r") as f:
+    with open(filename) as f:
         sql = f.read()
         with sqlite3.connect(db_file) as conn:
             cur = conn.cursor()
@@ -38,7 +37,8 @@ def query_tickers(limit: int = 20, offset: int = 0):
         return tickers
 
 
-def upsert_tickers(tickers: List[str], last_requested: datetime = datetime.now()):
+def upsert_tickers(tickers: list[str]):
+    last_requested = datetime.now()
     with sqlite3.connect(db_file) as conn:
         cur = conn.cursor()
         cur.execute("BEGIN")
