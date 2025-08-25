@@ -132,13 +132,27 @@ sudo systemctl enable uvicorn
 sudo systemctl start uvicorn
 ```
 
-#### 8. Schedule the Scraper periodically
-
-Cronjob to run scraper daily.
-Note: `crontab -l 2` is to include already existing jobs.
+#### 8. Set the Scraper to automatically launch on VM restarts
 
 ```bash
-(echo "0 2 * * * cd /home/vitobasso/stocks-scraper && .venv/bin/python3 -u -m scraper 2>&1 | tee -a /home/vitobasso/scraper.log") | crontab -
+sudo tee /etc/systemd/system/scraper.service > /dev/null<<'EOF'
+[Unit]
+Description=Stock Scraper
+After=network.target
+
+[Service]
+User=vitobasso
+WorkingDirectory=/home/vitobasso/stocks-scraper
+ExecStart=/home/vitobasso/stocks-scraper/.venv/bin/python3 -u -m src.scraper
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable scraper
+sudo systemctl start scraper
 ```
 
 ## Research
