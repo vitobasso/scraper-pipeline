@@ -75,4 +75,3 @@ def _download_url(url: str):
 def _file_path() -> Path:
     timestamp = datetime.datetime.now().strftime(config.timestamp_format)
     return list_dir / f"{timestamp}.txt"
-
