@@ -20,12 +20,18 @@ async def new_page(proxy: str):
             headless=True,
             proxy=proxy_settings,
             args=[
-                "--disable-blink-features=AutomationControlled",
-                "--no-sandbox",  # loosen this security feature to avoid incompatibility with kernel
-                "--disable-gpu",  # avoid hanging if chrome attempts graphic acceleration, but it's not available in VM
-                # '--disable-dev-shm-usage', # avoid /dev/shm if short on RAM. use /tmp, i.e. disk, instead
-                # '--disable-web-security', # bypass CORS
-                # '--disable-extensions'
+                "--disable-blink-features=AutomationControlled",  # anti-bot detection evasion
+                "--no-sandbox",  # saves RAM and CPU, avoids permission issues, loosens security
+                "--disable-gpu",  # saves RAM
+                "--disable-software-rasterizer",  # saves RAM, avoid cpu-based renderer when gpu is disabled
+                "--no-default-browser-check",  # would save RAM. probably redundant in headless chrome
+                "--no-first-run",  # would save RAM. probably redundant in headless chrome
+                "--disable-extensions",  # would save RAM. probably redundant in headless chrome
+                "--mute-audio",
+                # "--disable-background-timer-throttling",  # prevent throttling of background tabs
+                # "--disable-backgrounding-occluded-windows", # prevent throttling of background tabs
+                # "--disable-dev-shm-usage",  # avoid /dev/shm if short on RAM. use /tmp, i.e. disk, instead
+                # "--disable-web-security",  # bypass CORS
             ],
         )
 
@@ -49,12 +55,18 @@ async def new_page(proxy: str):
             }
         )
 
+        await context.route("**/*", _prune_requests)
+
         page = await context.new_page()
 
         try:
             yield page
         finally:
             await browser.close()
+
+
+def _prune_requests(route):
+    route.abort() if route.request.resource_type in ["image", "media", "font"] else route.continue_()
 
 
 @asynccontextmanager
