@@ -32,7 +32,7 @@ def _init():
     return _proxies
 
 
-def _refresh():
+def _refresh() -> list[str]:
     if not _validate_latest_file():
         _download_list()
     if not _validate_latest_file():
@@ -53,14 +53,14 @@ def _validate_file(path: Path):
     return file_age < refresh_seconds
 
 
-def _load_list(path: Path):
+def _load_list(path: Path) -> list[str]:
     with open(path) as f:
         return f.read().splitlines()
 
 
 def _download_list():
     for url in config.proxy_urls:
-        path = _file_path(url)
+        path = _file_path()
         print(f"downloading proxy list, url: {url}, path: {path}")
         if data := _download_url(url):
             path.write_bytes(data)
@@ -72,11 +72,7 @@ def _download_url(url: str):
         return r.read()
 
 
-def _file_path(url: str) -> Path:
+def _file_path() -> Path:
     timestamp = datetime.datetime.now().strftime(config.timestamp_format)
-    name = _name_from_url(url)
-    return list_dir / f"proxify-{name}-{timestamp}.txt"
+    return list_dir / f"{timestamp}.txt"
 
-
-def _name_from_url(path):
-    return re.search("/(\\w+)/data.txt", path).group(1)
