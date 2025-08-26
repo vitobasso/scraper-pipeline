@@ -65,8 +65,11 @@ async def new_page(proxy: str):
             await browser.close()
 
 
-def _prune_requests(route):
-    route.abort() if route.request.resource_type in ["image", "media", "font"] else route.continue_()
+async def _prune_requests(route):
+    if route.request.resource_type in ["image", "media", "font"]:
+        await route.abort()
+    else:
+        await route.continue_()
 
 
 @asynccontextmanager
