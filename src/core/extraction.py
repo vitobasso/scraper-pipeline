@@ -53,4 +53,4 @@ def discard(input_path, dest_path):
         input_path.rename(dest_path)
     else:
         input_path.unlink()
-        dest_path.with_stem("stamp").touch()
+        dest_path.with_suffix(".stamp").touch()
