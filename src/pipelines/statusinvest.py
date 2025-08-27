@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from src.config import only_requested_tickers
-from src.core import paths, normalization
+from src.core import normalization, paths
 from src.core.logs import log
 from src.core.scheduler import Pipeline
 from src.core.tasks import global_task, intermediate_task
@@ -75,4 +75,3 @@ def _normalize(input_file: Path):
             out_path = paths.stage_dir_for(ticker, name, "ready") / f"{input_file.stem}.json"
             with out_path.open("w", encoding="utf-8") as out:
                 json.dump(data, out, ensure_ascii=False, indent=2)
-
