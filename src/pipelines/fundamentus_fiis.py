@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas
 
-from src.core import paths
+from src.core import paths, normalization
 from src.core.logs import log
 from src.core.scheduler import Pipeline
 from src.core.tasks import global_task
@@ -44,7 +44,7 @@ async def _scrape(proxy: str, url: str, path: Path):
 async def _extract_row(row):
     cells = await row.locator("td").all_text_contents()
     if cells:
-        return [c.replace("%", "").replace(".", "").replace(",", ".").strip() for c in cells[:-1]]
+        return [normalization.value(c) for c in cells[:-1]]
     else:
         return None
 
