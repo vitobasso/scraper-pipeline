@@ -40,13 +40,17 @@ schema = {
     }
 }
 
-normalize = normalization.rename_keys(
-    {
-        "indicadores_fundamentalistas": "fundamentos",
-        "dados_sobre_a_empresa": "cadastral",
-        "informacoes_sobre_a_empresa": "financeiro",
-        "rentabilidade": "rent",
-        "rentabilidade_nominal": "nominal",
-        "rentabilidade_real": "real",
-    }
-)
+
+def normalize(data):
+    rename_keys = normalization.rename_keys(
+        {
+            "indicadores_fundamentalistas": "fundamentos",
+            "dados_sobre_a_empresa": "cadastral",
+            "informacoes_sobre_a_empresa": "financeiro",
+            "rentabilidade": "rent",
+            "rentabilidade_nominal": "nominal",
+            "rentabilidade_real": "real",
+        }
+    )
+    normalize_values = normalization.traverse_values(normalization.value)
+    return normalize_values(rename_keys(data))

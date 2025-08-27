@@ -1,12 +1,10 @@
 import asyncio
 import csv
 import json
-import re
-import unicodedata
 from pathlib import Path
 
 from src.config import only_requested_tickers
-from src.core import paths
+from src.core import paths, normalization
 from src.core.logs import log
 from src.core.scheduler import Pipeline
 from src.core.tasks import global_task, intermediate_task
@@ -65,34 +63,16 @@ def _normalize(input_file: Path):
     with input_file.open(encoding="utf-8") as f:
         reader = csv.reader(f, delimiter=";")
         headers = next(reader)
-        headers = [_normalize_header(h) for h in headers]
+        headers = [normalization.key(h) for h in headers]
 
         for row in reader:
             ticker, *rest = row
             if only_requested_tickers and ticker not in requested_tickers:
                 continue
-            values = [_normalize_value(v) for v in rest]
+            values = [normalization.value(v) for v in rest]
             data = dict(zip(headers, [ticker] + values, strict=False))
 
             out_path = paths.stage_dir_for(ticker, name, "ready") / f"{input_file.stem}.json"
             with out_path.open("w", encoding="utf-8") as out:
                 json.dump(data, out, ensure_ascii=False, indent=2)
 
-
-def _normalize_header(header: str) -> str:
-    header = header.lower()
-    # remove accents
-    header = "".join(c for c in unicodedata.normalize("NFKD", header) if not unicodedata.combining(c))
-    # replace symbols with space
-    header = re.sub(r"[^a-z0-9]+", " ", header)
-    # trim and replace spaces with underscores
-    return "_".join(header.strip().split())
-
-
-def _normalize_value(value: str):
-    if value.strip() == "":
-        return None
-    try:
-        return float(value.replace(".", "").replace(",", "."))
-    except ValueError:
-        return value
