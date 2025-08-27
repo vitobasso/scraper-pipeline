@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas
 
-from src.core import paths, normalization
+from src.core import normalization, paths
 from src.core.logs import log
 from src.core.scheduler import Pipeline
 from src.core.tasks import global_task
