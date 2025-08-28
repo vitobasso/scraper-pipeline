@@ -1,15 +1,15 @@
 from collections.abc import Callable
 from pathlib import Path
 
-from src.core import extraction, normalization, progress, validation
-from src.core.scheduler import Task
-from src.services.repository import query_tickers
+from src.common import repository
+from src.scraper.core import extraction, normalization, progress, validation
+from src.scraper.core.scheduler import Task
 
 
 def source_task(pipeline: str, execute: Callable[[str], any]) -> Task:
     return Task(
-        find_input=lambda: progress.progress(pipeline, set(query_tickers())).available(),
-        progress=lambda: progress.progress(pipeline, set(query_tickers())),
+        find_input=lambda: progress.progress(pipeline, set(repository.query_tickers())).available(),
+        progress=lambda: progress.progress(pipeline, set(repository.query_tickers())),
         execute=execute,
     )
 

@@ -4,7 +4,7 @@ from functools import cache
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-from src.config import visual_llm_model as model_name
+from src.common import config
 
 
 @cache
@@ -14,4 +14,4 @@ def llm():
     if not api_key:
         raise ValueError("GOOGLE_GENAI_API_KEY not found")
     genai.configure(api_key=api_key)
-    return genai.GenerativeModel(model_name)
+    return genai.GenerativeModel(config.visual_llm_model)

@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from pathlib import Path
 
-from src.config import timestamp_format
+from src.common.config import timestamp_format
 
 
 def mkdir(path: Path):

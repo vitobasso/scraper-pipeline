@@ -3,15 +3,14 @@ import csv
 import json
 from pathlib import Path
 
-from src.config import only_requested_tickers
-from src.core import normalization, paths
-from src.core.logs import log
-from src.core.scheduler import Pipeline
-from src.core.tasks import global_task, intermediate_task
-from src.core.util import timestamp
-from src.services.browser import click, click_download, error_name, page_goto
-from src.services.proxies import random_proxy
-from src.services.repository import query_tickers
+from src.common import config, repository
+from src.common.util import timestamp
+from src.scraper.core import normalization, paths
+from src.scraper.core.logs import log
+from src.scraper.core.scheduler import Pipeline
+from src.scraper.core.tasks import global_task, intermediate_task
+from src.scraper.services.browser import click, click_download, error_name, page_goto
+from src.scraper.services.proxies import random_proxy
 
 name = "statusinvest"
 pipe_dir = paths.pipeline_dir("_global", name)
@@ -59,7 +58,7 @@ def normalize(path: Path):
 
 
 def _normalize(input_file: Path):
-    requested_tickers = set(query_tickers())
+    requested_tickers = set(repository.query_tickers())
     with input_file.open(encoding="utf-8") as f:
         reader = csv.reader(f, delimiter=";")
         headers = next(reader)
@@ -67,7 +66,7 @@ def _normalize(input_file: Path):
 
         for row in reader:
             ticker, *rest = row
-            if only_requested_tickers and ticker not in requested_tickers:
+            if config.only_requested_tickers and ticker not in requested_tickers:
                 continue
             values = [normalization.value(v) for v in rest]
             data = dict(zip(headers, [ticker] + values, strict=False))

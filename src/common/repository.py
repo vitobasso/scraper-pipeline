@@ -4,8 +4,8 @@ from pathlib import Path
 
 from cachetools.func import ttl_cache
 
-from src.config import output_root
-from src.core.util import mkdir
+from src.common.config import output_root
+from src.common.util import mkdir
 
 db_file = mkdir(Path(output_root)) / "db.sqlite"
 

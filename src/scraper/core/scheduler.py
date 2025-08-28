@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TypeVar
 
-from src.services.repository import query_tickers
+from src.common.repository import query_tickers
 
 
 @dataclass

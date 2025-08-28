@@ -1,11 +1,11 @@
 import asyncio
 from pathlib import Path
 
-from src.core import paths
-from src.core.logs import log
-from src.core.util import timestamp
-from src.services.browser import common_ancestor, error_name, page_goto
-from src.services.proxies import random_proxy
+from src.common.util import timestamp
+from src.scraper.core import paths
+from src.scraper.core.logs import log
+from src.scraper.services.browser import common_ancestor, error_name, page_goto
+from src.scraper.services.proxies import random_proxy
 
 after_load_timeout = 0
 

@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from src import config
-from src.core import paths
-from src.core.logs import timestamp_from_log
-from src.core.scheduler import Progress
-from src.core.util import datetime_from_filename
-from src.services.repository import query_tickers
+from src.common import config
+from src.common.repository import query_tickers
+from src.common.util import datetime_from_filename
+from src.scraper.core import paths
+from src.scraper.core.logs import timestamp_from_log
+from src.scraper.core.scheduler import Progress
 
 
 def progress(pipeline: str, input_domain: set[str]) -> Progress:

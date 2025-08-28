@@ -2,13 +2,13 @@ import asyncio
 import re
 from pathlib import Path
 
-from src.core import normalization
-from src.core.logs import log
-from src.core.scheduler import Pipeline
-from src.core.screenshot import output_path
-from src.core.tasks import extract_json, normalize_json, source_task, validate_json
-from src.services.browser import click, error_name, page_goto
-from src.services.proxies import random_proxy
+from src.scraper.core import normalization
+from src.scraper.core.logs import log
+from src.scraper.core.scheduler import Pipeline
+from src.scraper.core.screenshot import output_path
+from src.scraper.core.tasks import extract_json, normalize_json, source_task, validate_json
+from src.scraper.services.browser import click, error_name, page_goto
+from src.scraper.services.proxies import random_proxy
 
 name = "yahoo"
 

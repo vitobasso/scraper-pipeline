@@ -1,9 +1,9 @@
-from src.core import normalization
-from src.core.scheduler import Pipeline
-from src.core.screenshot import ss_common_ancestor
-from src.core.tasks import extract_json, normalize_json, source_task, validate_json
+from src.scraper.core import normalization
+from src.scraper.core.scheduler import Pipeline
+from src.scraper.core.screenshot import ss_common_ancestor
+from src.scraper.core.tasks import extract_json, normalize_json, source_task, validate_json
 
-name = "tradingview"
+name = "tipranks"
 
 
 def pipeline():
@@ -20,30 +20,26 @@ def pipeline():
 
 def screenshot(ticker: str):
     ss_common_ancestor(
-        ticker, name, f"https://tradingview.com/symbols/{ticker}/forecast", ["Price target", "Analyst rating"]
+        ticker, name, f"https://www.tipranks.com/stocks/{ticker}/forecast", ["Month Forecast", "Analyst Ratings"]
     )
 
 
 prompt = """
     1. analyst_rating (int values):
-       - strong_buy
        - buy
        - hold
        - sell
-       - strong_sell
     2. price_forecast (float values)
-       - min
+       - min (aka low)
        - avg
-       - max
+       - max (aka high)
     """
 
 schema = {
     "analyst_rating": {
-        "strong_buy": int,
         "buy": int,
         "hold": int,
         "sell": int,
-        "strong_sell": int,
     },
     "price_forecast": {
         "min": float,

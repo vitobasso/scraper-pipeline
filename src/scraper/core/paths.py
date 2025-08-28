@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from src.config import output_root
-from src.core.util import mkdir
+from src.common.config import output_root
+from src.common.util import mkdir
 
 """
 Path structure per ticker and pipeline:

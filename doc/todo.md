@@ -14,6 +14,12 @@
 
 queue non-displayed pipelines but prioritize the ones being displayed
 
+# Dev Experience
+
+### CI/CD
+- docker-compose
+- GitHub Actions
+
 # Performance
 
 ### parallelize between pipelines
