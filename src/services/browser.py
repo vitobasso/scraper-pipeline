@@ -62,7 +62,15 @@ async def new_page(proxy: str):
         try:
             yield page
         finally:
-            await browser.close()
+            try:
+                try:
+                    # give a brief moment for pending tasks (downloads/responses) to resolve
+                    await page.wait_for_load_state("networkidle", timeout=1000)
+                except Exception:
+                    pass
+                await context.close()
+            finally:
+                await browser.close()
 
 
 async def _prune_requests(route):
