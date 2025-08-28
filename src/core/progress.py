@@ -24,7 +24,7 @@ def intermediate_input(pipeline: str, stage: str) -> set[Path]:
 
 def has_recent_files(ticker: str, pipeline: str, stage: str) -> bool:
     latest = paths.latest_file(ticker, pipeline, stage)
-    return latest and datetime_from_filename(latest) > datetime.now() - timedelta(days=config.refresh_days)
+    return latest and datetime_from_filename(latest) > datetime.now() - timedelta(days=config.data_refresh_days)
 
 
 def _count_total_recent_failures(ticker: str, pipeline: str) -> int:
@@ -36,7 +36,7 @@ def should_abort(ticker: str, pipeline: str) -> bool:
 
 
 def _count_recent_failed_files(ticker: str, pipeline: str) -> int:
-    cutoff = datetime.now() - timedelta(days=config.refresh_days)
+    cutoff = datetime.now() - timedelta(days=config.data_refresh_days)
     return sum(1 for file in paths.failed_files(ticker, pipeline) if datetime_from_filename(file) > cutoff)
 
 
@@ -44,7 +44,7 @@ def _count_recent_error_logs(ticker: str, pipeline: str) -> int:
     errors = paths.errors_log(pipeline, ticker)
     if not errors.exists():
         return 0
-    cutoff = datetime.now() - timedelta(days=config.refresh_days)
+    cutoff = datetime.now() - timedelta(days=config.data_refresh_days)
     with errors.open() as file:
         return sum(1 for line in file if timestamp_from_log(line) > cutoff)
 

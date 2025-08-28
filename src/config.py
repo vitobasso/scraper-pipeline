@@ -25,6 +25,9 @@ use_proxies_for_pipeline = {
     "simplywall": True,
 }
 
+proxy_refresh_seconds = 2 * 60 * 60
+
+
 # if True, global pipelines will throw away non-requested tickers
 only_requested_tickers = env_bool("CONFIG_ONLY_REQUESTED_TICKERS", "false")
 
@@ -32,7 +35,7 @@ only_requested_tickers = env_bool("CONFIG_ONLY_REQUESTED_TICKERS", "false")
 keep_debug_images = env_bool("CONFIG_KEEP_DEBUG_IMAGES", "false")
 
 # data older than this is considered stale and should be scraped again
-refresh_days = 30
+data_refresh_days = 30
 
 # maximum number of error logs or files in debug/failed before giving up on a pipeline for particular ticker
 # after refresh_days, error logs and files are ignored
