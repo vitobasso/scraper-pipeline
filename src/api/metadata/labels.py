@@ -1,0 +1,136 @@
+yahoo_chart = {
+    "yahoo_chart.1mo": {"short": "1M", "long": "Último Mês"},
+    "yahoo_chart.1y": {"short": "1A", "long": "Último Ano"},
+    "yahoo_chart.5y": {"short": "5A", "long": "Últimos 5 Anos"},
+}
+
+yahoo = {
+    "yahoo.rating.strong_buy": {"short": "SBuy", "long": "Compra Forte"},
+    "yahoo.rating.buy": {"short": "Buy", "long": "Compra"},
+    "yahoo.rating.hold": {"short": "Hold", "long": "Manter"},
+    "yahoo.rating.sell": {"short": "Sell", "long": "Venda"},
+    "yahoo.rating.strong_sell": {"short": "SSell", "long": "Venda Forte"},
+    "yahoo.forecast.min": {"short": "Min", "long": "Previsão Mínima"},
+    "yahoo.forecast.avg": {"short": "Méd", "long": "Previsão Média"},
+    "yahoo.forecast.max": {"short": "Max", "long": "Previsão Máxima"},
+}
+
+yahoo_recommendations = {
+    "yahoo_recommendations.strong_buy": {"short": "SBuy", "long": "Compra Forte"},
+    "yahoo_recommendations.buy": {"short": "Buy", "long": "Compra"},
+    "yahoo_recommendations.hold": {"short": "Hold", "long": "Manter"},
+    "yahoo_recommendations.sell": {"short": "Sell", "long": "Venda"},
+    "yahoo_recommendations.strong_sell": {"short": "SSell", "long": "Venda Forte"}
+}
+
+tradingview = {
+    "tradingview.rating.strong_buy": {"short": "SBuy", "long": "Compra Forte"},
+    "tradingview.rating.buy": {"short": "Buy", "long": "Compra"},
+    "tradingview.rating.hold": {"short": "Hold", "long": "Manter"},
+    "tradingview.rating.sell": {"short": "Sell", "long": "Venda"},
+    "tradingview.rating.strong_sell": {"short": "SSell", "long": "Venda Forte"},
+    "tradingview.forecast.min": {"short": "Min", "long": "Previsão Mínima"},
+    "tradingview.forecast.avg": {"short": "Méd", "long": "Previsão Média"},
+    "tradingview.forecast.max": {"short": "Max", "long": "Previsão Máxima"},
+}
+
+simplywall = {
+    "simplywall.value": {"short": "Valor", "long": "Valor"},
+    "simplywall.future": {"short": "Futur", "long": "Futuro"},
+    "simplywall.past": {"short": "Passa", "long": "Passado"},
+    "simplywall.health": {"short": "Saúde", "long": "Saúde Financeira"},
+    "simplywall.dividend": {"short": "Divid", "long": "Dividendos"}
+}
+
+statusinvest = {
+    "statusinvest.preco": {"short": "Preço", "long": "Preço da Ação"},
+    "statusinvest.dy": {"short": "DY", "long": "Dividend Yield"},
+    "statusinvest.p_l": {"short": "P/L", "long": "Preço / Lucro"},
+    "statusinvest.p_vp": {"short": "P/VP", "long": "Preço / Valor Patrimonial"},
+    "statusinvest.p_ativos": {"short": "P/At", "long": "Preço / Ativos"},
+    "statusinvest.margem_bruta": {"short": "MB", "long": "Margem Bruta"},
+    "statusinvest.margem_ebit": {"short": "ME", "long": "Margem EBIT"},
+    "statusinvest.marg_liquida": {"short": "ML", "long": "Margem Líquida"},
+    "statusinvest.p_ebit": {"short": "P/EBIT", "long": "Preço / EBIT"},
+    "statusinvest.ev_ebit": {"short": "EV/EBIT", "long": "EV / EBIT"},
+    "statusinvest.divida_liquida_ebit": {"short": "DL/EBIT", "long": "Dívida Líquida / EBIT"},
+    "statusinvest.div_liq_patri": {"short": "DL/PL", "long": "Dívida Líquida / Patrimônio Líquido"},
+    "statusinvest.psr": {"short": "PSR", "long": "Preço / Receita"},
+    "statusinvest.p_cap_giro": {"short": "P/CG", "long": "Preço / Capital de Giro"},
+    "statusinvest.p_at_cir_liq": {"short": "P/AC", "long": "Preço / Ativo Circulante Líquido"},
+    "statusinvest.liq_corrente": {"short": "LC", "long": "Liquidez Corrente"},
+    "statusinvest.roe": {"short": "ROE", "long": "Retorno sobre Patrimônio Líquido"},
+    "statusinvest.roa": {"short": "ROA", "long": "Retorno sobre Ativos"},
+    "statusinvest.roic": {"short": "ROIC", "long": "Retorno sobre Capital Investido"},
+    "statusinvest.patrimonio_ativos": {"short": "PL/AT", "long": "Patrimônio / Ativos"},
+    "statusinvest.passivos_ativos": {"short": "P/AT", "long": "Passivos / Ativos"},
+    "statusinvest.giro_ativos": {"short": "GA", "long": "Giro de Ativos"},
+    "statusinvest.cagr_receitas_5_anos": {"short": "Rec", "long": "CAGR Receitas 5 Anos"},
+    "statusinvest.cagr_lucros_5_anos": {"short": "Lucro", "long": "CAGR Lucros 5 Anos"},
+    "statusinvest.liquidez_media_diaria": {"short": "LiqMD", "long": "Liquidez Média Diária"},
+    "statusinvest.vpa": {"short": "VPA", "long": "Valor Patrimonial por Ação"},
+    "statusinvest.lpa": {"short": "LPA", "long": "Lucro por Ação"},
+    "statusinvest.peg_ratio": {"short": "PEG", "long": "PEG Ratio"},
+    "statusinvest.valor_de_mercado": {"short": "VM", "long": "Valor de Mercado"}
+}
+
+investidor10 = {
+    "investidor10.rentabilidade.nominal.1_mes": {"short": "1M N", "long": "Rentabilidade Nominal 1 Mês"},
+    "investidor10.rentabilidade.nominal.3_meses": {"short": "3M N", "long": "Rentabilidade Nominal 3 Meses"},
+    "investidor10.rentabilidade.nominal.1_ano": {"short": "1A N", "long": "Rentabilidade Nominal 1 Ano"},
+    "investidor10.rentabilidade.nominal.2_anos": {"short": "2A N", "long": "Rentabilidade Nominal 2 Anos"},
+    "investidor10.rentabilidade.nominal.5_anos": {"short": "5A N", "long": "Rentabilidade Nominal 5 Anos"},
+    "investidor10.rentabilidade.nominal.10_anos": {"short": "10A N", "long": "Rentabilidade Nominal 10 Anos"},
+    "investidor10.rentabilidade.real.1_mes": {"short": "1M R", "long": "Rentabilidade Real 1 Mês"},
+    "investidor10.rentabilidade.real.3_meses": {"short": "3M R", "long": "Rentabilidade Real 3 Meses"},
+    "investidor10.rentabilidade.real.1_ano": {"short": "1A R", "long": "Rentabilidade Real 1 Ano"},
+    "investidor10.rentabilidade.real.2_anos": {"short": "2A R", "long": "Rentabilidade Real 2 Anos"},
+    "investidor10.rentabilidade.real.5_anos": {"short": "5A R", "long": "Rentabilidade Real 5 Anos"},
+    "investidor10.rentabilidade.real.10_anos": {"short": "10A R", "long": "Rentabilidade Real 10 Anos"},
+    "investidor10.fundamentos.p_l": {"short": "P/L", "long": "Preço / Lucro"},
+    "investidor10.fundamentos.p_receita_psr": {"short": "PSR", "long": "Preço / Receita"},
+    "investidor10.fundamentos.p_vp": {"short": "P/VP", "long": "Preço / Valor Patrimonial"},
+    "investidor10.fundamentos.dividend_yield_bbdc4": {"short": "DY", "long": "Dividend Yield"},
+    "investidor10.fundamentos.payout": {"short": "Payout", "long": "Payout"},
+    "investidor10.fundamentos.margem_liquida": {"short": "ML", "long": "Margem Líquida"},
+    "investidor10.fundamentos.margem_bruta": {"short": "MB", "long": "Margem Bruta"},
+    "investidor10.fundamentos.margem_ebit": {"short": "ME", "long": "Margem EBIT"},
+    "investidor10.fundamentos.ev_ebit": {"short": "EV/EBIT", "long": "EV / EBIT"},
+    "investidor10.fundamentos.p_ebit": {"short": "P/EBIT", "long": "Preço / EBIT"},
+    "investidor10.fundamentos.p_ativo": {"short": "P/At", "long": "Preço / Ativo"},
+    "investidor10.fundamentos.p_cap_giro": {"short": "P/CG", "long": "Preço / Capital de Giro"},
+    "investidor10.fundamentos.p_ativo_circ_liq": {"short": "P/AC", "long": "Preço / Ativo Circulante Líquido"},
+    "investidor10.fundamentos.vpa": {"short": "VPA", "long": "Valor Patrimonial por Ação"},
+    "investidor10.fundamentos.lpa": {"short": "LPA", "long": "Lucro por Ação"},
+    "investidor10.fundamentos.giro_ativos": {"short": "GA", "long": "Giro de Ativos"},
+    "investidor10.fundamentos.roe": {"short": "ROE", "long": "Retorno sobre Patrimônio Líquido"},
+    "investidor10.fundamentos.roic": {"short": "ROIC", "long": "Retorno sobre Capital Investido"},
+    "investidor10.fundamentos.roa": {"short": "ROA", "long": "Retorno sobre Ativos"},
+    "investidor10.fundamentos.patrimonio_ativos": {"short": "PL/AT", "long": "Patrimônio / Ativos"},
+    "investidor10.fundamentos.passivos_ativos": {"short": "P/AT", "long": "Passivos / Ativos"},
+    "investidor10.fundamentos.liquidez_corrente": {"short": "LC", "long": "Liquidez Corrente"},
+    "investidor10.fundamentos.cagr_receitas_5_anos": {"short": "Rec", "long": "CAGR Receitas 5 Anos"},
+    "investidor10.fundamentos.cagr_lucros_5_anos": {"short": "Lucro", "long": "CAGR Lucros 5 Anos"},
+    "investidor10.cadastral.nome_da_empresa": {"short": "Nome", "long": "Nome da Empresa"},
+    "investidor10.cadastral.cnpj": {"short": "CNPJ", "long": "CNPJ"},
+    "investidor10.cadastral.ano_de_estreia_na_bolsa": {"short": "AnoE", "long": "Ano de Estreia na Bolsa"},
+    "investidor10.cadastral.numero_de_funcionarios": {"short": "Func", "long": "Número de Funcionários"},
+    "investidor10.cadastral.ano_de_fundacao": {"short": "Ano", "long": "Ano de Fundação"},
+    "investidor10.cadastral.papeis_da_empresa": {"short": "Papéis", "long": "Papéis da Empresa"},
+    "investidor10.cadastral.papeis_fracionados": {"short": "Frac", "long": "Papéis Fracionados"},
+    "investidor10.financeiro.valor_de_mercado": {"short": "VM", "long": "Valor de Mercado"},
+    "investidor10.financeiro.valor_de_firma": {"short": "VF", "long": "Valor de Firma"},
+    "investidor10.financeiro.patrimonio_liquido": {"short": "PL", "long": "Patrimônio Líquido"},
+    "investidor10.financeiro.numero_total_de_papeis": {"short": "NTPap", "long": "Número Total de Papéis"},
+    "investidor10.financeiro.ativos": {"short": "Ativos", "long": "Ativos"},
+    "investidor10.financeiro.ativo_circulante": {"short": "AC", "long": "Ativo Circulante"},
+    "investidor10.financeiro.disponibilidade": {"short": "Disp", "long": "Disponibilidade"},
+    "investidor10.financeiro.segmento_de_listagem": {"short": "SegLst", "long": "Segmento de Listagem"},
+    "investidor10.financeiro.free_float": {"short": "FF", "long": "Free Float"},
+    "investidor10.financeiro.tag_along": {"short": "TA", "long": "Tag Along"},
+    "investidor10.financeiro.liquidez_media_diaria": {"short": "LiqMD", "long": "Liquidez Média Diária"},
+    "investidor10.financeiro.setor": {"short": "Setor", "long": "Setor"},
+    "investidor10.financeiro.segmento": {"short": "Segmt", "long": "Segmento"}
+}
+
+all = yahoo_chart | yahoo | yahoo_recommendations | tradingview | simplywall | statusinvest | investidor10
