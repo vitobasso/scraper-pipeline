@@ -4,8 +4,8 @@ import unicodedata
 from collections.abc import Callable
 from pathlib import Path
 
-from src.core import paths
-from src.core.logs import log
+from src.scraper.core import paths
+from src.scraper.core.logs import log
 
 
 def normalize_json(input_path: Path, function: Callable, next_stage: str):

@@ -2,13 +2,13 @@ import asyncio
 import json
 from pathlib import Path
 
-from src.core import paths
-from src.core.logs import log
-from src.core.scheduler import Pipeline
-from src.core.tasks import normalize_json, source_task, validate_json
-from src.core.util import timestamp
-from src.services import browser
-from src.services.proxies import random_proxy
+from src.common.util import timestamp
+from src.scraper.core import paths
+from src.scraper.core.logs import log
+from src.scraper.core.scheduler import Pipeline
+from src.scraper.core.tasks import normalize_json, source_task, validate_json
+from src.scraper.services import browser
+from src.scraper.services.proxies import random_proxy
 
 name = "simplywall"
 

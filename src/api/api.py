@@ -6,10 +6,8 @@ from typing import Any
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from src import config
-from src.api.metadata import labels, sources, schema
-from src.core import util
-from src.services import ipc_signal, repository
+from src.api.metadata import labels, schema, sources
+from src.common import config, ipc_signal, repository, util
 
 app = FastAPI()
 

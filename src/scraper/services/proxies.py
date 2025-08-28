@@ -6,12 +6,9 @@ import time
 import urllib.request
 from pathlib import Path
 
-from src import config
-from src.config import proxy_refresh_seconds
-from src.core import util
-from src.core.util import mkdir
+from src.common import config, util
 
-list_dir = mkdir(Path(config.output_root) / "_proxy-list")
+list_dir = util.mkdir(Path(config.output_root) / "_proxy-list")
 
 _proxies = None
 
@@ -49,7 +46,7 @@ def _validate_latest_file():
 def _validate_file(path: Path):
     file_time = os.path.getctime(path)
     file_age = time.time() - file_time
-    return file_age < proxy_refresh_seconds
+    return file_age < config.proxy_refresh_seconds
 
 
 def _load_list(path: Path) -> list[str]:

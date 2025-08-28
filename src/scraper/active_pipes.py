@@ -1,4 +1,4 @@
-from src.pipelines import *
+from src.scraper.pipelines import *
 
 _pipes = [
     # fundamentus_fiis,

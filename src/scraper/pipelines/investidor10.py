@@ -1,7 +1,7 @@
-from src.core import normalization
-from src.core.scheduler import Pipeline
-from src.core.screenshot import ss_full_page
-from src.core.tasks import extract_json, normalize_json, source_task, validate_json
+from src.scraper.core import normalization
+from src.scraper.core.scheduler import Pipeline
+from src.scraper.core.screenshot import ss_full_page
+from src.scraper.core.tasks import extract_json, normalize_json, source_task, validate_json
 
 name = "investidor10"
 

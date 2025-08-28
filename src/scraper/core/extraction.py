@@ -2,11 +2,11 @@ from pathlib import Path
 
 from PIL import Image
 
-from src import config
-from src.core import paths
-from src.core.logs import log
-from src.core.paths import extract_ticker_pipeline
-from src.services.llm import llm
+from src.common import config
+from src.scraper.core import paths
+from src.scraper.core.logs import log
+from src.scraper.core.paths import extract_ticker_pipeline
+from src.scraper.services.llm import llm
 
 this_stage = "extraction"
 

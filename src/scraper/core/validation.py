@@ -3,7 +3,7 @@ import re
 from collections.abc import Callable
 from pathlib import Path
 
-from src.core import paths
+from src.scraper.core import paths
 
 
 def validate_schema(path: Path, schema: dict, next_stage: str):

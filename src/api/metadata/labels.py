@@ -20,7 +20,7 @@ yahoo_recommendations = {
     "yahoo_recommendations.buy": {"short": "Buy", "long": "Compra"},
     "yahoo_recommendations.hold": {"short": "Hold", "long": "Manter"},
     "yahoo_recommendations.sell": {"short": "Sell", "long": "Venda"},
-    "yahoo_recommendations.strong_sell": {"short": "SSell", "long": "Venda Forte"}
+    "yahoo_recommendations.strong_sell": {"short": "SSell", "long": "Venda Forte"},
 }
 
 tradingview = {
@@ -39,7 +39,7 @@ simplywall = {
     "simplywall.future": {"short": "Futur", "long": "Futuro"},
     "simplywall.past": {"short": "Passa", "long": "Passado"},
     "simplywall.health": {"short": "Saúde", "long": "Saúde Financeira"},
-    "simplywall.dividend": {"short": "Divid", "long": "Dividendos"}
+    "simplywall.dividend": {"short": "Divid", "long": "Dividendos"},
 }
 
 statusinvest = {
@@ -71,7 +71,7 @@ statusinvest = {
     "statusinvest.vpa": {"short": "VPA", "long": "Valor Patrimonial por Ação"},
     "statusinvest.lpa": {"short": "LPA", "long": "Lucro por Ação"},
     "statusinvest.peg_ratio": {"short": "PEG", "long": "PEG Ratio"},
-    "statusinvest.valor_de_mercado": {"short": "VM", "long": "Valor de Mercado"}
+    "statusinvest.valor_de_mercado": {"short": "VM", "long": "Valor de Mercado"},
 }
 
 investidor10 = {
@@ -130,7 +130,7 @@ investidor10 = {
     "investidor10.financeiro.tag_along": {"short": "TA", "long": "Tag Along"},
     "investidor10.financeiro.liquidez_media_diaria": {"short": "LiqMD", "long": "Liquidez Média Diária"},
     "investidor10.financeiro.setor": {"short": "Setor", "long": "Setor"},
-    "investidor10.financeiro.segmento": {"short": "Segmt", "long": "Segmento"}
+    "investidor10.financeiro.segmento": {"short": "Segmt", "long": "Segmento"},
 }
 
 all = yahoo_chart | yahoo | yahoo_recommendations | tradingview | simplywall | statusinvest | investidor10
