@@ -7,7 +7,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from src import config
-from src.api import schema
+from src.api.metadata import labels, sources, schema
 from src.core import util
 from src.services import ipc_signal, repository
 
@@ -31,9 +31,13 @@ optional = Query(None)
 root_dir = Path(config.output_root)
 
 
-@app.get("/schema")
+@app.get("/meta")
 def get_meta():
-    return {"schema": schema.all}
+    return {
+        "schema": schema.all,
+        "sources": sources.all,
+        "labels": labels.all,
+    }
 
 
 @app.get("/data")
