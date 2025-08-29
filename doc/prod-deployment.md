@@ -2,8 +2,8 @@
 
 ## Requirements
 
-- The Scraper needs to run continuously for ~30 minutes and be retriggered periodically
-- The Api needs to listen to http
+- The Scraper needs to run continuously
+- The Api needs to listen to HTTP
 - Persistent storage for the scraped files
 - Free services only
 
@@ -20,7 +20,7 @@ Has free instance type: e2-micro.
 
 #### 2. Uvicorn
 
-ASGI web server that can run our API which is based on FastAPI, a web framework.
+ASGI web server that can run our Api which is based on FastAPI, a web framework.
 
 #### 3. Nginx
 
@@ -48,7 +48,7 @@ gcloud compute ssh vitobasso@scraper --zone "us-central1-f" --project "api-proje
 
 #### 2. Install this project
 
-Refer to [README.md](../README.md), "Local Setup"
+Refer to [README.md](../README.md), "Local Setup", "Debian"
 
 #### 3. Install Nginx and Certbot
 
@@ -89,7 +89,7 @@ server {
 
     location / {
         limit_req zone=one burst=5 nodelay;
-        proxy_pass http://127.0.0.1:8000;  # your uvicorn app port
+        proxy_pass http://127.0.0.1:8000;  # our uvicorn app port
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
@@ -97,19 +97,19 @@ server {
 EOF
 ```
 
-Remove /etc/nginx/sites-enabled/default to reduce attack surface
+Remove /etc/nginx/sites-enabled/default to reduce attack surface.
 
-#### 6. Restart Nginx and run Uvicorn
+Restart Nginx:
 
 ```
 sudo systemctl restart nginx
-uvicorn src.api.api:app --host 127.0.0.1 --port 8000
 ```
 
-#### 7. Set Uvicorn to automatically launch on VM restarts
+#### 6. Set Uvicorn to automatically launch on VM restarts
 
-Add Uvicorn to systemd. 
-We can set `--host 127.0.0.1` because Uvicorn will only be accessed indirectly through Nginx, which is running on localhost.
+Add Uvicorn to systemd.  
+Note: We can set `--host 127.0.0.1` instead of `0.0.0.0` because Uvicorn will only be accessed indirectly through Nginx,
+which is running on localhost.
 
 ```bash
 sudo tee /etc/systemd/system/uvicorn.service > /dev/null<<'EOF'
@@ -132,7 +132,7 @@ sudo systemctl enable uvicorn
 sudo systemctl start uvicorn
 ```
 
-#### 8. Set the Scraper to automatically launch on VM restarts
+#### 7. Set the Scraper to automatically launch on VM restarts
 
 ```bash
 sudo tee /etc/systemd/system/scraper.service > /dev/null<<'EOF'
@@ -165,10 +165,10 @@ Here is some information about the choices made and discarded alternatives.
 
 A non-managed VM seems to be the easiest way to get a long-running async job/script, Api and storage for free.
 The VM instance type available in "always free" is e2-micro.
-Other solutions like Cloud Run, a managed service, seemed to require Block Storage, which is not available in GCP "
-always free".
-Firestore, a no-SQL document storage, or SQL would options but require re-implementing the file logic.
-I believe the downside of VM instance would be bad scalability, but we don't have that requirement.
+Other solutions like Cloud Run, a managed service, seemed to require Block Storage, which is not available in GCP
+"always free".
+Firestore, a no-SQL document storage, or SQL would be options but require re-implementing the file logic.
+The downside of VM instance would be bad scalability, but we don't have that requirement so we're going for it.
 
 #### Alternatives
 
@@ -176,7 +176,7 @@ I believe the downside of VM instance would be bad scalability, but we don't hav
 - https://replit.com/ # free trial
 - https://railway.com/ # no longer has free tier
 - http://www.pythonanywhere.com/ # free tier has 500MB storage only
-- https://vercel.com/ # node.js only. has a beta python managed service but can't do long-running job with starage.
+- https://vercel.com/ # node.js only. has a beta python managed service but can't do long-running job with storage.
 
 ### Domain name
 
