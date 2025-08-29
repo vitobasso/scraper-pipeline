@@ -10,6 +10,4 @@ __pycache__
 .env
 gcp-secret.json
 client-secret.json
-input/*
-!input/sql-schema
 output

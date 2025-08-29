@@ -36,15 +36,7 @@ To call Gemini LLM Api and extract data from screenshots.
 [Api Keys](https://aistudio.google.com/apikey),
 Add the `GOOGLE_GENAI_API_KEY` var in the `.env` file at the project root.
 
-### Input files
-
-- ticker-list
-    - `acoes-br.csv`: one column of tickers, e.g. "bbas3"
-    - `acoes-br-setores.csv`: (optional) one column of sectors, e.g. "Financeiro". Used to order rows in the
-      spreadsheet.
-    - `fiis-br`: one column of tickers, e.g. "alzr11"
-
-### Running from CLI (no IDE)
+### Running from CLI
 
 #### Migrate DB
 
