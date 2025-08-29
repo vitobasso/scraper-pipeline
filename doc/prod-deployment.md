@@ -143,7 +143,7 @@ After=network.target
 [Service]
 User=vitobasso
 WorkingDirectory=/home/vitobasso/stocks-scraper
-ExecStart=/home/vitobasso/stocks-scraper/.venv/bin/python3 -u -m src.scraper
+ExecStart=/home/vitobasso/stocks-scraper/.venv/bin/python3 -u -m src.scraper.scraper
 Restart=always
 RestartSec=3
 
