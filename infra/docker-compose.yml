@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   api:
+    image: ${IMAGE_API}
     build:
       context: ..
       dockerfile: infra/Dockerfile
@@ -21,6 +22,7 @@ services:
       - "127.0.0.1:8000:8000"
 
   scraper:
+    image: ${IMAGE_SCRAPER}
     build:
       context: ..
       dockerfile: infra/Dockerfile

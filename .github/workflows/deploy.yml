@@ -1,3 +1,17 @@
+      - name: Define image tags
+        id: vars
+        run: |
+          OWNER_LC="${GITHUB_REPOSITORY_OWNER,,}"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          echo "IMAGE_API=ghcr.io/${OWNER_LC}/${REPO_NAME}-api:latest" >> $GITHUB_OUTPUT
+          echo "IMAGE_SCRAPER=ghcr.io/${OWNER_LC}/${REPO_NAME}-scraper:latest" >> $GITHUB_OUTPUT
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 name: build-and-deploy
 
 on:
@@ -9,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,25 +39,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Build API image
+      - name: Build & Push API image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: infra/Dockerfile
           target: api
-          push: false
-          tags: stocks-scraper-api:latest
+          push: true
+          tags: ${{ steps.vars.outputs.IMAGE_API }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
-      - name: Build Scraper image
+      - name: Build & Push Scraper image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: infra/Dockerfile
           target: scraper
-          push: false
-          tags: stocks-scraper-scraper:latest
+          push: true
+          tags: ${{ steps.vars.outputs.IMAGE_SCRAPER }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
@@ -80,9 +95,18 @@ jobs:
               git clone ${{ secrets.REPO_SSH_URL }} .
             fi
 
-            # Build and (re)start services
-            docker compose -f infra/docker-compose.yml build
-            docker compose -f infra/docker-compose.yml up -d
+            # Define image tags for compose (must match workflow build tags)
+            OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            REPO_NAME=${{ github.event.repository.name }}
+            export IMAGE_API=ghcr.io/${OWNER_LC}/${REPO_NAME}-api:latest
+            export IMAGE_SCRAPER=ghcr.io/${OWNER_LC}/${REPO_NAME}-scraper:latest
+
+            # Login to GHCR for pulling
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull and (re)start services
+            docker compose -f infra/docker-compose.yml pull
+            docker compose -f infra/docker-compose.yml up -d --no-build
 
             # Show status
             docker compose -f infra/docker-compose.yml ps
