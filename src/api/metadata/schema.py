@@ -1,3 +1,10 @@
+b3_listagem = [
+    "b3_listagem.setor",
+    "b3_listagem.subsetor",
+    "b3_listagem.segmento",
+    "b3_listagem.segmento_de_negociacao",
+]
+
 yahoo_chart = [
     "yahoo_chart.1mo",
     "yahoo_chart.1y",
@@ -133,4 +140,4 @@ investidor10 = [
     "investidor10.financeiro.segmento",
 ]
 
-all = yahoo_chart + yahoo + yahoo_recommendations + tradingview + simplywall + statusinvest + investidor10
+all = b3_listagem + yahoo_chart + yahoo + yahoo_recommendations + tradingview + simplywall + statusinvest + investidor10

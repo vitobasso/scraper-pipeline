@@ -7,7 +7,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.metadata import labels, schema, sources
-from src.common import config, ipc_signal, repository, util
+from src.common import config, date_util, ipc_signal, repository
 
 app = FastAPI()
 
@@ -87,8 +87,8 @@ def _get_pipeline_data(pipeline_dir: Path, start: date, end: date):
 
 
 def _select_file(ready_dir: Path, start: date, end: date) -> Path | None:
-    candidates = [f for f in ready_dir.glob("*.json") if start <= util.date_from_filename(f) <= end]
-    return max(candidates, key=util.date_from_filename) if candidates else None
+    candidates = [f for f in ready_dir.glob("*.json") if start <= date_util.date_from_filename(f) <= end]
+    return max(candidates, key=date_util.date_from_filename) if candidates else None
 
 
 def _flatten(d, parent_key="") -> dict[str, Any]:

@@ -1,12 +1,12 @@
 import asyncio
 from pathlib import Path
 
-from src.common.util import timestamp
+from src.common.date_util import timestamp
 from src.scraper.core import paths
 from src.scraper.services.browser import click_download, page_goto
 from src.scraper.services.proxies import random_proxy
 
-name = "b3idiv"
+name = "b3_idiv"
 
 
 def sync_download():

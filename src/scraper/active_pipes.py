@@ -1,7 +1,7 @@
 from src.scraper.pipelines import *
 
 _pipes = [
-    # fundamentus_fiis,
+    b3_listagem,
     investidor10,
     simplywall,
     statusinvest,

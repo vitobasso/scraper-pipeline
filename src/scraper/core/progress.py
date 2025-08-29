@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from src.common import config
+from src.common.date_util import datetime_from_filename
 from src.common.repository import query_tickers
-from src.common.util import datetime_from_filename
 from src.scraper.core import paths
 from src.scraper.core.logs import timestamp_from_log
 from src.scraper.core.scheduler import Progress

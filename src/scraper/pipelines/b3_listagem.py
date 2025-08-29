@@ -1,0 +1,189 @@
+import asyncio
+import csv
+import json
+import re
+from itertools import chain
+from pathlib import Path
+
+from src.common.date_util import timestamp
+from src.scraper.core import normalization, paths
+from src.scraper.core.logs import log
+from src.scraper.core.scheduler import Pipeline
+from src.scraper.core.tasks import global_task, intermediate_task
+from src.scraper.core.util import xls, zip
+from src.scraper.services.browser import download_bytes, error_name, find_url_contains, page_goto
+from src.scraper.services.data import known_tickers
+from src.scraper.services.proxies import random_proxy
+
+name = "b3_listagem"
+pipe_dir = paths.pipeline_dir("_global", name)
+
+
+def pipeline():
+    return Pipeline(
+        name=name,
+        tasks=[
+            global_task(name, sync_download),
+            intermediate_task(normalize, name, "normalization"),
+        ],
+    )
+
+
+def sync_download():
+    asyncio.run(download())
+
+
+async def download():
+    out_csv = paths.stage_dir(pipe_dir, "normalization") / f"{timestamp()}.csv"
+    proxy = random_proxy(name)
+    return await _download(proxy, out_csv)
+
+
+async def _download(proxy: str, out_csv: Path):
+    url = "https://sistemaswebb3-listados.b3.com.br/listedCompaniesPage/"
+    print(f"downloading csv, url: {url}, path: {out_csv}, proxy: {proxy}")
+    try:
+        async with page_goto(proxy, url) as page:
+            zip_url = await find_url_contains(page, url, ".zip")
+            zip_bytes = await download_bytes(page, zip_url)
+            _, xlsx_bytes = zip.first_file(zip_bytes, selector=".xlsx")
+            xls.to_csv(xlsx_bytes, out_csv, delimiter=";")
+    except Exception as e:
+        log(error_name(e), "_global", name)
+
+
+def normalize(input_csv: Path):
+    print(f"normalizing, path: {input_csv}")
+    try:
+        _normalize(input_csv)
+        # stamp and archive original csv (same pattern as statusinvest)
+        output, _, processed = paths.split_files(input_csv, "normalization", "ready", "stamp")
+        input_csv.rename(processed)
+        output.touch()
+    except Exception as e:
+        log(str(e), "_global", name)
+
+
+def _normalize(input_csv: Path):
+    # Read from CSV generated in download stage
+    with input_csv.open(encoding="utf-8") as f:
+        reader = csv.reader(f, delimiter=";")
+
+        buffered = _probe_buffer(reader)
+        header_idx = _find_header_index(buffered)
+        headers_found = _coalesce_headers(buffered, header_idx, depth=3)
+
+        col_index = {h: i for i, h in enumerate(headers_found)}
+        ticker_col = col_index.get("codigo")
+        if ticker_col is None:
+            raise ValueError("'codigo' column not found in headers")
+
+        headers_desired = ("setor", "subsetor", "segmento", "segmento_de_negociacao")
+        last_seen: dict[str, str | None] = {k: None for k in headers_desired}
+
+        def process_row(row: list[str]):
+            # map row -> data with cleaning and forward-fill
+            cleaned_values = [_clean(v) for v in row]
+            data = {headers_found[i]: cleaned_values[i] for i in range(min(len(headers_found), len(cleaned_values)))}
+            for key in last_seen.keys():
+                val = data.get(key)
+                if val is None and last_seen[key] is not None:
+                    data[key] = last_seen[key]  # propagate last seen when empty
+                elif val is not None:
+                    # only update last_seen when we got a concrete value
+                    last_seen[key] = val
+            # discard extra cols
+            data = {k: v for k, v in data.items() if k in headers_desired}
+            return data
+
+        valid_tickers = known_tickers()
+
+        # Single pass over rows after header (buffer tail + remaining reader)
+        for row in chain(buffered[header_idx + 1 :], reader):
+            # update state (last_seen) even when we won't emit a record
+            data = process_row(row)
+            if len(row) <= ticker_col:
+                continue
+            ticker_prefix = row[ticker_col].upper()
+            if not ticker_prefix:
+                continue
+            tickers = find_tickers(ticker_prefix, valid_tickers)
+            if not tickers:
+                continue
+            for t in tickers:
+                _write_record(input_csv, t, data)
+
+
+def find_tickers(partial, all_tickers):
+    partial = partial.upper()
+    pattern = re.compile(rf"^{re.escape(partial)}\d{{1,2}}$")
+    return [t for t in all_tickers if pattern.match(t)]
+
+
+def _probe_buffer(reader, max_probe: int = 10) -> list[list[str]]:
+    buffered: list[list[str]] = []
+    for _ in range(max_probe):
+        try:
+            row = next(reader)
+            buffered.append(row)
+        except StopIteration:
+            break
+    return buffered
+
+
+def _find_header_index(buffered: list[list[str]]) -> int:
+    expected = {
+        "setor",
+        "subsetor",
+        "segmento",
+        "emissor",
+        "nome_de_pregao",
+        "codigo",
+        "segmento_de_negociacao",
+    }
+    header_idx = 0
+    best_score = -1
+    for i, r in enumerate(buffered):
+        norm = [normalization.key(c or "") for c in r]
+        score = sum(1 for c in norm if c in expected)
+        if score > best_score:
+            best_score = score
+            header_idx = i
+    return header_idx
+
+
+def _coalesce_headers(buffered: list[list[str]], header_idx: int, depth: int = 3) -> list[str]:
+    # Coalesce non-empty cells from header row and a few rows below into a single header list
+    lines = buffered[header_idx : header_idx + depth]
+    max_len = max((len(r) for r in lines), default=0)
+    out: list[str] = []
+    for j in range(max_len):
+        cell = None
+        for i in range(len(lines)):
+            try:
+                v = lines[i][j]
+            except IndexError:
+                v = None
+            v = _clean(v)
+            if v:
+                cell = v
+                break
+        out.append(normalization.key(cell or ""))
+    return out
+
+
+def _clean(v):
+    try:
+        v = v.strip()
+        # treat common placeholders as empty to enable forward-fill
+        placeholders = {"", "-", "–", "—", "N/A", "n/a", "NA", "na"}
+        return None if v in placeholders else v
+    except AttributeError:
+        return v
+
+
+def _write_record(input_csv: Path, ticker: str, data: dict):
+    out_dir = paths.stage_dir_for(ticker, name, "ready")
+    out_path = out_dir / f"{input_csv.stem}.json"
+    with out_path.open("w", encoding="utf-8") as f_out:
+        json.dump(data, f_out, ensure_ascii=False, indent=2)

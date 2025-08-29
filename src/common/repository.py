@@ -4,10 +4,10 @@ from pathlib import Path
 
 from cachetools.func import ttl_cache
 
-from src.common.config import data_root
-from src.common.util import mkdir
+from src.common import config
+from src.scraper.core.util.files import mkdir
 
-db_file = mkdir(Path(data_root)) / "db.sqlite"
+db_file = mkdir(Path(config.data_root)) / "db.sqlite"
 
 
 def run_script(filename: str):

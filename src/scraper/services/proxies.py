@@ -6,9 +6,10 @@ import time
 import urllib.request
 from pathlib import Path
 
-from src.common import config, util
+from src.common import config
+from src.scraper.core.util import files
 
-list_dir = util.mkdir(Path(config.data_root) / "_proxy-list")
+list_dir = files.mkdir(Path(config.data_root) / "_proxy-list")
 
 _proxies = None
 
@@ -34,12 +35,12 @@ def _refresh() -> list[str]:
     if not _validate_latest_file():
         print("failed to download proxy lists", file=sys.stderr)
         sys.exit(1)
-    file = util.last_file(list_dir)
+    file = files.last_file(list_dir)
     return _load_list(file)
 
 
 def _validate_latest_file():
-    file = util.last_file(list_dir)
+    file = files.last_file(list_dir)
     return file and _validate_file(file)
 
 

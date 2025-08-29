@@ -1,4 +1,5 @@
 all = {
+    "b3_listagem": {"label": "B3, Listagem", "url": "https://www.b3.com.br"},
     "yahoo_chart": {"label": "Yahoo Finance API", "url": "https://ranaroussi.github.io/yfinance/"},
     "yahoo": {"label": "Yahoo Finance", "url": "https://finance.yahoo.com"},
     "yahoo_recommendations": {"label": "Yahoo Finance API", "url": "https://ranaroussi.github.io/yfinance/"},

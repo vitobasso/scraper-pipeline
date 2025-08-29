@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from src.common import util
+from src.common import date_util
 from src.scraper.core import paths
 
 cache = dict()
@@ -10,12 +10,12 @@ cache = dict()
 def log(msg: str, ticker: str, pipeline: str):
     logger = _get_logger(ticker, pipeline)
     safe_msg = msg.strip().replace("\n", "\\n")
-    logger.error(f"{util.timestamp()}: {safe_msg}")
+    logger.error(f"{date_util.timestamp()}: {safe_msg}")
 
 
 def timestamp_from_log(log_line: str):
     ts_str, _ = log_line.split(": ", 1)
-    return datetime.strptime(ts_str, util.timestamp_format)
+    return datetime.strptime(ts_str, date_util.timestamp_format)
 
 
 def _get_logger(ticker: str, pipeline: str):

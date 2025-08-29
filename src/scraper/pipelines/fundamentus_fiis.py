@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas
 
-from src.common.util import timestamp
+from src.common.date_util import timestamp
 from src.scraper.core import normalization, paths
 from src.scraper.core.logs import log
 from src.scraper.core.scheduler import Pipeline

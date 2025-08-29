@@ -1,8 +1,10 @@
 import re
 from asyncio import wait_for
+from collections.abc import Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urljoin
 
 from playwright.async_api import Error, ProxySettings, TimeoutError, ViewportSize, async_playwright
 
@@ -131,3 +133,83 @@ def error_name(e: Exception) -> str:
         return match.group(0) if match else str(e)
     else:
         return str(e)
+
+
+async def download_bytes(page, url: str) -> bytes:
+    resp = await page.context.request.get(url)
+    if not resp.ok:
+        raise RuntimeError(f"Failed to fetch: {url}, status={resp.status}")
+    return await resp.body()
+
+
+async def find_url_contains(page, base_url: str, substring: str) -> str:
+    """Find absolute URL whose href contains the given substring (case-insensitive)."""
+    sub_l = substring.lower()
+    return await find_url(page, base_url, href_predicate=lambda h: bool(h) and sub_l in h.lower())
+
+
+async def find_url_regex(page, base_url: str, pattern: str | re.Pattern) -> str:
+    """Find absolute URL whose href matches the provided regex pattern (case-insensitive if str)."""
+    rx = re.compile(pattern, re.IGNORECASE) if isinstance(pattern, str) else pattern
+    return await find_url(page, base_url, href_predicate=lambda h: bool(h) and bool(rx.search(h)))
+
+
+async def find_url(page, base_url: str, href_predicate: Callable[[str], bool]) -> str:
+    """Find absolute URL that matches href_predicate by scanning DOM and, if needed, HTML.
+    - href_predicate: receives the raw href string and returns True if it matches.
+    """
+    try:
+        await page.wait_for_load_state("load", timeout=timeout_millis)
+    except Exception:
+        pass
+    href = await _scan_dom_for_href(page, href_predicate)
+    if not href:
+        href = await _scan_html_for_href(page, base_url, href_predicate)
+    if not href:
+        raise RuntimeError("Could not find matching link on page via DOM or HTML fetch")
+    return urljoin(base_url, href)
+
+
+async def _scan_dom_for_href(page, href_predicate: Callable[[str], bool]) -> str | None:
+    try:
+        hrefs = await page.evaluate(
+            """
+            (() => Array.from(document.querySelectorAll('a'))
+              .map(a => a.getAttribute('href'))
+              .filter(Boolean))()
+            """
+        )
+        if not hrefs:
+            return None
+        for h in hrefs:
+            try:
+                if href_predicate(h):
+                    return h
+            except Exception:
+                continue
+        return None
+    except Exception:
+        return None
+
+
+async def _scan_html_for_href(page, url: str, href_predicate: Callable[[str], bool]) -> str | None:
+    try:
+        r = await page.context.request.get(url)
+        if not r.ok:
+            return None
+        html_text = await r.text()
+        hrefs = _extract_hrefs(html_text)
+        for h in hrefs:
+            try:
+                if href_predicate(h):
+                    return h
+            except Exception:
+                continue
+        return None
+    except Exception:
+        return None
+
+
+def _extract_hrefs(html_text: str) -> list[str]:
+    # Capture href values in single or double quotes, ignoring spaces and '>'
+    return re.findall(r"href=[\"']([^\"'\s>]+)[\"']", html_text, flags=re.IGNORECASE)

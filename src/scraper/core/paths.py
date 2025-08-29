@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from src.common.config import data_root
-from src.common.util import mkdir
+from src.scraper.core.util.files import mkdir
 
 """
 Path structure per ticker and pipeline:

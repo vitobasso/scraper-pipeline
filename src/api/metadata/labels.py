@@ -1,3 +1,10 @@
+b3_listagem = {
+    "b3_listagem.setor": {"short": "Setor", "long": "Setor"},
+    "b3_listagem.subsetor": {"short": "Subsetor", "long": "Subsetor"},
+    "b3_listagem.segmento": {"short": "Segmento", "long": "Segmento"},
+    "b3_listagem.segmento_de_negociacao": {"short": "Listagem", "long": "Segmento de Listagem"},
+}
+
 yahoo_chart = {
     "yahoo_chart.1mo": {"short": "1M", "long": "Último Mês"},
     "yahoo_chart.1y": {"short": "1A", "long": "Último Ano"},
@@ -125,12 +132,12 @@ investidor10 = {
     "investidor10.financeiro.ativos": {"short": "Ativos", "long": "Ativos"},
     "investidor10.financeiro.ativo_circulante": {"short": "AC", "long": "Ativo Circulante"},
     "investidor10.financeiro.disponibilidade": {"short": "Disp", "long": "Disponibilidade"},
-    "investidor10.financeiro.segmento_de_listagem": {"short": "SegLst", "long": "Segmento de Listagem"},
+    "investidor10.financeiro.segmento_de_listagem": {"short": "Listagem", "long": "Segmento de Listagem"},
     "investidor10.financeiro.free_float": {"short": "FF", "long": "Free Float"},
     "investidor10.financeiro.tag_along": {"short": "TA", "long": "Tag Along"},
     "investidor10.financeiro.liquidez_media_diaria": {"short": "LiqMD", "long": "Liquidez Média Diária"},
     "investidor10.financeiro.setor": {"short": "Setor", "long": "Setor"},
-    "investidor10.financeiro.segmento": {"short": "Segmt", "long": "Segmento"},
+    "investidor10.financeiro.segmento": {"short": "Segmento", "long": "Segmento"},
 }
 
-all = yahoo_chart | yahoo | yahoo_recommendations | tradingview | simplywall | statusinvest | investidor10
+all = b3_listagem | yahoo_chart | yahoo | yahoo_recommendations | tradingview | simplywall | statusinvest | investidor10

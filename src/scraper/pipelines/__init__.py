@@ -1,5 +1,6 @@
 __all__ = [
-    "b3idiv",
+    "b3_idiv",
+    "b3_listagem",
     "fundamentus_fiis",
     "investidor10",
     "simplywall",
