@@ -71,10 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Copy compose and infra files to VM and deploy
+      - name: Ensure remote directories
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_HOST }}
@@ -83,18 +80,37 @@ jobs:
           script_stop: true
           script: |
             set -euxo pipefail
-            # Create app dir if missing
-            mkdir -p ~/stocks-scraper
+            mkdir -p ~/stocks-scraper/infra
+
+      - name: Upload docker-compose.yml
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "infra/docker-compose.yml"
+          target: "~/stocks-scraper/"
+
+      - name: Upload .env.example (won't overwrite existing .env)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "infra/.env.example"
+          target: "~/stocks-scraper/"
+
+      - name: Deploy using prebuilt images
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euxo pipefail
             cd ~/stocks-scraper
-
-            # Pull latest code
-            if [ -d .git ]; then
-              git fetch --all
-              git reset --hard origin/main
-            else
-              git clone ${{ secrets.REPO_SSH_URL }} .
-            fi
-
+            
             # Define image tags for compose (must match workflow build tags)
             OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
             REPO_NAME=${{ github.event.repository.name }}
@@ -103,6 +119,9 @@ jobs:
 
             # Login to GHCR for pulling
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Ensure env file exists (create from example if missing)
+            if [ ! -f infra/.env ]; then cp infra/.env.example infra/.env; fi
 
             # Pull and (re)start services
             docker compose -f infra/docker-compose.yml pull
