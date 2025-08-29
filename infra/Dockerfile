@@ -5,16 +5,13 @@ FROM python:3.11-slim AS deps-builder
 
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    POETRY_VIRTUALENVS_CREATE=false \
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    POETRY_VIRTUALENVS_CREATE=false
 
 # Build-time system deps for compiling wheels
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       build-essential \
-       curl \
-       ca-certificates \
+    && apt-get install -y --no-install-recommends build-essential curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /w
@@ -30,10 +27,10 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 ########### Base stage (shared runtime deps, no browsers) ###########
 FROM python:3.11-slim AS base
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 # Runtime-only OS deps (keep minimal). curl + certs for health and TLS.
 RUN apt-get update \
