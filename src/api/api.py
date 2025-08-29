@@ -26,7 +26,7 @@ app.add_middleware(
 
 optional = Query(None)
 
-root_dir = Path(config.output_root)
+root_dir = Path(config.data_root)
 
 
 @app.get("/meta")

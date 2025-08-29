@@ -40,7 +40,7 @@ Add the `GOOGLE_GENAI_API_KEY` var in the `.env` file at the project root.
 
 #### Migrate DB
 
-Run once to setup `output/.../db.sqlite`
+Run once to setup `data/.../db.sqlite`
 
 ```
 python3 -m src.migrate_db

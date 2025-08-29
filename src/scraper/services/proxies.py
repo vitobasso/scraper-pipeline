@@ -8,7 +8,7 @@ from pathlib import Path
 
 from src.common import config, util
 
-list_dir = util.mkdir(Path(config.output_root) / "_proxy-list")
+list_dir = util.mkdir(Path(config.data_root) / "_proxy-list")
 
 _proxies = None
 

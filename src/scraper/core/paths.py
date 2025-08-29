@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from src.common.config import output_root
+from src.common.config import data_root
 from src.common.util import mkdir
 
 """
@@ -29,7 +29,7 @@ Path structure per ticker and pipeline:
 
 
 def pipeline_dir(ticker: str, pipeline: str):
-    return Path(output_root) / ticker / pipeline
+    return Path(data_root) / ticker / pipeline
 
 
 def pipeline_dir_for(child_path: Path) -> Path:

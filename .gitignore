@@ -10,4 +10,4 @@ __pycache__
 .env
 gcp-secret.json
 client-secret.json
-output
+data

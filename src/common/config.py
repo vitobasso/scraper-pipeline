@@ -16,7 +16,7 @@ def env_bool(name: str, default: str) -> bool:
 
 timestamp_format = "%Y%m%dT%H%M%S"
 
-output_root = env_str("CONFIG_OUTPUT_ROOT", "output")
+data_root = env_str("CONFIG_DATA_ROOT", "data")
 
 # overridable per pipeline
 use_proxies = env_bool("CONFIG_USE_PROXIES", "false")
