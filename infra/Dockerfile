@@ -11,7 +11,7 @@ ENV PIP_NO_CACHE_DIR=1 \
 
 # Build-time system deps for compiling wheels
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential curl ca-certificates \
+    && apt-get install -y --no-install-recommends build-essential ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /w
@@ -32,11 +32,9 @@ ENV PIP_NO_CACHE_DIR=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Runtime-only OS deps (keep minimal). curl + certs for health and TLS.
+# Runtime-only OS deps (keep minimal). certs for and TLS.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       curl \
-       ca-certificates \
+    && apt-get install -y --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
