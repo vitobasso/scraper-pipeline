@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+      target: api
+    container_name: stocks-api
+    restart: unless-stopped
+    environment:
+      - CONFIG_OUTPUT_ROOT=/app/output
+      # Add any other CONFIG_* envs as needed
+    volumes:
+      - ../output:/app/output
+      - ../input:/app/input:ro
+    ports:
+      # Bind only to localhost (Nginx on host will reverse proxy to this)
+      - "127.0.0.1:8000:8000"
+
+  scraper:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+      target: scraper
+    container_name: stocks-scraper
+    restart: unless-stopped
+    environment:
+      - CONFIG_OUTPUT_ROOT=/app/output
+      - CONFIG_USE_PROXIES=${CONFIG_USE_PROXIES:-false}
+      - CONFIG_ONLY_REQUESTED_TICKERS=${CONFIG_ONLY_REQUESTED_TICKERS:-false}
+      - CONFIG_KEEP_DEBUG_IMAGES=${CONFIG_KEEP_DEBUG_IMAGES:-false}
+    volumes:
+      - ../output:/app/output
+      - ../input:/app/input:ro
+    # No ports; long-running background worker
+
+# Named volumes could be used instead of bind mounts if preferred for persistence
+# volumes:
+#   output:
+#   input:
