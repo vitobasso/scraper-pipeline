@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 ########### Dependencies builder (Poetry) ###########
-FROM python:3.11-slim AS deps-builder
+FROM python:3.12-slim-bookworm AS deps-builder
 
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 
 ########### Base stage (shared runtime deps, no browsers) ###########
-FROM python:3.11-slim AS base
+FROM python:3.12-slim-bookworm AS base
 
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
@@ -40,7 +40,7 @@ RUN apt-get update \
 WORKDIR /app
 
 # Copy only installed Python packages and scripts from builder (no Poetry itself required at runtime)
-COPY --from=deps-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=deps-builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=deps-builder /usr/local/bin /usr/local/bin
 
 # Copy source (kept late for better caching when only code changes)
@@ -64,9 +64,7 @@ FROM base AS scraper
 
 # Install Playwright browsers only (Playwright Python is already installed in base via requirements.txt)
 # Use playwright CLI to install only Chromium to keep image small
-RUN --mount=type=cache,target=/root/.cache/ms-playwright \
-    python -m playwright install --with-deps chromium \
-    && rm -rf /var/lib/apt/lists/*
+RUN python -m playwright install --with-deps chromium
 
 # Default command (long-running scraper loop)
 CMD ["python", "-u", "-m", "src.scraper.scraper"]
