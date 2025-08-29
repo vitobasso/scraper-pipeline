@@ -1,14 +1,15 @@
 # syntax=docker/dockerfile:1.7
 
-# -------- Base stage (shared runtime deps, no browsers) --------
-FROM python:3.11-slim AS base
+########### Dependencies builder (Poetry) ###########
+FROM python:3.11-slim AS deps-builder
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    POETRY_VIRTUALENVS_CREATE=false \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-# System deps (build essentials for pillow/openpyxl/etc.; ca-certificates; curl for health/debug)
+# Build-time system deps for compiling wheels
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        build-essential \
@@ -16,41 +17,36 @@ RUN apt-get update \
        ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+WORKDIR /w
+COPY pyproject.toml poetry.lock ./
+
+# Install Poetry and then install project deps (no dev, no project itself)
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade pip \
+    && pip install poetry \
+    && poetry install --no-root --only main --no-interaction --no-ansi
+
+
+########### Base stage (shared runtime deps, no browsers) ###########
+FROM python:3.11-slim AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Runtime-only OS deps (keep minimal). curl + certs for health and TLS.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       curl \
+       ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Install Python deps (runtime only). We install directly from pyproject's poetry deps set below.
-# Using a constraints file avoids extra metadata resolution cost during build cache misses.
-COPY pyproject.toml ./
-
-# Extract runtime deps from poetry sections and install them via pip
-# Note: Keep this list aligned with [tool.poetry.dependencies] in pyproject.toml
-RUN --mount=type=cache,target=/root/.cache/pip \
-    python - <<'PY'
-from pathlib import Path
-import tomllib
-
-p = tomllib.loads(Path('pyproject.toml').read_text())
-# Poetry section names may vary; handle both tool.poetry.dependencies and legacy project.dependencies
-deps = p.get('tool', {}).get('poetry', {}).get('dependencies', {})
-if not deps:
-    raise SystemExit('No [tool.poetry.dependencies] found in pyproject.toml')
-# Remove python itself from deps if present
-deps.pop('python', None)
-# Convert to pip install line
-with open('requirements.txt', 'w') as f:
-    for name, spec in deps.items():
-        if isinstance(spec, str):
-            f.write(f"{name}{spec}\n")
-        elif isinstance(spec, dict) and 'version' in spec:
-            f.write(f"{name}{spec['version']}\n")
-        else:
-            # Fallback, attempt name as-is
-            f.write(f"{name}\n")
-print('Generated requirements.txt with', len(deps), 'deps')
-PY
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt
+# Copy only installed Python packages and scripts from builder (no Poetry itself required at runtime)
+COPY --from=deps-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=deps-builder /usr/local/bin /usr/local/bin
 
 # Copy source (kept late for better caching when only code changes)
 COPY src ./src
@@ -59,7 +55,7 @@ COPY src ./src
 ENV CONFIG_OUTPUT_ROOT=/app/output
 RUN mkdir -p /app/output
 
-# -------- API stage (smallest possible image) --------
+########### API stage (smallest possible image) ###########
 FROM base AS api
 # Expose port for uvicorn
 EXPOSE 8000
@@ -68,7 +64,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s CMD python -c "import
 # Default command (can be overridden by compose)
 CMD ["python", "-m", "uvicorn", "src.api.api:app", "--host", "0.0.0.0", "--port", "8000"]
 
-# -------- Scraper stage (adds Playwright browser runtime) --------
+########### Scraper stage (adds Playwright browser runtime) ###########
 FROM base AS scraper
 
 # Install Playwright browsers only (Playwright Python is already installed in base via requirements.txt)
