@@ -1,8 +1,17 @@
+# Data
+
+### valor justo?
+- Valor de Graham (intrínseco): sqrt( 22.5 x LPA x VPA )
+
 # User Experience
+
+### validate tickers
 
 ### normalize investidor10 "R$ 1234.0 Bilhoes"
 
 ### live update the frontend via websocket
+
+### when importing b3, add all tickers (ask confirmation)
 
 ### import b3 automatically
 

@@ -12,41 +12,41 @@ yahoo_chart = {
 }
 
 yahoo = {
-    "yahoo.rating.strong_buy": {"short": "SBuy", "long": "Compra Forte"},
-    "yahoo.rating.buy": {"short": "Buy", "long": "Compra"},
-    "yahoo.rating.hold": {"short": "Hold", "long": "Manter"},
-    "yahoo.rating.sell": {"short": "Sell", "long": "Venda"},
-    "yahoo.rating.strong_sell": {"short": "SSell", "long": "Venda Forte"},
+    "yahoo.rating.strong_buy": {"short": "CF", "long": "Compra Forte"},
+    "yahoo.rating.buy": {"short": "C", "long": "Compra"},
+    "yahoo.rating.hold": {"short": "M", "long": "Manter"},
+    "yahoo.rating.sell": {"short": "V", "long": "Venda"},
+    "yahoo.rating.strong_sell": {"short": "VF", "long": "Venda Forte"},
     "yahoo.forecast.min": {"short": "Min", "long": "Previsão Mínima"},
     "yahoo.forecast.avg": {"short": "Méd", "long": "Previsão Média"},
     "yahoo.forecast.max": {"short": "Max", "long": "Previsão Máxima"},
 }
 
 yahoo_recommendations = {
-    "yahoo_recommendations.strong_buy": {"short": "SBuy", "long": "Compra Forte"},
-    "yahoo_recommendations.buy": {"short": "Buy", "long": "Compra"},
-    "yahoo_recommendations.hold": {"short": "Hold", "long": "Manter"},
-    "yahoo_recommendations.sell": {"short": "Sell", "long": "Venda"},
-    "yahoo_recommendations.strong_sell": {"short": "SSell", "long": "Venda Forte"},
+    "yahoo_recommendations.strong_buy": {"short": "CF", "long": "Compra Forte"},
+    "yahoo_recommendations.buy": {"short": "C", "long": "Compra"},
+    "yahoo_recommendations.hold": {"short": "M", "long": "Manter"},
+    "yahoo_recommendations.sell": {"short": "V", "long": "Venda"},
+    "yahoo_recommendations.strong_sell": {"short": "VF", "long": "Venda Forte"},
 }
 
 tradingview = {
-    "tradingview.rating.strong_buy": {"short": "SBuy", "long": "Compra Forte"},
-    "tradingview.rating.buy": {"short": "Buy", "long": "Compra"},
-    "tradingview.rating.hold": {"short": "Hold", "long": "Manter"},
-    "tradingview.rating.sell": {"short": "Sell", "long": "Venda"},
-    "tradingview.rating.strong_sell": {"short": "SSell", "long": "Venda Forte"},
+    "tradingview.rating.strong_buy": {"short": "CF", "long": "Compra Forte"},
+    "tradingview.rating.buy": {"short": "C", "long": "Compra"},
+    "tradingview.rating.hold": {"short": "M", "long": "Manter"},
+    "tradingview.rating.sell": {"short": "V", "long": "Venda"},
+    "tradingview.rating.strong_sell": {"short": "VF", "long": "Venda Forte"},
     "tradingview.forecast.min": {"short": "Min", "long": "Previsão Mínima"},
     "tradingview.forecast.avg": {"short": "Méd", "long": "Previsão Média"},
     "tradingview.forecast.max": {"short": "Max", "long": "Previsão Máxima"},
 }
 
 simplywall = {
-    "simplywall.value": {"short": "Valor", "long": "Valor"},
-    "simplywall.future": {"short": "Futur", "long": "Futuro"},
-    "simplywall.past": {"short": "Passa", "long": "Passado"},
-    "simplywall.health": {"short": "Saúde", "long": "Saúde Financeira"},
-    "simplywall.dividend": {"short": "Divid", "long": "Dividendos"},
+    "simplywall.value": {"short": "Va", "long": "Valor"},
+    "simplywall.future": {"short": "Fu", "long": "Futuro"},
+    "simplywall.past": {"short": "Pa", "long": "Passado"},
+    "simplywall.health": {"short": "Sa", "long": "Saúde Financeira"},
+    "simplywall.dividend": {"short": "Di", "long": "Dividendos"},
 }
 
 statusinvest = {
