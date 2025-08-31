@@ -1,7 +1,7 @@
 import asyncio
 from pathlib import Path
 
-from src.common.date_util import timestamp
+from src.common.util.date_util import timestamp
 from src.scraper.core import paths
 from src.scraper.core.logs import log
 from src.scraper.services.browser import common_ancestor, error_name, page_goto

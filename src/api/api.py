@@ -4,11 +4,13 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, Query, HTTPException, status
+from fastapi import FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.metadata import labels, schema, sources
-from src.common import config, date_util, ipc_signal, repository
+from src.common import config
+from src.common.services import data, ipc_signal, repository
+from src.common.util import date_util
 
 app = FastAPI()
 
@@ -36,14 +38,15 @@ def get_meta():
         "schema": schema.all,
         "sources": sources.all,
         "labels": labels.all,
+        "tickers": data.known_tickers(),
     }
 
 
 @app.get("/data")
 def get_data(
-        tickers: str,
-        start: date | None = None,
-        end: date | None = None,
+    tickers: str,
+    start: date | None = None,
+    end: date | None = None,
 ) -> dict[str, Any]:
     tickers = _validate_tickers(tickers)
     start, end = _validate_period(start, end)

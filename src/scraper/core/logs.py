@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from src.common import date_util
+from src.common.util import date_util
 from src.scraper.core import paths
 
 cache = dict()

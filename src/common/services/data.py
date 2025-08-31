@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from src.common import config, repository
+from src.common import config
+from src.common.services import repository
 
 
 def known_tickers(limit: int = 1000) -> list[str]:

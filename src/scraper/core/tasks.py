@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from pathlib import Path
 
-from src.common import repository
+from src.common.services import repository
 from src.scraper.core import extraction, normalization, progress, validation
 from src.scraper.core.scheduler import Task
 

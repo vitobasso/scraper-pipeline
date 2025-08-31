@@ -3,8 +3,9 @@ import csv
 import json
 from pathlib import Path
 
-from src.common import config, repository
-from src.common.date_util import timestamp
+from src.common import config
+from src.common.services import repository
+from src.common.util.date_util import timestamp
 from src.scraper.core import normalization, paths
 from src.scraper.core.logs import log
 from src.scraper.core.scheduler import Pipeline

@@ -1,6 +1,7 @@
 import random
 
-from src.common import config, ipc_signal
+from src.common import config
+from src.common.services import ipc_signal
 from src.scraper.active_pipes import pipes
 
 if __name__ == "__main__":
