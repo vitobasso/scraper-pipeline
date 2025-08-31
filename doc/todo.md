@@ -5,8 +5,6 @@
 
 # User Experience
 
-### validate tickers
-
 ### normalize investidor10 "R$ 1234.0 Bilhoes"
 
 ### live update the frontend via websocket

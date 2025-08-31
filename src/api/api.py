@@ -1,9 +1,10 @@
 import json
+import re
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.metadata import labels, schema, sources
@@ -40,13 +41,12 @@ def get_meta():
 
 @app.get("/data")
 def get_data(
-    tickers: str,
-    start: date | None = optional,
-    end: date | None = optional,
+        tickers: str,
+        start: date | None = None,
+        end: date | None = None,
 ) -> dict[str, Any]:
-    end = end or date.today()
-    start = start or end - timedelta(days=30)
-    tickers = tickers.split(",")
+    tickers = _validate_tickers(tickers)
+    start, end = _validate_period(start, end)
     repository.upsert_tickers(tickers)
     ipc_signal.wake_scraper()
     return _load_data(tickers, start, end)
@@ -100,3 +100,25 @@ def _flatten(d, parent_key="") -> dict[str, Any]:
         else:
             items[new_key] = v
     return items
+
+
+def _validate_tickers(tickers: str) -> list[str]:
+    tickers = [t.strip().upper() for t in tickers.split(",") if t.strip()]
+    if not tickers:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No tickers provided",
+        )
+    pattern = re.compile(r"^[A-Z0-9]{4}[0-9]{1,2}$")
+    return [t for t in tickers if pattern.match(t)]
+
+
+def _validate_period(start: date, end: date) -> tuple[date, date]:
+    end = end or date.today()
+    start = start or end - timedelta(days=30)
+    if end < start:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="End date must be later than start date",
+        )
+    return start, end
