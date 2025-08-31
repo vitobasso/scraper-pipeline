@@ -5,8 +5,6 @@
 
 # User Experience
 
-### normalize investidor10 "R$ 1234.0 Bilhoes"
-
 ### live update the frontend via websocket
 
 ### when importing b3, add all tickers (ask confirmation)
@@ -22,6 +20,12 @@
 queue non-displayed pipelines but prioritize the ones being displayed
 
 # Dev Experience
+
+### unit tests
+- normalization
+- validation
+
+### replace poetry with uv
 
 ### CI/CD
 - docker-compose

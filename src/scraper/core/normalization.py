@@ -3,6 +3,7 @@ import re
 import unicodedata
 from collections.abc import Callable
 from pathlib import Path
+from functools import reduce
 
 from src.scraper.core import paths
 from src.scraper.core.logs import log
@@ -20,6 +21,10 @@ def normalize_json(input_path: Path, function: Callable, next_stage: str):
     except Exception as e:
         ticker, pipeline = paths.extract_ticker_pipeline(input_path)
         log(str(e), ticker, pipeline)
+
+
+def pipe(*funcs: Callable):
+    return lambda v: reduce(lambda acc, f: f(acc), funcs, v)
 
 
 def rename_keys(rename_dict):
@@ -41,9 +46,8 @@ def string(v):
 
 def number(v):
     try:
-        v = re.sub(r"[R$%\s]", "", v)
-        v = v.replace("%", "").replace(".", "").replace(",", ".")
-        return float(v)
+        replaced = v.replace("R$", "").replace("%", "").replace(".", "").replace(",", ".").strip()
+        return float(replaced)
     except (ValueError, TypeError):
         return v
 
@@ -82,3 +86,25 @@ def _traverse_values(d, func):
         return [_traverse_values(v, func) for v in d]
     else:
         return func(d)
+
+
+def traverse_dict(transform_dict: dict[str, Callable]):
+    return lambda d: _traverse_dict(d, transform_dict)
+
+
+def _traverse_dict(d, func_dict: dict[str, Callable]):
+    if isinstance(d, dict):
+        out = {}
+        for k, v in d.items():
+            if k in func_dict:
+                try:
+                    out[k] = func_dict[k](v)
+                except Exception:
+                    out[k] = v
+            else:
+                out[k] = _traverse_dict(v, func_dict)
+        return out
+    elif isinstance(d, list):
+        return [_traverse_dict(x, func_dict) for x in d]
+    else:
+        return d
