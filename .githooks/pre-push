@@ -1,0 +1,7 @@
+#!/bin/sh
+echo "Running linter..."
+.venv/bin/ruff check --fix . && .venv/bin/ruff format
+if [ $? -ne 0 ]; then
+  echo "Lint failed, push aborted."
+  exit 1
+fi

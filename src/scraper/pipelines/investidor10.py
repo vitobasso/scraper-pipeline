@@ -89,7 +89,7 @@ def _parse_magnitude(v):
         return v
     stripped = unit_re.sub("", v)
     num = normalization.value(stripped)
-    if not isinstance(num, (int, float)):
+    if not isinstance(num, int | float):
         return v
     if unit == "mi":
         return num * 1_000_000.0

@@ -62,11 +62,11 @@ source .venv/bin/activate
 uvicorn src.api.api:app --host 0.0.0.0 --port 8000
 ```
 
-#### Linting
+#### Enable pre-commit hooks
+To auto-run linting and formatting before pushing
 
 ```
-ruff check --fix .
-ruff format .
+git config core.hooksPath .githooks
 ```
 
 ## References

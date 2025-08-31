@@ -2,8 +2,8 @@ import json
 import re
 import unicodedata
 from collections.abc import Callable
-from pathlib import Path
 from functools import reduce
+from pathlib import Path
 
 from src.scraper.core import paths
 from src.scraper.core.logs import log
