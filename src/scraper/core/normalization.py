@@ -1,3 +1,4 @@
+import csv
 import json
 import re
 import unicodedata
@@ -5,11 +6,13 @@ from collections.abc import Callable
 from functools import reduce
 from pathlib import Path
 
+from src.common import config
+from src.common.services import repository
 from src.scraper.core import paths
-from src.scraper.core.logs import log
+from src.scraper.core.logs import log_for_path
 
 
-def normalize_json(input_path: Path, function: Callable, next_stage: str):
+def normalize_json(input_path: Path, function: Callable, next_stage: str = "ready"):
     print(f"normalizing, path: {input_path}")
     try:
         with input_path.open(encoding="utf-8") as f:
@@ -19,8 +22,47 @@ def normalize_json(input_path: Path, function: Callable, next_stage: str):
             json.dump(data, f)
         input_path.rename(processed)
     except Exception as e:
-        ticker, pipeline = paths.extract_ticker_pipeline(input_path)
-        log(str(e), ticker, pipeline)
+        log_for_path(str(e), input_path)
+
+
+def normalize_csv(input_path: Path, function: Callable, next_stage: str):
+    print(f"normalizing, path: {input_path}")
+    try:
+        _normalize_csv(input_path, function)
+        output, _, processed = paths.split_files(input_path, "normalization", next_stage, "stamp")
+        input_path.rename(processed)
+        output.touch()
+    except Exception as e:
+        log_for_path(str(e), input_path)
+
+
+def _normalize_csv(input_path: Path, function: Callable):
+    """
+    Splits the csv into one json per ticker.
+    Assumptions:
+     - csv contains multiple tickers
+     - the first line is the header
+     - the first column contains tickers
+    """
+    asset_class, _, pipe_name = paths.extract_ticker_pipeline(input_path)
+    requested_tickers = set(repository.query_tickers(asset_class))
+    with input_path.open(encoding="utf-8") as f:
+        reader = csv.reader(f)
+        headers = [h for h in (next(reader))]
+
+        for row in reader:
+            if not row:
+                continue
+            ticker, *rest = row
+            if config.only_requested_tickers and ticker not in requested_tickers:
+                continue
+            values = [v for v in rest]
+            data_raw = dict(zip(headers, [ticker] + values, strict=False))
+            data_norm = function(data_raw)
+
+            out_path = paths.stage_dir_for_parts(asset_class, ticker, pipe_name, "ready") / f"{input_path.stem}.json"
+            with out_path.open("w", encoding="utf-8") as out:
+                json.dump(data_norm, out, ensure_ascii=False, indent=2)
 
 
 def pipe(*funcs: Callable):
@@ -48,18 +90,28 @@ def number(v):
     try:
         replaced = v.replace("R$", "").replace("%", "").replace(".", "").replace(",", ".").strip()
         return float(replaced)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, AttributeError):
         return v
 
 
-def key(header: str) -> str:
-    header = header.lower()
+def key(k: str) -> str:
+    k = k.lower()
     # remove accents
-    header = "".join(c for c in unicodedata.normalize("NFKD", header) if not unicodedata.combining(c))
+    k = "".join(c for c in unicodedata.normalize("NFKD", k) if not unicodedata.combining(c))
     # replace symbols with space
-    header = re.sub(r"[^a-z0-9]+", " ", header)
+    k = re.sub(r"[^a-z0-9]+", " ", k)
     # trim and replace spaces with underscores
-    return "_".join(header.strip().split())
+    return "_".join(k.strip().split())
+
+
+def remove_keys(*keys: str):
+    return lambda d: _remove_keys(d, *keys)
+
+
+def _remove_keys(data, *keys: str):
+    for k in keys:
+        data.pop(k, None)
+    return data
 
 
 def traverse_keys(func):

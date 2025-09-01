@@ -7,6 +7,7 @@ import urllib.request
 from pathlib import Path
 
 from src.common import config
+from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.util import files
 
 list_dir = files.mkdir(Path(config.data_root) / "_proxy-list")
@@ -14,12 +15,12 @@ list_dir = files.mkdir(Path(config.data_root) / "_proxy-list")
 _proxies = None
 
 
-def random_proxy(pipeline):
-    return random.choice(_init()) if _is_enabled_for(pipeline) else None
+def random_proxy(pipe: Pipeline):
+    return random.choice(_init()) if _is_enabled_for(pipe) else None
 
 
-def _is_enabled_for(pipeline):
-    return config.use_proxies_for_pipeline.get(pipeline, config.use_proxies)
+def _is_enabled_for(pipe: Pipeline):
+    return config.use_proxies_for_pipeline.get(pipe.name, config.use_proxies)
 
 
 def _init():

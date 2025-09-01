@@ -4,8 +4,7 @@ from PIL import Image
 
 from src.common import config
 from src.scraper.core import paths
-from src.scraper.core.logs import log
-from src.scraper.core.paths import extract_ticker_pipeline
+from src.scraper.core.logs import log_for_path
 from src.scraper.services.llm import llm
 
 this_stage = "extraction"
@@ -37,8 +36,7 @@ def extract(image_path: Path, prompt: str, next_stage: str):
                 f.write(response.text)
         discard(image_path, processed)
     except Exception as e:
-        ticker, pipeline = extract_ticker_pipeline(image_path)
-        log(str(e), ticker, pipeline)
+        log_for_path(str(e), image_path)
         discard(image_path, failed)
 
 

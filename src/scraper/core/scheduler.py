@@ -1,7 +1,8 @@
+import inspect
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TypeVar
+from typing import Literal, TypeVar, get_args
 
 from src.common.services.repository import query_tickers
 
@@ -28,12 +29,24 @@ class Task:
     find_input: Callable[[], set[str | Path] | bool]
     progress: Callable[[], Progress] | None
     execute: Callable
+    pipeline: "Pipeline"
+
+
+AssetClass = Literal["stock_br", "reit_br"]
 
 
 @dataclass
 class Pipeline:
     name: str
+    asset_class: AssetClass
     tasks: list[Task]
+
+    @classmethod
+    def from_caller(cls, tasks: list["TaskFactory"]):
+        asset_class, name = _get_pipeline_name(inspect.stack()[1].filename)
+        pipeline = cls(name=name, asset_class=asset_class, tasks=[])
+        pipeline.tasks = [t(pipeline) for t in tasks]
+        return pipeline
 
     def run_next(self):
         for task in self.tasks[::-1]:
@@ -47,11 +60,16 @@ class Pipeline:
         return self.progress().is_done()
 
 
-def _try_task(task):
+TaskFactory = Callable[[Pipeline], Task]
+A = TypeVar("A")
+Executable = Callable[[Pipeline, A], any]
+
+
+def _try_task(task: Task):
     input_options = task.find_input()
     if input_options:
         if isinstance(input_options, set):
-            selected_input = _select_input(input_options)
+            selected_input = _select_input(input_options, task.pipeline.asset_class)
             task.execute(selected_input)
         else:
             task.execute()  # global task takes no input
@@ -60,11 +78,8 @@ def _try_task(task):
         return False
 
 
-A = TypeVar("A", str, Path)
-
-
-def _select_input(options: set[A]) -> A:
-    priority = query_tickers()
+def _select_input(options: set[A], asset_class: AssetClass) -> A:
+    priority = query_tickers(asset_class)
     pmap = {ticker: i for i, ticker in enumerate(priority)}
 
     def _extract_ticker(opt: A):
@@ -75,3 +90,11 @@ def _select_input(options: set[A]) -> A:
         return None
 
     return min(options, key=lambda opt: pmap.get(_extract_ticker(opt), float("inf")))
+
+
+def _get_pipeline_name(caller_file) -> tuple[AssetClass, str]:
+    p = Path(caller_file)
+    asset_class = p.parent.name
+    if asset_class not in list(get_args(AssetClass)):
+        raise ValueError(f"Unknown asset class: {asset_class}")
+    return asset_class, p.stem  # type: ignore

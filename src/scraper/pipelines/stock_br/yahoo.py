@@ -1,6 +1,5 @@
 import asyncio
 import re
-from pathlib import Path
 
 from src.scraper.core import normalization
 from src.scraper.core.logs import log
@@ -10,29 +9,28 @@ from src.scraper.core.tasks import extract_json, normalize_json, source_task, va
 from src.scraper.services.browser import click, error_name, page_goto
 from src.scraper.services.proxies import random_proxy
 
-name = "yahoo"
-
 
 def pipeline():
-    return Pipeline(
-        name=name,
+    return Pipeline.from_caller(
         tasks=[
-            source_task(name, screenshot),
-            extract_json(name, prompt),
-            validate_json(name, schema),
-            normalize_json(name, normalize),
+            source_task(screenshot),
+            extract_json(prompt),
+            validate_json(schema),
+            normalize_json(normalize),
         ],
     )
 
 
-def screenshot(ticker: str):
+def screenshot(pipe: Pipeline, ticker: str):
+    asyncio.run(_screenshot(pipe, ticker))
+
+
+async def _screenshot(pipe: Pipeline, ticker: str):
+    proxy = random_proxy(pipe)
     url_ticker = f"{ticker}.sa" if re.match(r"\w{4}\d\d?", ticker) else ticker
     url = f"https://finance.yahoo.com/quote/{url_ticker}/analysis"
-    path = output_path(ticker, name)
-    asyncio.run(_screenshot(random_proxy(name), url, path, ticker))
+    path = output_path(ticker, pipe)
 
-
-async def _screenshot(proxy: str, url: str, path: Path, ticker: str):
     print(f"taking screenshot, url: {url}, path: {path}, proxy: {proxy}")
     try:
         async with page_goto(proxy, url, wait_until="domcontentloaded") as page:
@@ -40,7 +38,7 @@ async def _screenshot(proxy: str, url: str, path: Path, ticker: str):
             await _dismiss_upgrade(page)
             await page.locator("div.cards-container").screenshot(path=path)
     except Exception as e:
-        log(error_name(e), ticker, name)
+        log(error_name(e), ticker, pipe)
 
 
 async def _reject_cookies(page):

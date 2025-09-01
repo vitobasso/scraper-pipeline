@@ -5,23 +5,20 @@ from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.screenshot import ss_full_page
 from src.scraper.core.tasks import extract_json, normalize_json, source_task, validate_json
 
-name = "investidor10"
-
 
 def pipeline():
-    return Pipeline(
-        name=name,
+    return Pipeline.from_caller(
         tasks=[
-            source_task(name, screenshot),
-            extract_json(name, prompt),
-            validate_json(name, schema),
-            normalize_json(name, normalize),
+            source_task(screenshot),
+            extract_json(prompt),
+            validate_json(schema),
+            normalize_json(normalize),
         ],
     )
 
 
-def screenshot(ticker: str):
-    ss_full_page(ticker, name, f"https://investidor10.com.br/acoes/{ticker}/")
+def screenshot(pipe: Pipeline, ticker: str):
+    ss_full_page(ticker, pipe, f"https://investidor10.com.br/acoes/{ticker}/")
 
 
 prompt = """

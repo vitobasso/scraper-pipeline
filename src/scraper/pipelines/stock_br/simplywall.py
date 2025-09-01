@@ -10,28 +10,25 @@ from src.scraper.core.tasks import normalize_json, source_task, validate_json
 from src.scraper.services import browser
 from src.scraper.services.proxies import random_proxy
 
-name = "simplywall"
-
 
 def pipeline():
-    return Pipeline(
-        name=name,
+    return Pipeline.from_caller(
         tasks=[
-            source_task(name, scrape),
-            normalize_json(name, normalize, "validation"),
-            validate_json(name, schema, "ready"),
+            source_task(scrape),
+            normalize_json(normalize, "validation"),
+            validate_json(schema, "ready"),
         ],
     )
 
 
-def scrape(ticker):
+def scrape(pipe: Pipeline, ticker: str):
     url = f"https://simplywall.st/stock/bovespa/{ticker.lower()}"
-    path = paths.stage_dir_for(ticker, name, "normalization") / f"{timestamp()}.json"
-    proxy = random_proxy(name)
-    asyncio.run(_scrape(proxy, url, path, ticker))
+    path = paths.stage_dir_for(pipe, ticker, "normalization") / f"{timestamp()}.json"
+    proxy = random_proxy(pipe)
+    asyncio.run(_scrape(proxy, url, path, pipe, ticker))
 
 
-async def _scrape(proxy: str, url: str, path: Path, ticker: str):
+async def _scrape(proxy: str, url: str, path: Path, pipe: Pipeline, ticker: str):
     print(f"scraping json, url: {url}, path: {path}, proxy: {proxy}")
     try:
         async with browser.new_page(proxy) as page:
@@ -39,7 +36,7 @@ async def _scrape(proxy: str, url: str, path: Path, ticker: str):
             analysis_url = f"https://simplywall.st{analysis_path}"
             await _intercept_company_summary(page, analysis_url, path)
     except Exception as e:
-        log(browser.error_name(e), ticker, name)
+        log(browser.error_name(e), ticker, pipe)
 
 
 async def _extract_href(page, url) -> str:

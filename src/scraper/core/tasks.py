@@ -3,59 +3,68 @@ from pathlib import Path
 
 from src.common.services import repository
 from src.scraper.core import extraction, normalization, progress, validation
-from src.scraper.core.scheduler import Task
+from src.scraper.core.scheduler import Executable, Task, TaskFactory
 
 
-def source_task(pipeline: str, execute: Callable[[str], any]) -> Task:
-    return Task(
-        find_input=lambda: progress.progress(pipeline, set(repository.query_tickers())).available(),
-        progress=lambda: progress.progress(pipeline, set(repository.query_tickers())),
-        execute=execute,
+def source_task(execute: Executable[str]) -> TaskFactory:
+    get_progress = lambda pipe: progress.progress(pipe, set(repository.query_tickers(pipe.asset_class)))
+    return lambda pipe: Task(
+        find_input=lambda: get_progress(pipe).available(),
+        progress=lambda: get_progress(pipe),
+        execute=lambda arg: execute(pipe, arg),
+        pipeline=pipe,
     )
 
 
-def intermediate_task(execute: Callable[[Path], any], pipeline: str, stage: str) -> Task:
-    return Task(
-        find_input=lambda: progress.intermediate_input(pipeline, stage),
-        progress=None,  # pipeline progress is based on the source task
-        execute=execute,
-    )
-
-
-def global_task(pipeline: str, execute) -> Task:
+def global_task(execute) -> TaskFactory:
     # a source task that takes no input
-    # find_input is a bool indicating whether the task is not done yet
-    return Task(
-        find_input=lambda: not progress.has_recent_files("_global", pipeline, "ready"),
-        progress=lambda: progress.progress(pipeline, {"_global"}),
-        execute=execute,
+    # find_input returns a bool indicating whether the task is not done yet
+    return lambda pipe: Task(
+        find_input=lambda: not progress.has_recent_files(pipe, "_global", "ready"),
+        progress=lambda: progress.progress(pipe, {"_global"}),
+        execute=lambda: execute(pipe),
+        pipeline=pipe,
     )
 
 
-def extract_json(pipeline: str, prompt: str, next_stage: str = "validation") -> Task:
-    execute = lambda path: extraction.extract_json(path, prompt, next_stage)
-    return intermediate_task(execute, pipeline, "extraction")
+def intermediate_task(execute: Executable[Path], stage: str) -> TaskFactory:
+    return lambda pipe: Task(
+        find_input=lambda: progress.intermediate_input(pipe, stage),
+        progress=None,  # pipeline progress is based on the source task
+        execute=lambda arg: execute(pipe, arg),
+        pipeline=pipe,
+    )
 
 
-def validate_json(pipeline: str, arg, next_stage: str = "normalization") -> Task:
+def extract_json(prompt: str, next_stage: str = "validation") -> TaskFactory:
+    execute = lambda pipe, path: extraction.extract_json(path, prompt, next_stage)
+    return intermediate_task(execute, "extraction")
+
+
+def validate_json(arg, next_stage: str = "normalization") -> TaskFactory:
     if isinstance(arg, dict):
-        return _validate_json_schema(pipeline, arg, next_stage)
+        return _validate_json_schema(arg, next_stage)
     elif callable(arg):
-        return _validate_json_callable(pipeline, arg, next_stage)
+        return _validate_json_callable(arg, next_stage)  # type: ignore
     else:
         raise TypeError(f"validate_data not implemented for type: {type(arg)}")
 
 
-def _validate_json_schema(pipeline: str, schema, next_stage: str) -> Task:
-    execute = lambda path: validation.validate_schema(path, schema, next_stage)
-    return intermediate_task(execute, pipeline, "validation")
+def _validate_json_schema(schema, next_stage: str) -> TaskFactory:
+    execute = lambda pipe, path: validation.validate_schema(path, schema, next_stage)
+    return intermediate_task(execute, "validation")
 
 
-def _validate_json_callable(pipeline: str, validator: Callable[[str], list], next_stage: str) -> Task:
-    execute = lambda path: validation.validate_json(path, validator, next_stage)
-    return intermediate_task(execute, pipeline, "validation")
+def _validate_json_callable(validator: Callable[[str], list], next_stage: str) -> TaskFactory:
+    execute = lambda pipe, path: validation.validate_json(path, validator, next_stage)
+    return intermediate_task(execute, "validation")
 
 
-def normalize_json(pipeline: str, function: Callable, next_stage: str = "ready") -> Task:
-    execute = lambda path: normalization.normalize_json(path, function, next_stage)
-    return intermediate_task(execute, pipeline, "normalization")
+def normalize_json(function: Callable, next_stage: str = "ready") -> TaskFactory:
+    execute = lambda pipe, path: normalization.normalize_json(path, function, next_stage)
+    return intermediate_task(execute, "normalization")
+
+
+def normalize_csv(function: Callable, next_stage: str = "ready") -> TaskFactory:
+    execute = lambda pipe, path: normalization.normalize_csv(path, function, next_stage)
+    return intermediate_task(execute, "normalization")

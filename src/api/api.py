@@ -7,7 +7,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.metadata import labels, schema, sources
+from src.api import metadata
 from src.common import config
 from src.common.services import data, ipc_signal, repository
 from src.common.util import date_util
@@ -35,37 +35,48 @@ root_dir = Path(config.data_root)
 @app.get("/meta")
 def get_meta():
     return {
-        "schema": schema.all,
-        "sources": sources.all,
-        "labels": labels.all,
-        "tickers": data.known_tickers(),
+        "stock_br": {
+            "schema": metadata.stock_br.schema.all,
+            "sources": metadata.stock_br.sources.all,
+            "labels": metadata.stock_br.labels.all,
+            "tickers": data.known_tickers("stock_br"),
+        },
+        "reit_br": {
+            "schema": metadata.reit_br.schema.all,
+            "sources": metadata.reit_br.sources.all,
+            "labels": metadata.reit_br.labels.all,
+            "tickers": data.known_tickers("reit_br"),
+        },
     }
 
 
 @app.get("/data")
 def get_data(
-    tickers: str,
+    stock_br: str | None = None,
+    reit_br: str | None = None,
     start: date | None = None,
     end: date | None = None,
 ) -> dict[str, Any]:
-    tickers = _validate_tickers(tickers)
     start, end = _validate_period(start, end)
-    repository.upsert_tickers(tickers)
+    stock_br, reit_br = _process_tickers(stock_br, reit_br)
     ipc_signal.wake_scraper()
-    return _load_data(tickers, start, end)
+    return {
+        "stock_br": _load_data("stock_br", stock_br, start, end),
+        "reit_br": _load_data("reit_br", reit_br, start, end),
+    }
 
 
-def _load_data(tickers, start, end) -> dict[str, Any]:
+def _load_data(asset_class: str, tickers, start, end) -> dict[str, Any]:
     results = {}
     for ticker in tickers:
-        ticker_data = _get_ticker_data(ticker, start, end)
+        ticker_data = _get_ticker_data(asset_class, ticker, start, end)
         if ticker_data:
             results[ticker] = ticker_data
     return results
 
 
-def _get_ticker_data(ticker: str, start: date, end: date) -> dict[str, Any] | None:
-    ticker_path = root_dir / ticker
+def _get_ticker_data(asset_class: str, ticker: str, start: date, end: date) -> dict[str, Any] | None:
+    ticker_path = root_dir / asset_class / ticker
     if not ticker_path.exists():
         return None
     pipelines = {}
@@ -105,14 +116,29 @@ def _flatten(d, parent_key="") -> dict[str, Any]:
     return items
 
 
-def _validate_tickers(tickers: str) -> list[str]:
-    tickers = [t.strip().upper() for t in tickers.split(",") if t.strip()]
-    if not tickers:
+def _process_tickers(stock_br: str, reit_br: str) -> tuple[list[str], list[str]]:
+    stock_br = _validate_stock_br(stock_br)
+    reit_br = _validate_reit_br(reit_br)
+    if not stock_br and not reit_br:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No tickers provided",
+            detail="At least one of 'stock_br' or 'reit_br' is required",
         )
-    pattern = re.compile(r"^[A-Z0-9]{4}[0-9]{1,2}$")
+    repository.upsert_tickers(stock_br, "stock_br")
+    repository.upsert_tickers(reit_br, "reit_br")
+    return stock_br, reit_br
+
+
+def _validate_stock_br(tickers: str) -> list[str]:
+    return _validate_tickers(tickers, re.compile(r"^[A-Z0-9]{4}[0-9]{1,2}$"))
+
+
+def _validate_reit_br(tickers: str) -> list[str]:
+    return _validate_tickers(tickers, re.compile(r"^[A-Z]{4}11$"))
+
+
+def _validate_tickers(tickers: str, pattern: re.Pattern) -> list[str]:
+    tickers = [t.strip().upper() for t in tickers.split(",") if t.strip()] if tickers else []
     return [t for t in tickers if pattern.match(t)]
 
 

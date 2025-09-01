@@ -13,30 +13,23 @@ from src.scraper.core.tasks import global_task, intermediate_task
 from src.scraper.services.browser import click, click_download, error_name, page_goto
 from src.scraper.services.proxies import random_proxy
 
-name = "statusinvest"
-pipe_dir = paths.pipeline_dir("_global", name)
-
 
 def pipeline():
-    return Pipeline(
-        name=name,
+    return Pipeline.from_caller(
         tasks=[
-            global_task(name, sync_download),
-            intermediate_task(normalize, name, "normalization"),
+            global_task(sync_download),
+            intermediate_task(normalize, "normalization"),
         ],
     )
 
 
-def sync_download():
-    asyncio.run(download())
+def sync_download(pipe: Pipeline):
+    asyncio.run(_download(pipe))
 
 
-async def download():
-    path = paths.stage_dir(pipe_dir, "normalization") / f"{timestamp()}.csv"
-    return await _download(random_proxy(name), path)
-
-
-async def _download(proxy: str, path: Path):
+async def _download(pipe: Pipeline):
+    path = paths.stage_dir_for(pipe, "_global", "normalization") / f"{timestamp()}.csv"
+    proxy = random_proxy(pipe)
     url = "https://statusinvest.com.br/acoes/busca-avancada"
     print(f"downloading csv, url: {url}, path: {path}, proxy: {proxy}")
     try:
@@ -44,22 +37,22 @@ async def _download(proxy: str, path: Path):
             await click(page, "button", "Buscar")
             await click_download(path, page, "a", "DOWNLOAD")
     except Exception as e:
-        log(error_name(e), "_global", name)
+        log(error_name(e), "_global", pipe)
 
 
-def normalize(path: Path):
+def normalize(pipe: Pipeline, path: Path):
     print(f"normalizing, path: {path}")
     try:
-        _normalize(path)
+        _normalize(pipe, path)
         output, _, processed = paths.split_files(path, "normalization", "ready", "stamp")
         path.rename(processed)
         output.touch()
     except Exception as e:
-        log(str(e), "_global", name)
+        log(str(e), "_global", pipe)
 
 
-def _normalize(input_file: Path):
-    requested_tickers = set(repository.query_tickers())
+def _normalize(pipe: Pipeline, input_file: Path):
+    requested_tickers = set(repository.query_tickers(pipe.asset_class))
     with input_file.open(encoding="utf-8") as f:
         reader = csv.reader(f, delimiter=";")
         headers = next(reader)
@@ -72,6 +65,6 @@ def _normalize(input_file: Path):
             values = [normalization.value(v) for v in rest]
             data = dict(zip(headers, [ticker] + values, strict=False))
 
-            out_path = paths.stage_dir_for(ticker, name, "ready") / f"{input_file.stem}.json"
+            out_path = paths.stage_dir_for(pipe, ticker, "ready") / f"{input_file.stem}.json"
             with out_path.open("w", encoding="utf-8") as out:
                 json.dump(data, out, ensure_ascii=False, indent=2)

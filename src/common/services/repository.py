@@ -19,16 +19,18 @@ def run_script(filename: str):
 
 
 @ttl_cache(ttl=10)
-def query_tickers(limit: int = 20, offset: int = 0):
+def query_tickers(asset_class: str, limit: int = 20, offset: int = 0) -> list[str]:
     with sqlite3.connect(db_file) as conn:
         cur = conn.cursor()
         query = """
                 SELECT s.ticker
                 FROM tickers s
+                WHERE s.asset_class = :asset_class
                 ORDER BY s.last_requested DESC
                 LIMIT :limit OFFSET :offset;
                 """
         params = {
+            "asset_class": asset_class,
             "limit": limit,
             "offset": offset,
         }
@@ -37,18 +39,19 @@ def query_tickers(limit: int = 20, offset: int = 0):
         return tickers
 
 
-def upsert_tickers(tickers: list[str]):
+def upsert_tickers(tickers: list[str], asset_class: str):
     last_requested = datetime.now()
     with sqlite3.connect(db_file) as conn:
         cur = conn.cursor()
         cur.execute("BEGIN")
         for ticker in tickers:
             query = """
-                    INSERT OR REPLACE INTO tickers (ticker, last_requested)
-                    VALUES (:ticker, :last_requested)
+                    INSERT OR REPLACE INTO tickers (ticker, asset_class, last_requested)
+                    VALUES (:ticker, :asset_class, :last_requested)
                     """
             params = {
                 "ticker": ticker,
+                "asset_class": asset_class,
                 "last_requested": last_requested.replace(microsecond=0),
             }
             cur.execute(query, params)

@@ -15,31 +15,24 @@ from src.scraper.core.util import xls, zip
 from src.scraper.services.browser import download_bytes, error_name, find_url_contains, page_goto
 from src.scraper.services.proxies import random_proxy
 
-name = "b3_listagem"
-pipe_dir = paths.pipeline_dir("_global", name)
-
 
 def pipeline():
-    return Pipeline(
-        name=name,
+    return Pipeline.from_caller(
         tasks=[
-            global_task(name, sync_download),
-            intermediate_task(normalize, name, "normalization"),
+            global_task(sync_download),
+            intermediate_task(normalize, "normalization"),  # TODO separate extraction and normalization
         ],
     )
 
 
-def sync_download():
-    asyncio.run(download())
+def sync_download(pipe: Pipeline):
+    asyncio.run(_download(pipe))
 
 
-async def download():
+async def _download(pipe: Pipeline):
+    pipe_dir = paths.pipeline_dir(pipe, "_global")
     out_csv = paths.stage_dir(pipe_dir, "normalization") / f"{timestamp()}.csv"
-    proxy = random_proxy(name)
-    return await _download(proxy, out_csv)
-
-
-async def _download(proxy: str, out_csv: Path):
+    proxy = random_proxy(pipe)
     url = "https://sistemaswebb3-listados.b3.com.br/listedCompaniesPage/"
     print(f"downloading csv, url: {url}, path: {out_csv}, proxy: {proxy}")
     try:
@@ -49,22 +42,22 @@ async def _download(proxy: str, out_csv: Path):
             _, xlsx_bytes = zip.first_file(zip_bytes, selector=".xlsx")
             xls.to_csv(xlsx_bytes, out_csv, delimiter=";")
     except Exception as e:
-        log(error_name(e), "_global", name)
+        log(error_name(e), "_global", pipe)
 
 
-def normalize(input_csv: Path):
+def normalize(pipe: Pipeline, input_csv: Path):
     print(f"normalizing, path: {input_csv}")
     try:
-        _normalize(input_csv)
+        _normalize(pipe, input_csv)
         # stamp and archive original csv (same pattern as statusinvest)
         output, _, processed = paths.split_files(input_csv, "normalization", "ready", "stamp")
         input_csv.rename(processed)
         output.touch()
     except Exception as e:
-        log(str(e), "_global", name)
+        log(str(e), "_global", pipe)
 
 
-def _normalize(input_csv: Path):
+def _normalize(pipe: Pipeline, input_csv: Path):
     # Read from CSV generated in download stage
     with input_csv.open(encoding="utf-8") as f:
         reader = csv.reader(f, delimiter=";")
@@ -96,7 +89,7 @@ def _normalize(input_csv: Path):
             data = {k: v for k, v in data.items() if k in headers_desired}
             return data
 
-        valid_tickers = known_tickers()
+        valid_tickers = known_tickers(pipe.asset_class)
 
         # Single pass over rows after header (buffer tail + remaining reader)
         for row in chain(buffered[header_idx + 1 :], reader):
@@ -111,7 +104,7 @@ def _normalize(input_csv: Path):
             if not tickers:
                 continue
             for t in tickers:
-                _write_record(input_csv, t, data)
+                _write_record(pipe, t, input_csv, data)
 
 
 def find_tickers(partial, all_tickers):
@@ -182,8 +175,8 @@ def _clean(v):
         return v
 
 
-def _write_record(input_csv: Path, ticker: str, data: dict):
-    out_dir = paths.stage_dir_for(ticker, name, "ready")
+def _write_record(pipe: Pipeline, ticker: str, input_csv: Path, data: dict):
+    out_dir = paths.stage_dir_for(pipe, ticker, "ready")
     out_path = out_dir / f"{input_csv.stem}.json"
     with out_path.open("w", encoding="utf-8") as f_out:
         json.dump(data, f_out, ensure_ascii=False, indent=2)
