@@ -74,7 +74,7 @@ statusinvest = {
     "statusinvest.giro_ativos": {"short": "GA", "long": "Giro de Ativos"},
     "statusinvest.cagr_receitas_5_anos": {"short": "Rec", "long": "CAGR Receitas 5 Anos"},
     "statusinvest.cagr_lucros_5_anos": {"short": "Lucro", "long": "CAGR Lucros 5 Anos"},
-    "statusinvest.liquidez_media_diaria": {"short": "LMD", "long": "Liquidez Média Diária"},
+    "statusinvest.liquidez_media_diaria": {"short": "LMD", "long": "Liquidez Média Diária (Milhões)"},
     "statusinvest.vpa": {"short": "VPA", "long": "Valor Patrimonial por Ação"},
     "statusinvest.lpa": {"short": "LPA", "long": "Lucro por Ação"},
     "statusinvest.peg_ratio": {"short": "PEG", "long": "PEG Ratio"},

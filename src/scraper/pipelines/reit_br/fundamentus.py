@@ -41,15 +41,22 @@ async def _scrape(pipe: Pipeline):
         log(error_name(e), "_global", pipe)
 
 
+# TODO
+#   if segmento = "Títulos e Val. Mob.", then remove if 0 (or null?):
+#       qtd_de_imoveis
+#       vacancia_media
+#       preco_do_m2
+#       aluguel_por_m2
+#       cap_rate
 def _normalize(data) -> str:
     norm_keys = normalization.traverse_keys(normalization.key)
     remove_keys = normalization.remove_keys("papel", "endereco")
     numbers = normalization.traverse_values(normalization.value)
     magnitude = normalization.traverse_dict(
         {
-            "valor_de_mercado": lambda v: v / 1_000_000_000,
-            "liquidez": lambda v: v / 1_000_000,
-            "preco_do_m2": lambda v: v / 1000,
+            "valor_de_mercado": lambda v: v / 1e9,
+            "liquidez": lambda v: v / 1e6,
+            "preco_do_m2": lambda v: v / 1e3,
         }
     )
     return normalization.pipe(norm_keys, remove_keys, numbers, magnitude)(data)

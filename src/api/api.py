@@ -7,7 +7,8 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api import metadata
+from src.api.metadata.stock_br import schema as stock_schema, sources as stock_sources, labels as stock_labels
+from src.api.metadata.reit_br import schema as reit_schema, sources as reit_sources, labels as reit_labels
 from src.common import config
 from src.common.services import data, ipc_signal, repository
 from src.common.util import date_util
@@ -36,15 +37,15 @@ root_dir = Path(config.data_root)
 def get_meta():
     return {
         "stock_br": {
-            "schema": metadata.stock_br.schema.all,
-            "sources": metadata.stock_br.sources.all,
-            "labels": metadata.stock_br.labels.all,
+            "schema": stock_schema.all,
+            "sources": stock_sources.all,
+            "labels": stock_labels.all,
             "tickers": data.known_tickers("stock_br"),
         },
         "reit_br": {
-            "schema": metadata.reit_br.schema.all,
-            "sources": metadata.reit_br.sources.all,
-            "labels": metadata.reit_br.labels.all,
+            "schema": reit_schema.all,
+            "sources": reit_sources.all,
+            "labels": reit_labels.all,
             "tickers": data.known_tickers("reit_br"),
         },
     }
