@@ -1,4 +1,6 @@
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional, Iterator
 
 from src.common.config import data_root
 from src.scraper.core.scheduler import Pipeline
@@ -7,107 +9,118 @@ from src.scraper.core.util.files import mkdir
 """
 Path structure per ticker and pipeline:
 
-{ticker}/
-    {pipeline}/
-        waiting/
-            extraction/
-            validation/
-            normalization/
-        ready/
-        debug/
-            failed/
+{asset_class}/
+    {ticker}/
+        {pipeline}/
+            waiting/                # Input for intermediate pipeline stages
                 extraction/
                 validation/
                 normalization/
-            processed/
-            errors.log
-
-- waiting: input for intermediate pipeline stages
-- ready: final output, ready to be consumed via api
-- debug: can be discarded or optionally kept for debug purposes
-- errors.log determines whether we should stop insisting on a ticker pipeline
+            ready/                  # Final output, ready to be consumed via API
+            debug/                  # Debug information. Also determines when to abort a pipeline.
+                failed/             # Failed processing attempts
+                    extraction/
+                    validation/
+                    normalization/
+                processed/          # Successfully processed files
+                errors.log
 """
 
-
-def pipeline_dir(pipe: Pipeline, ticker: str):
-    return pipeline_dir_for_parts(pipe.asset_class, ticker, pipe.name)
-
-
-def pipeline_dir_for_parts(asset_class: str, ticker: str, pipeline_name: str):
-    return Path(data_root) / asset_class / ticker / pipeline_name
-
-
-def pipeline_dir_for_child(child_path: Path) -> Path:
-    asset_class, ticker, pipeline_name = extract_ticker_pipeline(child_path)
-    return pipeline_dir_for_parts(asset_class, ticker, pipeline_name)
+_WAITING = "waiting"
+_READY = "ready"
+_DEBUG = "debug"
+_FAILED = "failed"
+_PROCESSED = "processed"
+_ERRORS_LOG = "errors.log"
 
 
-def stage_dir(pipe_dir: Path, stage: str):
-    if stage == "ready":
-        return mkdir(pipe_dir / "ready")
-    else:
-        return mkdir(pipe_dir / "waiting" / stage)
+@dataclass(frozen=True)
+class PipelinePaths:
+    asset_class: str
+    ticker: str
+    pipeline_name: str
+
+    @property
+    def base_dir(self) -> Path:
+        return Path(data_root) / self.asset_class / self.ticker / self.pipeline_name
+
+    def stage_dir(self, stage: str) -> Path:
+        """Get directory for a specific stage (creates if it doesn't exist)."""
+        if stage == _READY:
+            return mkdir(self.base_dir / _READY)
+        return mkdir(self.base_dir / _WAITING / stage)
+
+    @property
+    def debug_dir(self) -> Path:
+        return mkdir(self.base_dir / _DEBUG)
+
+    def failed_dir(self, stage: str) -> Path:
+        return mkdir(self.debug_dir / _FAILED / stage)
+
+    @property
+    def processed_dir(self) -> Path:
+        return mkdir(self.debug_dir / _PROCESSED)
+
+    @property
+    def errors_log(self) -> Path:
+        return self.debug_dir / _ERRORS_LOG
 
 
-def stage_dir_for(pipe: Pipeline, ticker: str, stage: str):
-    return stage_dir(pipeline_dir(pipe, ticker), stage)
+def for_parts(asset_class: str, ticker: str, pipeline_name: str) -> PipelinePaths:
+    """Get path helper for pipeline components."""
+    return PipelinePaths(asset_class, ticker, pipeline_name)
 
 
-def stage_dir_for_parts(asset_class: str, ticker: str, pipeline_name: str, stage: str):
-    return stage_dir(pipeline_dir_for_parts(asset_class, ticker, pipeline_name), stage)
+def for_pipe(pipe: Pipeline, ticker: str) -> PipelinePaths:
+    """Get path helper for a pipeline and ticker."""
+    return for_parts(pipe.asset_class, ticker, pipe.name)
 
 
-def _failed_dir(pipe_dir: Path, stage: str):
-    return mkdir(pipe_dir / "debug" / "failed" / stage)
+def for_child(child_path: Path) -> PipelinePaths:
+    """Get path helper from a child path within the pipeline structure."""
+    asset_class, ticker, pipeline_name = parts(child_path)
+    return for_parts(asset_class, ticker, pipeline_name)
 
 
-def _processed_dir(pipe_dir: Path):
-    return mkdir(pipe_dir / "debug" / "processed")
-
-
-def split_files(input_path: Path, current_stage: str, next_stage: str, out_ext: str | None = None) -> list[Path]:
-    pipe_dir = pipeline_dir_for_child(input_path)
+def split_files(input_path: Path, current_stage: str, next_stage: str, out_ext: Optional[str] = None) -> list[Path]:
+    """Split files into output, failed, and processed paths."""
+    paths = for_child(input_path)
     output_file = f"{input_path.stem}.{out_ext}" if out_ext else input_path.name
-    output = stage_dir(pipe_dir, next_stage) / output_file
-    failed = _failed_dir(pipe_dir, current_stage) / input_path.name
-    processed = _processed_dir(pipe_dir) / input_path.name
-    return [output, failed, processed]
+    return [
+        paths.stage_dir(next_stage) / output_file,
+        paths.failed_dir(current_stage) / input_path.name,
+        paths.processed_dir / input_path.name
+    ]
 
 
-def latest_file(pipe: Pipeline, ticker: str, stage: str) -> Path | None:
-    stage = stage_dir(pipeline_dir(pipe, ticker), stage)
-    files = [f for f in stage.glob("*") if f.is_file()]
-    if not files:
-        return None
-    return max(files, key=lambda f: f.stem)
+def latest_file(pipe: Pipeline, ticker: str, stage: str) -> Optional[Path]:
+    """Get the most recent file in a stage directory, if any."""
+    stage_path = for_pipe(pipe, ticker).stage_dir(stage)
+    files = [f for f in stage_path.glob("*") if f.is_file()]
+    return max(files, key=lambda f: f.stem) if files else None
 
 
-def waiting_files(pipe: Pipeline, ticker: str, stage: str) -> list[Path]:
-    stage = pipeline_dir(pipe, ticker) / "waiting" / stage
-    return stage.glob("*") if stage.exists() else []
+def waiting_files(pipe: Pipeline, ticker: str, stage: str) -> Iterator[Path]:
+    """Get all files in the waiting directory for a stage."""
+    stage_path = for_pipe(pipe, ticker).stage_dir(stage)
+    return stage_path.glob("*") if stage_path.exists() else []
 
 
 def has_waiting_files(pipe: Pipeline, ticker: str) -> bool:
-    waiting = pipeline_dir(pipe, ticker) / "waiting"
-    return any(f.is_file() for f in waiting.rglob("*"))
+    """Check if there are any files waiting to be processed."""
+    waiting_path = for_pipe(pipe, ticker).base_dir / _WAITING
+    return any(f.is_file() for f in waiting_path.rglob("*"))
 
 
 def failed_files(pipe: Pipeline, ticker: str) -> list[Path]:
-    failed = pipeline_dir(pipe, ticker) / "debug" / "failed"
-    return [f for f in failed.rglob("*") if f.is_file()] if failed.exists() else []
+    """Get all files in the failed directory."""
+    failed_path = for_pipe(pipe, ticker).debug_dir / _FAILED
+    return [f for f in failed_path.rglob("*") if f.is_file()] if failed_path.exists() else []
 
 
-def errors_log(pipe: Pipeline, ticker: str):
-    errors_log_for_parts(pipe.asset_class, ticker, pipe.name)
-
-
-def errors_log_for_parts(asset_class: str, ticker: str, pipeline_name: str):
-    debug = mkdir(pipeline_dir_for_parts(asset_class, ticker, pipeline_name) / "debug")
-    return debug / "errors.log"
-
-
-def extract_ticker_pipeline(child_path: Path) -> tuple[str, str, str]:
-    for marker in ("waiting", "ready", "debug"):
+def parts(child_path: Path) -> tuple[str, str, str]:
+    """Extract (asset_class, ticker, pipeline_name) from a child path."""
+    for marker in (_WAITING, _READY, _DEBUG):
         if marker in child_path.parts:
             idx = child_path.parts.index(marker)
             return child_path.parts[idx - 3], child_path.parts[idx - 2], child_path.parts[idx - 1]

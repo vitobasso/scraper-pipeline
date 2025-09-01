@@ -23,7 +23,7 @@ def pipeline():
 
 def scrape(pipe: Pipeline, ticker: str):
     url = f"https://simplywall.st/stock/bovespa/{ticker.lower()}"
-    path = paths.stage_dir_for(pipe, ticker, "normalization") / f"{timestamp()}.json"
+    path = paths.for_pipe(pipe, ticker).stage_dir("normalization") / f"{timestamp()}.json"
     proxy = random_proxy(pipe)
     asyncio.run(_scrape(proxy, url, path, pipe, ticker))
 

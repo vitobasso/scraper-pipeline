@@ -9,6 +9,7 @@ from src.common.services.data import known_tickers
 from src.common.util.date_util import timestamp
 from src.scraper.core import normalization, paths
 from src.scraper.core.logs import log
+from src.scraper.core.paths import for_pipe
 from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.tasks import global_task, intermediate_task
 from src.scraper.core.util import xls, zip
@@ -30,8 +31,7 @@ def sync_download(pipe: Pipeline):
 
 
 async def _download(pipe: Pipeline):
-    pipe_dir = paths.pipeline_dir(pipe, "_global")
-    out_csv = paths.stage_dir(pipe_dir, "normalization") / f"{timestamp()}.csv"
+    out_csv = for_pipe(pipe, "_global").stage_dir("normalization") / f"{timestamp()}.csv"
     proxy = random_proxy(pipe)
     url = "https://sistemaswebb3-listados.b3.com.br/listedCompaniesPage/"
     print(f"downloading csv, url: {url}, path: {out_csv}, proxy: {proxy}")
@@ -176,7 +176,7 @@ def _clean(v):
 
 
 def _write_record(pipe: Pipeline, ticker: str, input_csv: Path, data: dict):
-    out_dir = paths.stage_dir_for(pipe, ticker, "ready")
+    out_dir = paths.for_pipe(pipe, ticker).stage_dir("ready")
     out_path = out_dir / f"{input_csv.stem}.json"
     with out_path.open("w", encoding="utf-8") as f_out:
         json.dump(data, f_out, ensure_ascii=False, indent=2)

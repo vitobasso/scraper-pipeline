@@ -22,7 +22,7 @@ def pipeline():
 
 def call_api(pipe: Pipeline, ticker: str):
     proxy = random_proxy(pipe)
-    path = paths.stage_dir_for(pipe, ticker, "validation") / f"{timestamp()}.json"
+    path = paths.for_pipe(pipe, ticker).stage_dir("validation") / f"{timestamp()}.json"
     print(f"scraping, path: {path}, proxy: {proxy}")
     try:
         result = yfinance.Ticker(f"{ticker}.SA").history(period="5y", interval="1d", proxy=proxy, raise_errors=True)

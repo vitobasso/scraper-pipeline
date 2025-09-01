@@ -44,7 +44,7 @@ def _normalize_csv(input_path: Path, function: Callable):
      - the first line is the header
      - the first column contains tickers
     """
-    asset_class, _, pipe_name = paths.extract_ticker_pipeline(input_path)
+    asset_class, _, pipe_name = paths.parts(input_path)
     requested_tickers = set(repository.query_tickers(asset_class))
     with input_path.open(encoding="utf-8") as f:
         reader = csv.reader(f)
@@ -60,7 +60,7 @@ def _normalize_csv(input_path: Path, function: Callable):
             data_raw = dict(zip(headers, [ticker] + values, strict=False))
             data_norm = function(data_raw)
 
-            out_path = paths.stage_dir_for_parts(asset_class, ticker, pipe_name, "ready") / f"{input_path.stem}.json"
+            out_path = paths.for_parts(asset_class, ticker, pipe_name).stage_dir("ready") / f"{input_path.stem}.json"
             with out_path.open("w", encoding="utf-8") as out:
                 json.dump(data_norm, out, ensure_ascii=False, indent=2)
 

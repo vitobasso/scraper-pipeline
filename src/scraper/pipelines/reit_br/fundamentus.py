@@ -26,7 +26,7 @@ def scrape(pipe: Pipeline):
 
 async def _scrape(pipe: Pipeline):
     url = "https://www.fundamentus.com.br/fii_resultado.php"
-    path = paths.stage_dir_for(pipe, "_global", "normalization") / f"{timestamp()}.csv"
+    path = paths.for_pipe(pipe, "_global").stage_dir("normalization") / f"{timestamp()}.csv"
     proxy = random_proxy(pipe)
     print(f"scraping html, url: {url}, path: {path}, proxy: {proxy}")
     try:

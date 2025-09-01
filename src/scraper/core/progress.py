@@ -41,7 +41,7 @@ def _count_recent_failed_files(pipe: Pipeline, ticker: str) -> int:
 
 
 def _count_recent_error_logs(pipe: Pipeline, ticker: str) -> int:
-    errors = paths.errors_log(pipe, ticker)
+    errors = paths.for_pipe(pipe, ticker).errors_log
     if not errors.exists():
         return 0
     cutoff = datetime.now() - timedelta(days=config.data_refresh_days)

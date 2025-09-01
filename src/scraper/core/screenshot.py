@@ -19,7 +19,7 @@ def ss_common_ancestor(ticker: str, pipe: Pipeline, url: str, texts):
 
 
 def output_path(ticker: str, pipe: Pipeline):
-    return paths.stage_dir_for(pipe, ticker, "extraction") / f"{timestamp()}.png"
+    return paths.for_pipe(pipe, ticker).stage_dir("extraction") / f"{timestamp()}.png"
 
 
 async def _screenshot_full_page(url: str, pipe: Pipeline, ticker: str):

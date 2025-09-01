@@ -14,7 +14,7 @@ def log(msg: str, ticker: str, pipeline: Pipeline):
 
 
 def log_for_path(msg: str, path: Path):
-    asset_class, ticker, pipe_name = paths.extract_ticker_pipeline(path)
+    asset_class, ticker, pipe_name = paths.parts(path)
     _log(msg, asset_class, ticker, pipe_name)
 
 
@@ -39,7 +39,7 @@ def _get_logger(asset_class: str, ticker: str, pipe_name: str):
 
 def _create_logger(asset_class: str, ticker: str, pipe_name: str):
     name = _get_logger_name(asset_class, ticker, pipe_name)
-    path = paths.errors_log_for_parts(asset_class, ticker, pipe_name)
+    path = paths.for_parts(asset_class, ticker, pipe_name).errors_log
     path.parent.mkdir(parents=True, exist_ok=True)
     handler = logging.FileHandler(path)
     logger = logging.getLogger(name)

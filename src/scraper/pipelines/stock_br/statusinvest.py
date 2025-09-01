@@ -28,7 +28,7 @@ def sync_download(pipe: Pipeline):
 
 
 async def _download(pipe: Pipeline):
-    path = paths.stage_dir_for(pipe, "_global", "normalization") / f"{timestamp()}.csv"
+    path = paths.for_pipe(pipe, "_global").stage_dir("normalization") / f"{timestamp()}.csv"
     proxy = random_proxy(pipe)
     url = "https://statusinvest.com.br/acoes/busca-avancada"
     print(f"downloading csv, url: {url}, path: {path}, proxy: {proxy}")
@@ -65,6 +65,6 @@ def _normalize(pipe: Pipeline, input_file: Path):
             values = [normalization.value(v) for v in rest]
             data = dict(zip(headers, [ticker] + values, strict=False))
 
-            out_path = paths.stage_dir_for(pipe, ticker, "ready") / f"{input_file.stem}.json"
+            out_path = paths.for_pipe(pipe, ticker).stage_dir("ready") / f"{input_file.stem}.json"
             with out_path.open("w", encoding="utf-8") as out:
                 json.dump(data, out, ensure_ascii=False, indent=2)
