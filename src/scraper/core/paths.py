@@ -1,6 +1,6 @@
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Iterator
 
 from src.common.config import data_root
 from src.scraper.core.scheduler import Pipeline
@@ -82,18 +82,18 @@ def for_child(child_path: Path) -> PipelinePaths:
     return for_parts(asset_class, ticker, pipeline_name)
 
 
-def split_files(input_path: Path, current_stage: str, next_stage: str, out_ext: Optional[str] = None) -> list[Path]:
+def split_files(input_path: Path, current_stage: str, next_stage: str, out_ext: str | None = None) -> list[Path]:
     """Split files into output, failed, and processed paths."""
     paths = for_child(input_path)
     output_file = f"{input_path.stem}.{out_ext}" if out_ext else input_path.name
     return [
         paths.stage_dir(next_stage) / output_file,
         paths.failed_dir(current_stage) / input_path.name,
-        paths.processed_dir / input_path.name
+        paths.processed_dir / input_path.name,
     ]
 
 
-def latest_file(pipe: Pipeline, ticker: str, stage: str) -> Optional[Path]:
+def latest_file(pipe: Pipeline, ticker: str, stage: str) -> Path | None:
     """Get the most recent file in a stage directory, if any."""
     stage_path = for_pipe(pipe, ticker).stage_dir(stage)
     files = [f for f in stage_path.glob("*") if f.is_file()]

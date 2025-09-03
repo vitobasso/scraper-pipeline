@@ -7,8 +7,12 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.metadata.stock_br import schema as stock_schema, sources as stock_sources, labels as stock_labels
-from src.api.metadata.reit_br import schema as reit_schema, sources as reit_sources, labels as reit_labels
+from src.api.metadata.reit_br import labels as reit_labels
+from src.api.metadata.reit_br import schema as reit_schema
+from src.api.metadata.reit_br import sources as reit_sources
+from src.api.metadata.stock_br import labels as stock_labels
+from src.api.metadata.stock_br import schema as stock_schema
+from src.api.metadata.stock_br import sources as stock_sources
 from src.common import config
 from src.common.services import data, ipc_signal, repository
 from src.common.util import date_util
