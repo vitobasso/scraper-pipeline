@@ -1,1 +1,6 @@
-from . import yahoo_chart, fundamentus
+from . import fundamentus, yahoo_chart
+
+active = [
+    fundamentus,
+    yahoo_chart,
+]

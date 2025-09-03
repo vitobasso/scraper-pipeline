@@ -1,5 +1,5 @@
-from src.scraper.pipelines import common
+from src.scraper.pipelines.common import yahoo_chart
 
 
 def pipeline():
-    return common.yahoo_chart.from_caller()
+    return yahoo_chart.from_caller()
