@@ -8,6 +8,8 @@ from urllib.parse import urljoin
 
 from playwright.async_api import Error, ProxySettings, TimeoutError, ViewportSize, async_playwright
 
+from src.common import config
+
 timeout_millis = 60000
 timeout_secs = timeout_millis // 1000
 WaitUntil = Literal["commit", "domcontentloaded", "load", "networkidle"]
@@ -46,7 +48,7 @@ async def new_page(proxy: str):
                 "Safari/537.36"
             ),
             viewport=viewport,
-            ignore_https_errors=True,  # avoids ERR_CERT_AUTHORITY_INVALID, risks getting data tampered by MIM
+            ignore_https_errors=not config.enforce_https,
             bypass_csp=True,
         )
 
