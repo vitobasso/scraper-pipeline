@@ -42,8 +42,15 @@ class Pipeline:
     tasks: list[Task]
 
     @classmethod
-    def from_caller(cls, tasks: list["TaskFactory"]):
-        asset_class, name = _get_pipeline_name(inspect.stack()[1].filename)
+    def from_caller(cls, tasks: list["TaskFactory"], stack_frame_index: int = 1) -> "Pipeline":
+        """
+        Construct a Pipeline instance based on the caller’s module filename.
+
+        :param tasks: A list of TaskFactory callables to create tasks for the pipeline.
+        :param stack_frame_index: Index of the call stack frame to use for extracting the module filename.
+                                  Default is 1 (direct caller). Increase by 1 for each additional layer of indirection.
+        """
+        asset_class, name = _get_pipeline_name(inspect.stack()[stack_frame_index].filename)
         pipeline = cls(name=name, asset_class=asset_class, tasks=[])
         pipeline.tasks = [t(pipeline) for t in tasks]
         return pipeline

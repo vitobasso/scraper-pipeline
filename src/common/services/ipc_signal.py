@@ -2,6 +2,8 @@ import os
 import signal
 from pathlib import Path
 
+from src.common.util.date_util import timestamp
+
 alarm_seconds = 3600 * 24
 pid_file = Path("/tmp/scraper.pid")
 
@@ -14,10 +16,10 @@ def _init():
 
 def wait_for_signal():
     _init()
-    print("*** waiting for signal ***")
+    print(f"{timestamp()}: *** waiting for signal ***")
     signal.alarm(alarm_seconds)
     signal.pause()
-    print("*** woke up ***")
+    print(f"{timestamp()}: *** woke up ***")
 
 
 def wake_scraper():
