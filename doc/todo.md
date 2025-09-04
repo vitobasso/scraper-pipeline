@@ -1,3 +1,7 @@
+# Bug
+
+### b3_listagem depends on statusinvest
+
 # Data
 
 ### valor justo?
