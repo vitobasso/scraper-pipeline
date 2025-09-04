@@ -10,16 +10,14 @@ from src.scraper.core.util.files import mkdir
 db_file = mkdir(Path(config.data_root)) / "db.sqlite"
 
 
-def run_script(filename: str):
-    with open(filename) as f:
-        sql = f.read()
-        with sqlite3.connect(db_file) as conn:
-            cur = conn.cursor()
-            cur.executescript(sql)
+def init():
+    if not db_file.exists():
+        build_db()
 
 
 @ttl_cache(ttl=10)
 def query_tickers(asset_class: str, limit: int = 20, offset: int = 0) -> list[str]:
+    init()
     with sqlite3.connect(db_file) as conn:
         cur = conn.cursor()
         query = """
@@ -40,6 +38,7 @@ def query_tickers(asset_class: str, limit: int = 20, offset: int = 0) -> list[st
 
 
 def upsert_tickers(tickers: list[str], asset_class: str):
+    init()
     last_requested = datetime.now()
     with sqlite3.connect(db_file) as conn:
         cur = conn.cursor()
@@ -56,3 +55,17 @@ def upsert_tickers(tickers: list[str], asset_class: str):
             }
             cur.execute(query, params)
         cur.execute("COMMIT")
+
+
+def run_script(filename: str):
+    with open(filename) as f:
+        sql = f.read()
+        with sqlite3.connect(db_file) as conn:
+            cur = conn.cursor()
+            cur.executescript(sql)
+
+
+def build_db():
+    run_script("resources/sql-schema/schema.sql")
+    run_script("resources/sql-schema/seed_data.sql")
+    # run_script("resources/sql-schema/migrate.sql")

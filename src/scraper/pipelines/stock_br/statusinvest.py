@@ -13,7 +13,7 @@ def pipeline():
     return Pipeline.from_caller(
         tasks=[
             global_task(sync_download),
-            normalize_csv(_normalize),
+            normalize_csv(_normalize, delimiter=";"),
         ],
     )
 

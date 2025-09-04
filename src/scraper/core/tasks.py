@@ -65,6 +65,6 @@ def normalize_json(function: Callable, next_stage: str = "ready") -> TaskFactory
     return intermediate_task(execute, "normalization")
 
 
-def normalize_csv(function: Callable, next_stage: str = "ready") -> TaskFactory:
-    execute = lambda pipe, path: normalization.normalize_csv(path, function, next_stage)
+def normalize_csv(function: Callable, next_stage: str = "ready", delimiter: str = ",") -> TaskFactory:
+    execute = lambda pipe, path: normalization.normalize_csv(path, function, next_stage, delimiter)
     return intermediate_task(execute, "normalization")

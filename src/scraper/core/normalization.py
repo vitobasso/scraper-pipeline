@@ -25,10 +25,10 @@ def normalize_json(input_path: Path, function: Callable, next_stage: str = "read
         log_for_path(str(e), input_path)
 
 
-def normalize_csv(input_path: Path, function: Callable, next_stage: str):
+def normalize_csv(input_path: Path, function: Callable, next_stage: str, delimiter: str = ","):
     print(f"normalizing, path: {input_path}")
     try:
-        _normalize_csv(input_path, function)
+        _normalize_csv(input_path, function, delimiter)
         output, _, processed = paths.split_files(input_path, "normalization", next_stage, "stamp")
         input_path.rename(processed)
         output.touch()
@@ -36,7 +36,7 @@ def normalize_csv(input_path: Path, function: Callable, next_stage: str):
         log_for_path(str(e), input_path)
 
 
-def _normalize_csv(input_path: Path, function: Callable):
+def _normalize_csv(input_path: Path, function: Callable, delimiter: str = ","):
     """
     Splits the csv into one json per ticker.
     Assumptions:
@@ -47,7 +47,7 @@ def _normalize_csv(input_path: Path, function: Callable):
     asset_class, _, pipe_name = paths.parts(input_path)
     requested_tickers = set(repository.query_tickers(asset_class))
     with input_path.open(encoding="utf-8") as f:
-        reader = csv.reader(f)
+        reader = csv.reader(f, delimiter=delimiter)
         headers = [h for h in (next(reader))]
 
         for row in reader:
