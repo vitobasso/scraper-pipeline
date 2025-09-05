@@ -39,5 +39,5 @@ validator = lambda data: ["array is empty"] if not data else []
 normalize = lambda raw: {
     "1mo": raw[-21:],
     "1y": [v for i, v in enumerate(raw[-252:]) if i % 5 == 0],
-    "5y": [v for i, v in enumerate(raw) if i % 20 == 0],
+    "5y": [v for i, v in enumerate(raw) if i % 20 == 0],  # TODO smoothen the edges
 }

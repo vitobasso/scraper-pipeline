@@ -2,10 +2,9 @@
 
 ### b3_listagem depends on statusinvest
 
-# Data
+### forecast wrong sometimes
 
-### valor justo?
-- Valor de Graham (intrínseco): sqrt( 22.5 x LPA x VPA )
+# Data
 
 # User Experience
 
@@ -38,6 +37,8 @@ queue non-displayed pipelines but prioritize the ones being displayed
 - GitHub Actions
 
 # Performance
+
+### simplywall: bulk scrape "[browse all stocks](https://simplywall.st/stocks/br)" even though it's not all tickers
 
 ### parallelize between pipelines
 

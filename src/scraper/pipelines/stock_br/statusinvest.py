@@ -36,6 +36,12 @@ async def _download(pipe: Pipeline):
 
 
 def _normalize(data):
-    norm_keys = normalization.traverse_keys(normalization.key)
-    numbers = normalization.traverse_values(normalization.value)
-    return normalization.pipe(norm_keys, numbers)(data)
+    keys = normalization.traverse_keys(normalization.key)
+    values = normalization.traverse_values(normalization.value)
+    magnitude = normalization.traverse_dict(
+        {
+            "liquidez_media_diaria": lambda v: v / 1e6,
+            "valor_de_mercado": lambda v: v / 1e9,
+        }
+    )
+    return normalization.pipe(keys, values, magnitude)(data)

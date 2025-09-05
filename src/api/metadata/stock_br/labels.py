@@ -78,7 +78,7 @@ statusinvest = {
     "statusinvest.vpa": {"short": "VPA", "long": "Valor Patrimonial por Ação"},
     "statusinvest.lpa": {"short": "LPA", "long": "Lucro por Ação"},
     "statusinvest.peg_ratio": {"short": "PEG", "long": "PEG Ratio"},
-    "statusinvest.valor_de_mercado": {"short": "VM", "long": "Valor de Mercado"},
+    "statusinvest.valor_de_mercado": {"short": "VM", "long": "Valor de Mercado (Bilhões)"},
 }
 
 investidor10 = {

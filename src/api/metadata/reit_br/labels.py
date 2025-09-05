@@ -16,7 +16,7 @@ fundamentus = {
     "fundamentus.preco_do_m2": {"short": "Pm2", "long": "Preço do m2 (Milhares)"},
     "fundamentus.aluguel_por_m2": {"short": "Am2", "long": "Aluguel por m2"},
     "fundamentus.cap_rate": {"short": "CR", "long": "Cap Rate"},
-    "fundamentus.vacancia_media": {"short": "VM", "long": "Vacância Média"},
+    "fundamentus.vacancia_media": {"short": "Vac", "long": "Vacância Média"},
 }
 
 all = yahoo_chart | fundamentus
