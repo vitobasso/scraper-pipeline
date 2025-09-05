@@ -62,4 +62,3 @@ def _remove_brick_fields(d):
         if d.get(field) == 0:
             d.pop(field, None)
     return d
-

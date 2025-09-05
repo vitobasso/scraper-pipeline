@@ -1,7 +1,13 @@
 #!/bin/sh
 echo "Running linter..."
 .venv/bin/ruff check --fix . && .venv/bin/ruff format
+
 if [ $? -ne 0 ]; then
   echo "Lint failed, push aborted."
+  exit 1
+fi
+
+if ! git diff --quiet; then
+  echo "Lint auto-fixed some files. Push aborted."
   exit 1
 fi
