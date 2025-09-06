@@ -1,6 +1,6 @@
 #!/bin/sh
 echo "Running linter..."
-.venv/bin/ruff check --fix . && .venv/bin/ruff format
+uv run ruff check . --fix . && uv run ruff format .
 
 if [ $? -ne 0 ]; then
   echo "Lint failed, push aborted."

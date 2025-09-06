@@ -5,10 +5,9 @@
 #### MacOS
 
 ```
-brew install python3 poetry
-poetry config virtualenvs.in-project true
-poetry install --no-root
-playwright install chromium --with-deps
+brew install python3 uv
+uv sync
+uv run playwright install chromium --with-deps
 ```
 
 #### Debian (GCP VM)
@@ -19,13 +18,9 @@ sudo apt install git
 git clone git@github.com:vitobasso/stocks-scraper.git
 cd stocks-scraper
 
-curl -sSL https://install.python-poetry.org | python3 -
-source ~/.profile
-poetry config virtualenvs.in-project true
-poetry install --no-root
-
-playwright install-deps
-playwright install
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
+uv run playwright install chromium --with-deps
 ```
 
 ### Secrets
@@ -38,32 +33,23 @@ Add the `GOOGLE_GENAI_API_KEY` var in the `.env` file at the project root.
 
 ### Running from CLI
 
-#### Migrate DB
-
-Run once to setup `data/.../db.sqlite`
-
-```
-python3 -m src.migrate_db
-```
-
 #### Scraper
 
 To avoid conflicts between project lib and system libs
 
 ```
-source .venv/bin/activate
-python3 -m src.scraper
+uv run -m src.scraper.scraper
 ```
 
 #### Rest API
 
 ```
-source .venv/bin/activate
-uvicorn src.api.api:app --host 0.0.0.0 --port 8000
+uv run uvicorn src.api.api:app --host 0.0.0.0 --port 8000
 ```
 
 #### Enable pre-commit hooks
-To auto-run linting and formatting before pushing
+
+To auto-run linting and formatting before git push
 
 ```
 git config core.hooksPath .githooks

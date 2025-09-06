@@ -30,8 +30,6 @@ queue non-displayed pipelines but prioritize the ones being displayed
 - normalization
 - validation
 
-### replace poetry with uv
-
 ### CI/CD
 - docker-compose
 - GitHub Actions

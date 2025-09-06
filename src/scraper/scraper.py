@@ -4,7 +4,8 @@ from src.common import config
 from src.common.services import ipc_signal
 from src.scraper.active_pipes import pipes
 
-if __name__ == "__main__":
+
+def main():
     config.print_me()
 
     while True:
@@ -14,3 +15,7 @@ if __name__ == "__main__":
             p.run_next()
         else:
             ipc_signal.wait_for_signal()
+
+
+if __name__ == "__main__":
+    main()
