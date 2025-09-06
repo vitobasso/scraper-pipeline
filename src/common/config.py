@@ -26,7 +26,6 @@ use_proxies_for_pipeline = {
 }
 
 # if False, ignores SSL certificate verification. Enables more proxies but risks data tampered by MIM.
-# note: yfinance does not support disabling this
 enforce_https = False
 
 proxy_refresh_seconds = 2 * 60 * 60

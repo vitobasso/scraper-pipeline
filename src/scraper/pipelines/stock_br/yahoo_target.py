@@ -1,9 +1,11 @@
 import json
 
 import yfinance
+from curl_cffi import requests
 
+from src.common import config
 from src.common.util.date_util import timestamp
-from src.scraper.core import paths
+from src.scraper.core import normalization, paths
 from src.scraper.core.logs import log
 from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.tasks import normalize_json, source_task, validate_json
@@ -25,8 +27,8 @@ def call_api(pipe: Pipeline, ticker: str):
     path = paths.for_pipe(pipe, ticker).stage_dir("validation") / f"{timestamp()}.json"
     print(f"scraping, path: {path}, proxy: {proxy}")
     try:
-        ticker_obj = yfinance.Ticker(f"{ticker}.SA")
-        data = ticker_obj.get_recommendations(proxy=proxy).to_dict()
+        session = requests.Session(impersonate="chrome", verify=config.enforce_https)
+        data = yfinance.Ticker(f"{ticker}.SA", session=session).get_analyst_price_targets(proxy=proxy)
         with open(path, "w") as f:
             json.dump(data, f)
     except Exception as e:
@@ -34,30 +36,15 @@ def call_api(pipe: Pipeline, ticker: str):
 
 
 schema = {
-    "period": {
-        "0": str,
-    },
-    "strongBuy": {
-        "0": int,
-    },
-    "buy": {
-        "0": int,
-    },
-    "hold": {
-        "0": int,
-    },
-    "sell": {
-        "0": int,
-    },
-    "strongSell": {
-        "0": int,
-    },
+    "high": float,
+    "mean": float,
+    "low": float,
 }
 
-normalize = lambda raw: {
-    "strong_buy": raw.get("strongBuy", {}).get("0"),
-    "buy": raw.get("buy", {}).get("0"),
-    "hold": raw.get("hold", {}).get("0"),
-    "sell": raw.get("sell", {}).get("0"),
-    "strong_sell": raw.get("strongSell", {}).get("0"),
-}
+normalize = normalization.rename_keys(
+    {
+        "high": "max",
+        "mean": "avg",
+        "low": "min",
+    }
+)

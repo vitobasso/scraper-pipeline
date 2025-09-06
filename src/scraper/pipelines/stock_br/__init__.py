@@ -4,9 +4,9 @@ from . import (
     simplywall,
     statusinvest,
     tradingview,
-    yahoo,
     yahoo_chart,
-    yahoo_recommendations,
+    yahoo_recom,
+    yahoo_target,
 )
 
 active = [
@@ -15,7 +15,7 @@ active = [
     simplywall,
     statusinvest,
     tradingview,
-    yahoo,
     yahoo_chart,
-    yahoo_recommendations,
+    yahoo_recom,
+    yahoo_target,
 ]

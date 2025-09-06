@@ -6,28 +6,26 @@ b3_listagem = [
 ]
 
 yahoo_chart = [
-    "yahoo_chart.1mo",
-    "yahoo_chart.1y",
-    "yahoo_chart.5y",
+    "yahoo_chart.1mo_series",
+    "yahoo_chart.1mo_variation",
+    "yahoo_chart.1y_series",
+    "yahoo_chart.1y_variation",
+    "yahoo_chart.5y_series",
+    "yahoo_chart.5y_variation",
 ]
 
-yahoo = [
-    "yahoo.rating.strong_buy",
-    "yahoo.rating.buy",
-    "yahoo.rating.hold",
-    "yahoo.rating.sell",
-    "yahoo.rating.strong_sell",
-    "yahoo.forecast.min",
-    "yahoo.forecast.avg",
-    "yahoo.forecast.max",
+yahoo_target = [
+    "yahoo_target.min",
+    "yahoo_target.avg",
+    "yahoo_target.max",
 ]
 
-yahoo_recommendations = [
-    "yahoo_recommendations.strong_buy",
-    "yahoo_recommendations.buy",
-    "yahoo_recommendations.hold",
-    "yahoo_recommendations.sell",
-    "yahoo_recommendations.strong_sell",
+yahoo_recom = [
+    "yahoo_recom.strong_buy",
+    "yahoo_recom.buy",
+    "yahoo_recom.hold",
+    "yahoo_recom.sell",
+    "yahoo_recom.strong_sell",
 ]
 
 tradingview = [
@@ -140,4 +138,4 @@ investidor10 = [
     "investidor10.financeiro.segmento",
 ]
 
-all = b3_listagem + yahoo_chart + yahoo + yahoo_recommendations + tradingview + simplywall + statusinvest + investidor10
+all = b3_listagem + yahoo_chart + yahoo_target + yahoo_recom + tradingview + simplywall + statusinvest + investidor10

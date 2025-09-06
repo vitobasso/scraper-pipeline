@@ -1,7 +1,9 @@
 import json
 
 import yfinance
+from curl_cffi import requests
 
+from src.common import config
 from src.common.util.date_util import timestamp
 from src.scraper.core import paths
 from src.scraper.core.logs import log
@@ -15,7 +17,7 @@ def from_caller():
         stack_frame_index=2,
         tasks=[
             source_task(call_api),
-            validate_json(validator, "normalization"),
+            validate_json(validator),
             normalize_json(normalize),
         ],
     )
@@ -26,7 +28,10 @@ def call_api(pipe: Pipeline, ticker: str):
     path = paths.for_pipe(pipe, ticker).stage_dir("validation") / f"{timestamp()}.json"
     print(f"scraping, path: {path}, proxy: {proxy}")
     try:
-        result = yfinance.Ticker(f"{ticker}.SA").history(period="5y", interval="1d", proxy=proxy, raise_errors=True)
+        session = requests.Session(impersonate="chrome", verify=config.enforce_https)
+        result = yfinance.Ticker(f"{ticker}.SA", session).history(
+            period="5y", interval="1d", proxy=proxy, raise_errors=True
+        )
         data = result["Close"].tolist()
         with open(path, "w") as f:
             json.dump(data, f)

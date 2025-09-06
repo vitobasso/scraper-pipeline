@@ -6,28 +6,26 @@ b3_listagem = {
 }
 
 yahoo_chart = {
-    "yahoo_chart.1mo": {"short": "1M", "long": "Último Mês"},
-    "yahoo_chart.1y": {"short": "1A", "long": "Último Ano"},
-    "yahoo_chart.5y": {"short": "5A", "long": "Últimos 5 Anos"},
+    "yahoo_chart.1mo_series": {"short": "1M", "long": "Último Mês"},
+    "yahoo_chart.1mo_variation": {"short": "1M", "long": "Último Mês"},
+    "yahoo_chart.1y_series": {"short": "1A", "long": "Último Ano"},
+    "yahoo_chart.1y_variation": {"short": "1A", "long": "Último Ano"},
+    "yahoo_chart.5y_series": {"short": "5A", "long": "Últimos 5 Anos"},
+    "yahoo_chart.5y_variation": {"short": "5A", "long": "Últimos 5 Anos"},
 }
 
 yahoo = {
-    "yahoo.rating.strong_buy": {"short": "CF", "long": "Compra Forte"},
-    "yahoo.rating.buy": {"short": "C", "long": "Compra"},
-    "yahoo.rating.hold": {"short": "M", "long": "Manter"},
-    "yahoo.rating.sell": {"short": "V", "long": "Venda"},
-    "yahoo.rating.strong_sell": {"short": "VF", "long": "Venda Forte"},
-    "yahoo.forecast.min": {"short": "Min", "long": "Previsão Mínima"},
-    "yahoo.forecast.avg": {"short": "Méd", "long": "Previsão Média"},
-    "yahoo.forecast.max": {"short": "Max", "long": "Previsão Máxima"},
+    "yahoo_target.min": {"short": "Min", "long": "Previsão Mínima"},
+    "yahoo_target.avg": {"short": "Méd", "long": "Previsão Média"},
+    "yahoo_target.max": {"short": "Max", "long": "Previsão Máxima"},
 }
 
 yahoo_recommendations = {
-    "yahoo_recommendations.strong_buy": {"short": "CF", "long": "Compra Forte"},
-    "yahoo_recommendations.buy": {"short": "C", "long": "Compra"},
-    "yahoo_recommendations.hold": {"short": "M", "long": "Manter"},
-    "yahoo_recommendations.sell": {"short": "V", "long": "Venda"},
-    "yahoo_recommendations.strong_sell": {"short": "VF", "long": "Venda Forte"},
+    "yahoo_recom.strong_buy": {"short": "CF", "long": "Compra Forte"},
+    "yahoo_recom.buy": {"short": "C", "long": "Compra"},
+    "yahoo_recom.hold": {"short": "M", "long": "Manter"},
+    "yahoo_recom.sell": {"short": "V", "long": "Venda"},
+    "yahoo_recom.strong_sell": {"short": "VF", "long": "Venda Forte"},
 }
 
 tradingview = {
