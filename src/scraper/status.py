@@ -1,5 +1,5 @@
-from src.scraper.active_pipes import pipes
 from src.scraper.core.scheduler import Pipeline
+from src.scraper.scraper import pipes
 
 
 def report_status(pipelines: list[Pipeline]):

@@ -6,7 +6,9 @@ from src.common.util.date_util import timestamp
 from src.scraper.core import paths
 from src.scraper.core.logs import log
 from src.scraper.core.scheduler import Pipeline
-from src.scraper.core.tasks import normalize_json, source_task, validate_json
+from src.scraper.core.tasks.base import source_task
+from src.scraper.core.tasks.normalization import normalize_json
+from src.scraper.core.tasks.validation import validate_json
 from src.scraper.services import browser
 from src.scraper.services.proxies import random_proxy
 

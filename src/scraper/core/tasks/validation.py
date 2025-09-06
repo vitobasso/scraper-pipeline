@@ -4,19 +4,40 @@ from collections.abc import Callable
 from pathlib import Path
 
 from src.scraper.core import paths
+from src.scraper.core.scheduler import TaskFactory
+from src.scraper.core.tasks.base import intermediate_task
 
 
-def validate_schema(path: Path, schema: dict, next_stage: str):
+def validate_json(arg, next_stage: str = "normalization") -> TaskFactory:
+    if isinstance(arg, dict):
+        return _validate_json_schema(arg, next_stage)
+    elif callable(arg):
+        return _validate_json_callable(arg, next_stage)  # type: ignore
+    else:
+        raise TypeError(f"validate_data not implemented for type: {type(arg)}")
+
+
+def _validate_json_schema(schema, next_stage: str) -> TaskFactory:
+    execute = lambda pipe, path: _validate_schema(path, schema, next_stage)
+    return intermediate_task(execute, "validation")
+
+
+def _validate_json_callable(validator: Callable[[str], list], next_stage: str) -> TaskFactory:
+    execute = lambda pipe, path: _validate(path, validator, next_stage)
+    return intermediate_task(execute, "validation")
+
+
+def _validate_schema(path: Path, schema: dict, next_stage: str):
     validator = lambda data: _validate_dict(data, schema)
-    validate_json(path, validator, next_stage)
+    _validate(path, validator, next_stage)
 
 
-def validate_json(path: Path, validator: Callable[[str], list], next_stage: str):
+def _validate(path: Path, validator: Callable[[str], list], next_stage: str):
     if _is_extraction_error(path):
         _, failed, _ = paths.split_files(path, "extraction", next_stage)
         path.rename(failed)
     else:
-        errors = _validate_json(path, validator)
+        errors = _validate_core(path, validator)
         output, failed, _ = paths.split_files(path, "validation", next_stage)
         dest_path = failed if errors else output
         path.rename(dest_path)
@@ -30,7 +51,7 @@ def _is_extraction_error(path: Path):
         return re.search(r"^\w", first_line) and not re.search(r"[{}]", first_line)
 
 
-def _validate_json(path: Path, validator: Callable[[str], list]):
+def _validate_core(path: Path, validator: Callable[[str], list]):
     try:
         with open(path) as f:
             return validator(json.load(f))

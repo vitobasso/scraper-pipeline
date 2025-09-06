@@ -7,11 +7,12 @@ from pathlib import Path
 
 from src.common.services.data import known_tickers
 from src.common.util.date_util import timestamp
-from src.scraper.core import normalization, paths
+from src.scraper.core import paths
 from src.scraper.core.logs import log
 from src.scraper.core.paths import for_pipe
 from src.scraper.core.scheduler import Pipeline
-from src.scraper.core.tasks import global_task, intermediate_task
+from src.scraper.core.tasks import normalization
+from src.scraper.core.tasks.base import global_task, intermediate_task
 from src.scraper.core.util import xls, zip
 from src.scraper.services.browser import download_bytes, error_name, find_url_contains, page_goto
 from src.scraper.services.proxies import random_proxy

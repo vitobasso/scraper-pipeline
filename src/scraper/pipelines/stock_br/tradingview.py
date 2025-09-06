@@ -1,13 +1,15 @@
-from src.scraper.core import normalization
 from src.scraper.core.scheduler import Pipeline
-from src.scraper.core.screenshot import ss_common_ancestor
-from src.scraper.core.tasks import extract_json, normalize_json, source_task, validate_json
+from src.scraper.core.tasks import normalization
+from src.scraper.core.tasks.extraction import extract_json
+from src.scraper.core.tasks.normalization import normalize_json
+from src.scraper.core.tasks.screenshot import screenshot
+from src.scraper.core.tasks.validation import validate_json
 
 
 def pipeline():
     return Pipeline.from_caller(
         tasks=[
-            source_task(screenshot),
+            screenshot(url, scope_selectors),
             extract_json(prompt),
             validate_json(schema),
             normalize_json(normalize),
@@ -15,11 +17,8 @@ def pipeline():
     )
 
 
-def screenshot(pipe: Pipeline, ticker: str):
-    ss_common_ancestor(
-        ticker, pipe, f"https://tradingview.com/symbols/{ticker}/forecast", ["Price target", "Analyst rating"]
-    )
-
+url = lambda ticker: f"https://tradingview.com/symbols/{ticker}/forecast"
+scope_selectors = ["Price target", "Analyst rating"]
 
 prompt = """
     1. analyst_rating (int values):

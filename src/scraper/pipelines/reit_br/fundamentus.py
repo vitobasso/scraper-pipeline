@@ -3,10 +3,12 @@ import asyncio
 import pandas
 
 from src.common.util.date_util import timestamp
-from src.scraper.core import normalization, paths
+from src.scraper.core import paths
 from src.scraper.core.logs import log
 from src.scraper.core.scheduler import Pipeline
-from src.scraper.core.tasks import global_task, normalize_csv
+from src.scraper.core.tasks import normalization
+from src.scraper.core.tasks.base import global_task
+from src.scraper.core.tasks.normalization import normalize_csv
 from src.scraper.services.browser import error_name, page_goto
 from src.scraper.services.proxies import random_proxy
 

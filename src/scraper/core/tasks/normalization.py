@@ -10,9 +10,21 @@ from src.common import config
 from src.common.services import repository
 from src.scraper.core import paths
 from src.scraper.core.logs import log_for_path
+from src.scraper.core.scheduler import TaskFactory
+from src.scraper.core.tasks.base import intermediate_task
 
 
-def normalize_json(input_path: Path, function: Callable, next_stage: str = "ready"):
+def normalize_json(function: Callable, next_stage: str = "ready") -> TaskFactory:
+    execute = lambda pipe, path: _normalize_json(path, function, next_stage)
+    return intermediate_task(execute, "normalization")
+
+
+def normalize_csv(function: Callable, next_stage: str = "ready", delimiter: str = ",") -> TaskFactory:
+    execute = lambda pipe, path: _normalize_csv(path, function, next_stage, delimiter)
+    return intermediate_task(execute, "normalization")
+
+
+def _normalize_json(input_path: Path, function: Callable, next_stage: str = "ready"):
     print(f"normalizing, path: {input_path}")
     try:
         with input_path.open(encoding="utf-8") as f:
@@ -25,10 +37,10 @@ def normalize_json(input_path: Path, function: Callable, next_stage: str = "read
         log_for_path(str(e), input_path)
 
 
-def normalize_csv(input_path: Path, function: Callable, next_stage: str, delimiter: str = ","):
+def _normalize_csv(input_path: Path, function: Callable, next_stage: str, delimiter: str = ","):
     print(f"normalizing, path: {input_path}")
     try:
-        _normalize_csv(input_path, function, delimiter)
+        _normalize_csv_core(input_path, function, delimiter)
         output, _, processed = paths.split_files(input_path, "normalization", next_stage, "stamp")
         input_path.rename(processed)
         output.touch()
@@ -36,7 +48,7 @@ def normalize_csv(input_path: Path, function: Callable, next_stage: str, delimit
         log_for_path(str(e), input_path)
 
 
-def _normalize_csv(input_path: Path, function: Callable, delimiter: str = ","):
+def _normalize_csv_core(input_path: Path, function: Callable, delimiter: str = ","):
     """
     Splits the csv into one json per ticker.
     Assumptions:

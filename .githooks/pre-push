@@ -3,11 +3,11 @@ echo "Running linter..."
 uv run ruff check . --fix . && uv run ruff format .
 
 if [ $? -ne 0 ]; then
-  echo "Lint failed, push aborted."
+  echo "Push aborted: Lint failed."
   exit 1
 fi
 
 if ! git diff --quiet; then
-  echo "Lint auto-fixed some files. Push aborted."
+  echo "Push aborted: Found uncommitted files. Were they changed by the linter?"
   exit 1
 fi

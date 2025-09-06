@@ -5,12 +5,19 @@ from PIL import Image
 from src.common import config
 from src.scraper.core import paths
 from src.scraper.core.logs import log_for_path
+from src.scraper.core.scheduler import TaskFactory
+from src.scraper.core.tasks.base import intermediate_task
 from src.scraper.services.llm import llm
 
 this_stage = "extraction"
 
 
-def extract_json(image_path: Path, prompt_json_properties: str, next_stage: str):
+def extract_json(prompt: str, next_stage: str = "validation") -> TaskFactory:
+    execute = lambda pipe, path: _extract_json(path, prompt, next_stage)
+    return intermediate_task(execute, "extraction")
+
+
+def _extract_json(image_path: Path, prompt_json_properties: str, next_stage: str):
     prompt = f"""
     Extract the following data as raw JSON.
     Do not use any markdown formatting or backticks.
@@ -23,10 +30,10 @@ def extract_json(image_path: Path, prompt_json_properties: str, next_stage: str)
       or "Error: 404 not found"
       or "Found no price forecast data"
     """
-    extract(image_path, prompt, next_stage)
+    _extract(image_path, prompt, next_stage)
 
 
-def extract(image_path: Path, prompt: str, next_stage: str):
+def _extract(image_path: Path, prompt: str, next_stage: str):
     print(f"extracting data, path: {image_path}")
     output, failed, processed = paths.split_files(image_path, this_stage, next_stage, "json")
     try:
@@ -34,10 +41,10 @@ def extract(image_path: Path, prompt: str, next_stage: str):
             response = llm().generate_content([prompt, image])
             with output.open(mode="w", encoding="utf-8") as f:
                 f.write(response.text)
-        discard(image_path, processed)
+        _discard(image_path, processed)
     except Exception as e:
         log_for_path(str(e), image_path)
-        discard(image_path, failed)
+        _discard(image_path, failed)
 
 
 def ask(prompt: str, output_path: Path):
@@ -46,7 +53,7 @@ def ask(prompt: str, output_path: Path):
         file.write(response.text)
 
 
-def discard(input_path, dest_path):
+def _discard(input_path, dest_path):
     if config.keep_debug_images:
         input_path.rename(dest_path)
     else:

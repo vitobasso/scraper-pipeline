@@ -118,8 +118,8 @@ async def expect_json_response(page, url: str, condition):
     return data
 
 
-def common_ancestor(page, texts: list[str]):
-    children = " and ".join([_xpath_contains(text) for text in texts])
+def common_ancestor(page, scope_selectors: list[str]):
+    children = " and ".join([_xpath_contains(text) for text in scope_selectors])
     return page.locator(f"""xpath=//*[{children}]""").last
 
 

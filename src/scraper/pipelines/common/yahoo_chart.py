@@ -1,42 +1,30 @@
-import json
-
 import yfinance
 from curl_cffi import requests
 
 from src.common import config
-from src.common.util.date_util import timestamp
-from src.scraper.core import paths
-from src.scraper.core.logs import log
 from src.scraper.core.scheduler import Pipeline
-from src.scraper.core.tasks import normalize_json, source_task, validate_json
-from src.scraper.services.proxies import random_proxy
+from src.scraper.core.tasks.api_call import call_api
+from src.scraper.core.tasks.normalization import normalize_json
+from src.scraper.core.tasks.validation import validate_json
 
 
 def from_caller():
     return Pipeline.from_caller(
         stack_frame_index=2,
         tasks=[
-            source_task(call_api),
+            call_api(call),
             validate_json(validator),
             normalize_json(normalize),
         ],
     )
 
 
-def call_api(pipe: Pipeline, ticker: str):
-    proxy = random_proxy(pipe)
-    path = paths.for_pipe(pipe, ticker).stage_dir("validation") / f"{timestamp()}.json"
-    print(f"scraping, path: {path}, proxy: {proxy}")
-    try:
-        session = requests.Session(impersonate="chrome", verify=config.enforce_https)
-        result = yfinance.Ticker(f"{ticker}.SA", session).history(
-            period="5y", interval="1d", proxy=proxy, raise_errors=True
-        )
-        data = result["Close"].tolist()
-        with open(path, "w") as f:
-            json.dump(data, f)
-    except Exception as e:
-        log(str(e), ticker, pipe)
+def call(ticker: str, proxy: str):
+    session = requests.Session(impersonate="chrome", verify=config.enforce_https)
+    result = yfinance.Ticker(f"{ticker}.SA", session=session).history(
+        period="5y", interval="1d", proxy=proxy, raise_errors=True
+    )
+    return result["Close"].tolist()
 
 
 # business days

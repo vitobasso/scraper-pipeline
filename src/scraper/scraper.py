@@ -2,7 +2,9 @@ import random
 
 from src.common import config
 from src.common.services import ipc_signal
-from src.scraper.active_pipes import pipes
+from src.scraper.pipelines import reit_br, stock_br
+
+pipes = [p.pipeline() for p in stock_br.active + reit_br.active]
 
 
 def main():
