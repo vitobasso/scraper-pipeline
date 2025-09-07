@@ -6,7 +6,6 @@ from itertools import chain
 from pathlib import Path
 
 from src.common.services.data import known_tickers
-from src.common.util.date_util import timestamp
 from src.scraper.core import paths
 from src.scraper.core.logs import log
 from src.scraper.core.paths import for_pipe
@@ -32,7 +31,7 @@ def sync_download(pipe: Pipeline):
 
 
 async def _download(pipe: Pipeline):
-    out_csv = for_pipe(pipe, "_global").stage_dir("normalization") / f"{timestamp()}.csv"
+    out_csv = for_pipe(pipe, "_global").output_file("normalization", "csv")
     proxy = random_proxy(pipe)
     url = "https://sistemaswebb3-listados.b3.com.br/listedCompaniesPage/"
     print(f"downloading csv, url: {url}, path: {out_csv}, proxy: {proxy}")
@@ -108,10 +107,10 @@ def _normalize(pipe: Pipeline, input_csv: Path):
                 _write_record(pipe, t, input_csv, data)
 
 
-def find_tickers(partial, all_tickers):
+def find_tickers(partial, valid_tickers):
     partial = partial.upper()
     pattern = re.compile(rf"^{re.escape(partial)}\d{{1,2}}$")
-    return [t for t in all_tickers if pattern.match(t)]
+    return [t for t in valid_tickers if pattern.match(t)]
 
 
 def _probe_buffer(reader, max_probe: int = 10) -> list[list[str]]:
@@ -177,7 +176,6 @@ def _clean(v):
 
 
 def _write_record(pipe: Pipeline, ticker: str, input_csv: Path, data: dict):
-    out_dir = paths.for_pipe(pipe, ticker).stage_dir("ready")
-    out_path = out_dir / f"{input_csv.stem}.json"
+    out_path = paths.for_pipe(pipe, ticker).stage_dir("ready") / f"{input_csv.stem}.json"
     with out_path.open("w", encoding="utf-8") as f_out:
         json.dump(data, f_out, ensure_ascii=False, indent=2)

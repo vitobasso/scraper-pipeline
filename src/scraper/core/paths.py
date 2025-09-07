@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from src.common.config import data_root
+from src.common.util.date_util import timestamp
 from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.util.files import mkdir
 
@@ -60,6 +61,9 @@ class PipelinePaths:
     @property
     def processed_dir(self) -> Path:
         return mkdir(self.debug_dir / _PROCESSED)
+
+    def output_file(self, stage: str, ext: str):
+        return self.stage_dir(stage) / f"{timestamp()}.{ext}"
 
     @property
     def errors_log(self) -> Path:

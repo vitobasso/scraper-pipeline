@@ -1,7 +1,6 @@
 import asyncio
 from collections.abc import Callable
 
-from src.common.util.date_util import timestamp
 from src.scraper.core import paths
 from src.scraper.core.logs import log
 from src.scraper.core.scheduler import Pipeline, TaskFactory
@@ -58,4 +57,4 @@ async def _common_ancestor(url: str, scope_selectors: list[str], pipe: Pipeline,
 
 
 def _output_path(pipe: Pipeline, ticker: str):
-    return paths.for_pipe(pipe, ticker).stage_dir("extraction") / f"{timestamp()}.png"
+    return paths.for_pipe(pipe, ticker).output_file("extraction", "png")

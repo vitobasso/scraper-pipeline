@@ -2,8 +2,6 @@
 
 ### b3_listagem depends on statusinvest
 
-### forecast wrong sometimes
-
 # Data
 
 # User Experience
@@ -15,8 +13,6 @@
 ### import b3 automatically
 
 # Server Health
-
-### auto-clean proxy list files
 
 ### retry each pipeline with exponential backoff
 

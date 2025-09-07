@@ -1,7 +1,6 @@
 import json
 from collections.abc import Callable
 
-from src.common.util.date_util import timestamp
 from src.scraper.core import paths
 from src.scraper.core.logs import log
 from src.scraper.core.scheduler import Pipeline, TaskFactory
@@ -17,7 +16,7 @@ def call_api(call: Callable[[str, str], dict]) -> TaskFactory:
 
 def _call_api(pipe: Pipeline, ticker: str, call: Callable[[str, str], dict]):
     proxy = random_proxy(pipe)
-    path = paths.for_pipe(pipe, ticker).stage_dir("validation") / f"{timestamp()}.json"
+    path = paths.for_pipe(pipe, ticker).output_file("validation", "json")
     print(f"calling api, path: {path}, proxy: {proxy}")
     try:
         data = call(ticker, proxy)
