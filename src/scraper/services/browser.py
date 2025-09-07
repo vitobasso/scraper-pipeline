@@ -1,12 +1,13 @@
+import asyncio
 import re
 from asyncio import wait_for
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 from urllib.parse import urljoin
 
-from playwright.async_api import Error, ProxySettings, TimeoutError, ViewportSize, async_playwright
+from playwright.async_api import Error, Page, ProxySettings, TimeoutError, ViewportSize, async_playwright
 
 from src.common import config
 
@@ -21,6 +22,7 @@ async def new_page(proxy: str):
         proxy_settings: ProxySettings | None = {"server": f"{proxy}"} if proxy else None
 
         browser = await playwright.chromium.launch(
+            channel="chromium", # headless mode more realistic. might use more RAM/CPU.
             headless=True,
             proxy=proxy_settings,
             args=[
@@ -118,7 +120,7 @@ async def expect_json_response(page, url: str, condition):
     return data
 
 
-def common_ancestor(page, scope_selectors: list[str]):
+def common_ancestor(page: Page, scope_selectors: list[str]):
     children = " and ".join([_xpath_contains(text) for text in scope_selectors])
     return page.locator(f"""xpath=//*[{children}]""").last
 
@@ -215,3 +217,18 @@ async def _scan_html_for_href(page, url: str, href_predicate: Callable[[str], bo
 def _extract_hrefs(html_text: str) -> list[str]:
     # Capture href values in single or double quotes, ignoring spaces and '>'
     return re.findall(r"href=[\"']([^\"'\s>]+)[\"']", html_text, flags=re.IGNORECASE)
+
+
+async def expect_either(page: Page, f1: Callable[[Page], Coroutine], f2: Callable[[Page], Coroutine]):
+    tasks = [
+        asyncio.create_task(f1(page)),
+        asyncio.create_task(f2(page)),
+    ]
+    done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+    for task in pending:
+        task.cancel()
+    return done.pop().result()
+
+
+async def wait_idle(page: Page):
+    await page.wait_for_load_state("networkidle", timeout=timeout_millis)

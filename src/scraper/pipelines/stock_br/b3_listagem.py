@@ -1,12 +1,10 @@
 import asyncio
 import csv
-import json
 import re
 from itertools import chain
 from pathlib import Path
 
 from src.common.services.data import known_tickers
-from src.scraper.core import paths
 from src.scraper.core.logs import log
 from src.scraper.core.paths import for_pipe
 from src.scraper.core.scheduler import Pipeline
@@ -40,7 +38,7 @@ async def _download(pipe: Pipeline):
             zip_url = await find_url_contains(page, url, ".zip")
             zip_bytes = await download_bytes(page, zip_url)
             _, xlsx_bytes = zip.first_file(zip_bytes, selector=".xlsx")
-            xls.to_csv(xlsx_bytes, out_csv, delimiter=";")
+            xls.to_csv(xlsx_bytes, out_csv)
     except Exception as e:
         log(error_name(e), "_global", pipe)
 
@@ -49,10 +47,7 @@ def normalize(pipe: Pipeline, input_csv: Path):
     print(f"normalizing, path: {input_csv}")
     try:
         _normalize(pipe, input_csv)
-        # stamp and archive original csv (same pattern as statusinvest)
-        output, _, processed = paths.split_files(input_csv, "normalization", "ready", "stamp")
-        input_csv.rename(processed)
-        output.touch()
+        normalization.stamp_ready(input_csv)
     except Exception as e:
         log(str(e), "_global", pipe)
 
@@ -60,7 +55,7 @@ def normalize(pipe: Pipeline, input_csv: Path):
 def _normalize(pipe: Pipeline, input_csv: Path):
     # Read from CSV generated in download stage
     with input_csv.open(encoding="utf-8") as f:
-        reader = csv.reader(f, delimiter=";")
+        reader = csv.reader(f)
 
         buffered = _probe_buffer(reader)
         header_idx = _find_header_index(buffered)
@@ -104,7 +99,7 @@ def _normalize(pipe: Pipeline, input_csv: Path):
             if not tickers:
                 continue
             for t in tickers:
-                _write_record(pipe, t, input_csv, data)
+                normalization.write_output(data, pipe, t, input_csv)
 
 
 def find_tickers(partial, valid_tickers):
@@ -173,9 +168,3 @@ def _clean(v):
         return None if v in placeholders else v
     except AttributeError:
         return v
-
-
-def _write_record(pipe: Pipeline, ticker: str, input_csv: Path, data: dict):
-    out_path = paths.for_pipe(pipe, ticker).stage_dir("ready") / f"{input_csv.stem}.json"
-    with out_path.open("w", encoding="utf-8") as f_out:
-        json.dump(data, f_out, ensure_ascii=False, indent=2)

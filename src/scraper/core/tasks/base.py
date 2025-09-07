@@ -19,7 +19,7 @@ def global_task(execute) -> TaskFactory:
     # a source task that takes no input
     # find_input returns a bool indicating whether the task is not done yet
     return lambda pipe: Task(
-        find_input=lambda: not progress.has_recent_files(pipe, "_global", "ready"),
+        find_input=lambda: bool(progress.progress(pipe, {"_global"}).available()),
         progress=lambda: progress.progress(pipe, {"_global"}),
         execute=lambda: execute(pipe),
         pipeline=pipe,

@@ -5,11 +5,10 @@ from pathlib import Path
 import openpyxl
 
 
-def to_csv(xlsx_bytes: bytes, out_csv: Path, delimiter: str = ";"):
+def to_csv(xlsx_bytes: bytes, out_csv: Path, delimiter: str = ","):
     """
     Convert an in-memory XLSX (bytes) into a CSV file at out_csv.
     - Writes headers as the first row.
-    - Uses delimiter ';' by default to match other pipelines.
     - Replaces None cells with empty string for CSV output.
     """
     wb = openpyxl.load_workbook(BytesIO(xlsx_bytes), data_only=True)

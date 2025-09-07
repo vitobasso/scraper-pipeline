@@ -9,16 +9,16 @@ from src.common.services.repository import query_tickers
 
 @dataclass
 class Progress:
-    full_domain: set[str]
+    scope: set[str]
     ready: set[str]
     waiting: set[str]
     aborted: set[str]
 
     def available(self) -> set[str]:
-        return self.full_domain - self.waiting - self.ready - self.aborted
+        return self.scope - self.waiting - self.ready - self.aborted
 
     def pending(self) -> set[str]:
-        return self.full_domain - self.ready - self.aborted
+        return self.scope - self.ready - self.aborted
 
     def is_done(self) -> bool:
         return len(self.pending()) <= 0

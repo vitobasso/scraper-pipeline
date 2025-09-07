@@ -9,12 +9,12 @@ from src.scraper.core.logs import timestamp_from_log
 from src.scraper.core.scheduler import Pipeline, Progress
 
 
-def progress(pipe: Pipeline, input_domain: set[str]) -> Progress:
+def progress(pipe: Pipeline, scope: set[str]) -> Progress:
     return Progress(
-        full_domain=input_domain,
-        ready=_ready(pipe, input_domain),
-        waiting=_waiting(pipe, input_domain),
-        aborted=_aborted(pipe, input_domain),
+        scope=scope,
+        ready=_ready(pipe, scope),
+        waiting=_waiting(pipe, scope),
+        aborted=_aborted(pipe, scope),
     )
 
 
@@ -49,16 +49,16 @@ def _count_recent_error_logs(pipe: Pipeline, ticker: str) -> int:
         return sum(1 for line in file if timestamp_from_log(line) > cutoff)
 
 
-def _waiting(pipe: Pipeline, all_tickers: set[str]) -> set[str]:
-    return {ticker for ticker in all_tickers if paths.has_waiting_files(pipe, ticker)}
+def _waiting(pipe: Pipeline, scope: set[str]) -> set[str]:
+    return {ticker for ticker in scope if paths.for_pipe(pipe, ticker).has_waiting_files}
 
 
-def _ready(pipe: Pipeline, all_tickers: set[str]) -> set[str]:
-    return {ticker for ticker in all_tickers if has_recent_files(pipe, ticker, "ready")}
+def _ready(pipe: Pipeline, scope: set[str]) -> set[str]:
+    return {ticker for ticker in scope if has_recent_files(pipe, ticker, "ready")}
 
 
-def _aborted(pipe: Pipeline, all_tickers: set[str]) -> set[str]:
-    return {ticker for ticker in all_tickers if _should_abort(pipe, ticker)}
+def _aborted(pipe: Pipeline, scope: set[str]) -> set[str]:
+    return {ticker for ticker in scope if _should_abort(pipe, ticker)}
 
 
 def _should_abort(pipe: Pipeline, ticker: str) -> bool:

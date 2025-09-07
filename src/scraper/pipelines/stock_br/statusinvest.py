@@ -36,7 +36,7 @@ async def _download(pipe: Pipeline):
         log(error_name(e), "_global", pipe)
 
 
-def _normalize(data):
+def _normalize(data: dict) -> dict:
     keys = normalization.traverse_keys(normalization.key)
     values = normalization.traverse_values(normalization.value)
     magnitude = normalization.traverse_dict(

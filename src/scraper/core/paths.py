@@ -69,6 +69,12 @@ class PipelinePaths:
     def errors_log(self) -> Path:
         return self.debug_dir / _ERRORS_LOG
 
+    @property
+    def has_waiting_files(self) -> bool:
+        """Check if there are any files waiting to be processed."""
+        waiting_path = self.base_dir / _WAITING
+        return any(f.is_file() for f in waiting_path.rglob("*"))
+
 
 def for_parts(asset_class: str, ticker: str, pipeline_name: str) -> PipelinePaths:
     """Get path helper for pipeline components."""
@@ -97,6 +103,11 @@ def split_files(input_path: Path, current_stage: str, next_stage: str, out_ext: 
     ]
 
 
+def processed_path(input_path: Path) -> Path:
+    paths = for_child(input_path)
+    return paths.processed_dir / input_path.name
+
+
 def latest_file(pipe: Pipeline, ticker: str, stage: str) -> Path | None:
     """Get the most recent file in a stage directory, if any."""
     stage_path = for_pipe(pipe, ticker).stage_dir(stage)
@@ -108,12 +119,6 @@ def waiting_files(pipe: Pipeline, ticker: str, stage: str) -> Iterator[Path]:
     """Get all files in the waiting directory for a stage."""
     stage_path = for_pipe(pipe, ticker).stage_dir(stage)
     return stage_path.glob("*") if stage_path.exists() else []
-
-
-def has_waiting_files(pipe: Pipeline, ticker: str) -> bool:
-    """Check if there are any files waiting to be processed."""
-    waiting_path = for_pipe(pipe, ticker).base_dir / _WAITING
-    return any(f.is_file() for f in waiting_path.rglob("*"))
 
 
 def failed_files(pipe: Pipeline, ticker: str) -> list[Path]:

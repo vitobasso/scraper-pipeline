@@ -32,7 +32,7 @@ queue non-displayed pipelines but prioritize the ones being displayed
 
 # Performance
 
-### simplywall: bulk scrape "[browse all stocks](https://simplywall.st/stocks/br)" even though it's not all tickers
+### improve simplywall_bulk by storing the urls as intermediate input, so they're retriable
 
 ### parallelize between pipelines
 

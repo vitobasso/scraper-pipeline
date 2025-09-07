@@ -23,6 +23,7 @@ use_proxies = env_bool("CONFIG_USE_PROXIES", "false")
 use_proxies_for_pipeline = {
     "statusinvest": True,
     "simplywall": True,
+    "simplywall_bulk": True,
 }
 
 # if False, ignores SSL certificate verification. Enables more proxies but risks data tampered by MIM.

@@ -42,7 +42,7 @@ async def _scrape(pipe: Pipeline):
         log(error_name(e), "_global", pipe)
 
 
-def _normalize(data) -> str:
+def _normalize(data: dict) -> dict:
     norm_keys = normalization.traverse_keys(normalization.key)
     remove_keys = normalization.remove_keys("papel", "endereco")
     numbers = normalization.traverse_values(normalization.value)
