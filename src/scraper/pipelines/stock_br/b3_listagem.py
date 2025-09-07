@@ -22,7 +22,7 @@ def pipeline():
     return Pipeline.from_caller(
         tasks=[
             global_task(sync_download),
-            intermediate_task(normalize, "normalization"),  # TODO separate extraction and normalization
+            intermediate_task(normalize, "normalization"),
         ],
     )
 

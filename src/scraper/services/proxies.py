@@ -6,32 +6,27 @@ import time
 import urllib.request
 from pathlib import Path
 
+from cachetools.func import ttl_cache
+
 from src.common import config
 from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.util import files
 
 list_dir = files.mkdir(Path(config.data_root) / "_proxy-list")
 
-_proxies = None
-
 
 def random_proxy(pipe: Pipeline):
-    return random.choice(_init()) if _is_enabled_for(pipe) else None
+    return random.choice(_refresh()) if _is_enabled_for(pipe) else None
 
 
 def _is_enabled_for(pipe: Pipeline):
     return config.use_proxies_for_pipeline.get(pipe.name, config.use_proxies)
 
 
-def _init():
-    global _proxies
-    if not _proxies:
-        _proxies = _refresh()
-    return _proxies
-
-
+@ttl_cache(ttl=config.proxy_refresh_seconds)
 def _refresh() -> list[str]:
     if not _validate_latest_file():
+        _clean_files()
         _download_list()
     if not _validate_latest_file():
         print("failed to download proxy lists", file=sys.stderr)
@@ -73,3 +68,8 @@ def _download_url(url: str):
 def _file_path() -> Path:
     timestamp = datetime.datetime.now().strftime(config.timestamp_format)
     return list_dir / f"{timestamp}.txt"
+
+
+def _clean_files():
+    for file in list_dir.glob("*"):
+        file.unlink()
