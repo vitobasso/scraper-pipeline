@@ -15,7 +15,7 @@ from src.scraper.services.proxies import random_proxy
 def pipeline():
     return Pipeline.from_caller(
         tasks=[
-            source_task(scrape),
+            source_task(scrape, requires=["simplywall_bulk"]),
             normalize_json(normalize, "validation"),
             validate_json(schema, "ready"),
         ],

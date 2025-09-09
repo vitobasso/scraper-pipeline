@@ -22,7 +22,7 @@ async def new_page(proxy: str):
         proxy_settings: ProxySettings | None = {"server": f"{proxy}"} if proxy else None
 
         browser = await playwright.chromium.launch(
-            channel="chromium", # headless mode more realistic. might use more RAM/CPU.
+            channel="chromium",  # headless mode more realistic. might use more RAM/CPU.
             headless=True,
             proxy=proxy_settings,
             args=[

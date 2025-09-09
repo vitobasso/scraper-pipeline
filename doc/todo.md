@@ -1,7 +1,3 @@
-# Bug
-
-### b3_listagem depends on statusinvest
-
 # Data
 
 # User Experience
@@ -31,8 +27,6 @@ queue non-displayed pipelines but prioritize the ones being displayed
 - GitHub Actions
 
 # Performance
-
-### improve simplywall_bulk by storing the urls as intermediate input, so they're retriable
 
 ### parallelize between pipelines
 

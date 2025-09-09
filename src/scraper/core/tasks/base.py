@@ -5,17 +5,18 @@ from src.scraper.core import progress
 from src.scraper.core.scheduler import Executable, Task, TaskFactory
 
 
-def source_task(execute: Executable[str]) -> TaskFactory:
+def source_task(execute: Executable[str], requires: list[str] | None = None) -> TaskFactory:
     get_progress = lambda pipe: progress.progress(pipe, set(repository.query_tickers(pipe.asset_class)))
     return lambda pipe: Task(
         find_input=lambda: get_progress(pipe).available(),
         progress=lambda: get_progress(pipe),
         execute=lambda arg: execute(pipe, arg),
         pipeline=pipe,
+        requires=requires or [],
     )
 
 
-def global_task(execute) -> TaskFactory:
+def global_task(execute, requires: list[str] | None = None) -> TaskFactory:
     # a source task that takes no input
     # find_input returns a bool indicating whether the task is not done yet
     return lambda pipe: Task(
@@ -23,6 +24,7 @@ def global_task(execute) -> TaskFactory:
         progress=lambda: progress.progress(pipe, {"_global"}),
         execute=lambda: execute(pipe),
         pipeline=pipe,
+        requires=requires or [],
     )
 
 
@@ -32,4 +34,5 @@ def intermediate_task(execute: Executable[Path], stage: str) -> TaskFactory:
         progress=None,  # pipeline progress is based on the source task
         execute=lambda arg: execute(pipe, arg),
         pipeline=pipe,
+        requires=[],
     )

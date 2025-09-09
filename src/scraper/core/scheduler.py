@@ -1,4 +1,5 @@
 import inspect
+import random
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -15,7 +16,7 @@ class Progress:
     aborted: set[str]
 
     def available(self) -> set[str]:
-        return self.scope - self.waiting - self.ready - self.aborted
+        return self.pending() - self.waiting
 
     def pending(self) -> set[str]:
         return self.scope - self.ready - self.aborted
@@ -30,6 +31,7 @@ class Task:
     progress: Callable[[], Progress] | None
     execute: Callable
     pipeline: "Pipeline"
+    requires: list[str]
 
 
 AssetClass = Literal["stock_br", "reit_br"]
@@ -55,7 +57,7 @@ class Pipeline:
         pipeline.tasks = [t(pipeline) for t in tasks]
         return pipeline
 
-    def run_next(self):
+    def run_task(self):
         for task in self.tasks[::-1]:
             if _try_task(task):
                 return
@@ -66,10 +68,34 @@ class Pipeline:
     def is_done(self):
         return self.progress().is_done()
 
+    def dependencies(self):
+        return {r for t in self.tasks for r in t.requires}
+
 
 TaskFactory = Callable[[Pipeline], Task]
 A = TypeVar("A")
 Executable = Callable[[Pipeline, A], any]
+
+
+@dataclass
+class Manager:
+    pipes: dict[str, Pipeline]
+
+    @classmethod
+    def from_pipelines(cls, pipelines: list[Pipeline]) -> "Manager":
+        return cls({pipe.name: pipe for pipe in pipelines})
+
+    def is_available(self, pipe: Pipeline):
+        return not pipe.is_done() and all(self.pipes[r].is_done() for r in pipe.dependencies())
+
+    def run_next(self):
+        pending = [p for p in self.pipes.values() if self.is_available(p)]
+        if pending:
+            p = random.choice(pending)
+            p.run_task()
+            return True
+        else:
+            return False
 
 
 def _try_task(task: Task):

@@ -18,7 +18,7 @@ from src.scraper.services.proxies import random_proxy
 def pipeline():
     return Pipeline.from_caller(
         tasks=[
-            global_task(sync_download),
+            global_task(sync_download, requires=["statusinvest"]),
             intermediate_task(normalize, "normalization"),
         ],
     )

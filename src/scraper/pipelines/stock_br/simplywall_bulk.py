@@ -12,7 +12,7 @@ from src.scraper.core.tasks import normalization
 from src.scraper.core.tasks.base import global_task, intermediate_task
 from src.scraper.core.tasks.normalization import normalize_json_split
 from src.scraper.core.tasks.validation import validate_json
-from src.scraper.core.util.files import write_json, read_lines, write_lines
+from src.scraper.core.util.files import read_lines, write_json, write_lines
 from src.scraper.services import browser
 from src.scraper.services.proxies import random_proxy
 
