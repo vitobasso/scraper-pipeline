@@ -83,10 +83,10 @@ class Manager:
 
     @classmethod
     def from_pipelines(cls, pipelines: list[Pipeline]) -> "Manager":
-        return cls({pipe.name: pipe for pipe in pipelines})
+        return cls({f"{pipe.asset_class}-{pipe.name}": pipe for pipe in pipelines})
 
     def is_available(self, pipe: Pipeline):
-        return not pipe.is_done() and all(self.pipes[r].is_done() for r in pipe.dependencies())
+        return not pipe.is_done() and all(self.pipes[f"{pipe.asset_class}-{r}"].is_done() for r in pipe.dependencies())
 
     def run_next(self):
         pending = [p for p in self.pipes.values() if self.is_available(p)]
