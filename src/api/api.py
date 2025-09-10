@@ -1,6 +1,6 @@
 import json
 import re
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +16,7 @@ from src.api.metadata.stock_br import sources as stock_sources
 from src.common import config
 from src.common.services import data, ipc_signal, repository
 from src.common.util import date_util
+from src.scraper.core import paths
 
 app = FastAPI()
 
@@ -36,19 +37,21 @@ optional = Query(None)
 
 root_dir = Path(config.data_root)
 
+last_updated: dict[str, dict[str, datetime]] = dict()  # per asset_class, per pipeline
+
 
 @app.get("/meta")
 def get_meta():
     return {
         "stock_br": {
             "schema": stock_schema.all,
-            "sources": stock_sources.all,
+            "sources": _merge_sources(stock_sources.all, last_updated.get("stock_br", {})),
             "labels": stock_labels.all,
             "tickers": data.known_tickers("stock_br"),
         },
         "reit_br": {
             "schema": reit_schema.all,
-            "sources": reit_sources.all,
+            "sources": _merge_sources(reit_sources.all, last_updated.get("reit_br", {})),
             "labels": reit_labels.all,
             "tickers": data.known_tickers("reit_br"),
         },
@@ -101,6 +104,7 @@ def _get_pipeline_data(pipeline_dir: Path, start: date, end: date):
     file = _select_file(ready_dir, start, end)
     if not file:
         return None
+    _mark_updated(file)
     with file.open(encoding="utf-8") as f:
         return json.load(f)
 
@@ -156,3 +160,21 @@ def _validate_period(start: date, end: date) -> tuple[date, date]:
             detail="End date must be later than start date",
         )
     return start, end
+
+
+def _mark_updated(file: Path):
+    d = date_util.datetime_from_filename(file)
+    asset_class, _, pipe = paths.parts(file)
+    if asset_class not in last_updated:
+        last_updated[asset_class] = {}
+    last_updated[asset_class][pipe] = d
+
+
+def _merge_sources(sources: dict[str, dict[str, str]], pipe_updated: dict[str, datetime]):
+    merged_sources = {}
+    for source, obj in sources.items():
+        merged_sources[source] = {
+            **obj,
+            "updated_at": pipe_updated.get(source, None),
+        }
+    return merged_sources

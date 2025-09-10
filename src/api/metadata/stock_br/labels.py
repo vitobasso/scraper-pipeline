@@ -14,13 +14,13 @@ yahoo_chart = {
     "yahoo_chart.5y_variation": {"short": "5A", "long": "Últimos 5 Anos"},
 }
 
-yahoo = {
+yahoo_target = {
     "yahoo_target.min": {"short": "Min", "long": "Previsão Mínima"},
     "yahoo_target.avg": {"short": "Méd", "long": "Previsão Média"},
     "yahoo_target.max": {"short": "Max", "long": "Previsão Máxima"},
 }
 
-yahoo_recommendations = {
+yahoo_recom = {
     "yahoo_recom.strong_buy": {"short": "CF", "long": "Compra Forte"},
     "yahoo_recom.buy": {"short": "C", "long": "Compra"},
     "yahoo_recom.hold": {"short": "M", "long": "Manter"},
@@ -140,4 +140,4 @@ investidor10 = {
     "investidor10.financeiro.segmento": {"short": "Segmento", "long": "Segmento"},
 }
 
-all = b3_listagem | yahoo_chart | yahoo | yahoo_recommendations | tradingview | simplywall | statusinvest | investidor10
+all = b3_listagem | yahoo_chart | yahoo_target | yahoo_recom | tradingview | simplywall | statusinvest | investidor10
