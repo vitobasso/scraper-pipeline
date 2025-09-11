@@ -1,6 +1,6 @@
 import json
 import re
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -173,8 +173,9 @@ def _mark_updated(file: Path):
 def _merge_sources(sources: dict[str, dict[str, str]], pipe_updated: dict[str, datetime]):
     merged_sources = {}
     for source, obj in sources.items():
+        d = pipe_updated.get(source, None)
         merged_sources[source] = {
             **obj,
-            "updated_at": pipe_updated.get(source, None),
+            "updated_at": d.astimezone(UTC) if d else d,
         }
     return merged_sources

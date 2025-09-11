@@ -1,5 +1,3 @@
-# Data
-
 # User Experience
 
 ### live update the frontend via websocket
@@ -19,10 +17,12 @@ queue non-displayed pipelines but prioritize the ones being displayed
 ### AI review on keys
 
 ### unit tests
+
 - normalization
 - validation
 
 ### CI/CD
+
 - docker-compose
 - GitHub Actions
 
@@ -49,7 +49,9 @@ response.candidates[0].grounding_metadata
 
 ### prioritize scraping cols that are currently displayed
 
-# Linting
+# Best practices
+
+### make datetimes explicitly UTC
 
 ### Use consistent logging instead of print (review by Windsurf)
 
