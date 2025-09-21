@@ -94,7 +94,7 @@ def _get_ticker_data(asset_class: str, ticker: str, start: date, end: date) -> d
             pipelines[pipeline_dir.name] = pipeline_data
     if not pipelines:
         return None
-    return _flatten(pipelines)
+    return _flatten(pipelines, 1)
 
 
 def _get_pipeline_data(pipeline_dir: Path, start: date, end: date):
@@ -114,12 +114,12 @@ def _select_file(ready_dir: Path, start: date, end: date) -> Path | None:
     return max(candidates, key=date_util.date_from_filename) if candidates else None
 
 
-def _flatten(d, parent_key="") -> dict[str, Any]:
+def _flatten(d, depth=0, parent_key="") -> dict[str, Any]:
     items = {}
     for k, v in d.items():
         new_key = f"{parent_key}.{k}" if parent_key else k
-        if isinstance(v, dict):
-            items.update(_flatten(v, new_key))
+        if isinstance(v, dict) and depth:
+            items.update(_flatten(v, depth - 1, new_key))
         else:
             items[new_key] = v
     return items

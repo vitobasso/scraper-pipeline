@@ -49,10 +49,16 @@ def normalize(raw):
     avg = lambda start, end: sum(raw[start:end]) / (end - start)
     var = lambda a1, a2, b1, b2: (avg(b1, b2) - avg(a1, a2)) / avg(a1, a2)
     return {
-        "1mo_series": raw[-21:],
-        "1y_series": [v for i, v in enumerate(raw[-252:]) if i % 5 == 0],
-        "5y_series": [v for i, v in enumerate(raw) if i % 20 == 0],
-        "1mo_variation": var(-MONTH_DAYS - 1, -MONTH_DAYS + 1, -3, -1),
-        "1y_variation": var(-YEAR_DAYS - 12, -YEAR_DAYS + 12, -25, -1),
-        "5y_variation": var(0, 100, -100, -1),
+        "1mo": {
+            "series": raw[-21:],
+            "variation": var(-MONTH_DAYS - 1, -MONTH_DAYS + 1, -3, -1),
+        },
+        "1y": {
+            "series": [v for i, v in enumerate(raw[-252:]) if i % 5 == 0],
+            "variation": var(-YEAR_DAYS - 12, -YEAR_DAYS + 12, -25, -1),
+        },
+        "5y": {
+            "series": [v for i, v in enumerate(raw) if i % 20 == 0],
+            "variation": var(0, 100, -100, -1),
+        },
     }
