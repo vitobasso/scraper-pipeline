@@ -1,17 +1,10 @@
+from src.api.metadata.common.schema import yahoo_chart
+
 b3_listagem = [
     "b3_listagem.setor",
     "b3_listagem.subsetor",
     "b3_listagem.segmento",
     "b3_listagem.segmento_de_negociacao",
-]
-
-yahoo_chart = [
-    "yahoo_chart.1mo_series",
-    "yahoo_chart.1mo_variation",
-    "yahoo_chart.1y_series",
-    "yahoo_chart.1y_variation",
-    "yahoo_chart.5y_series",
-    "yahoo_chart.5y_variation",
 ]
 
 yahoo_target = [
