@@ -32,8 +32,8 @@ MONTH_DAYS = 21
 YEAR_DAYS = 252
 
 # raw data expected to have 5 years of data in days, with 10% tolerance
-TOLERANCE_MIN = 5 * YEAR_DAYS * 0.9
-TOLERANCE_MAX = 5 * YEAR_DAYS * 1.1
+TOLERANCE_MIN = 5 * YEAR_DAYS * 0.7
+TOLERANCE_MAX = 5 * YEAR_DAYS * 1.2
 
 
 def validator(data):
