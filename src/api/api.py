@@ -67,7 +67,7 @@ def get_data(
 ) -> dict[str, Any]:
     start, end = _validate_period(start, end)
     stock_br, reit_br = _process_tickers(stock_br, reit_br)
-    ipc_signal.wake_scraper()
+    ipc_signal.scraper_notify()
     return {
         "stock_br": _load_data("stock_br", stock_br, start, end),
         "reit_br": _load_data("reit_br", reit_br, start, end),

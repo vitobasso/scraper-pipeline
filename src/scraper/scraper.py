@@ -1,5 +1,6 @@
 from src.common import config
 from src.common.services import ipc_signal
+from src.common.util.date_util import timestamp
 from src.scraper.core.scheduler import Manager
 from src.scraper.pipelines import reit_br, stock_br
 
@@ -12,7 +13,9 @@ def main():
 
     while True:
         if not manager.run_next():
-            ipc_signal.wait_for_signal()
+            print(f"{timestamp()}: *** waiting for signal ***")
+            ipc_signal.scraper_wait()
+            print(f"{timestamp()}: *** woke up ***")
 
 
 if __name__ == "__main__":
