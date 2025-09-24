@@ -1,10 +1,13 @@
+import asyncio
+import contextlib
 import json
 import re
+from collections import defaultdict
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Query, status
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.metadata.reit_br import labels as reit_labels
@@ -16,7 +19,10 @@ from src.api.metadata.stock_br import sources as stock_sources
 from src.common import config
 from src.common.services import data, ipc_signal, repository
 from src.common.util import date_util
+from src.common.util.date_util import timestamp
 from src.scraper.core import paths
+
+HEARTBEAT_INTERVAL = 300  # 5 minutes in seconds
 
 app = FastAPI()
 
@@ -72,6 +78,62 @@ def get_data(
         "stock_br": _load_data("stock_br", stock_br, start, end),
         "reit_br": _load_data("reit_br", reit_br, start, end),
     }
+
+
+@app.websocket("/data-live")
+async def ws_data(
+    ws: WebSocket,
+    stock_br: str | None = None,
+    reit_br: str | None = None,
+    start: date | None = None,
+    end: date | None = None,
+):
+    start, end = _validate_period(start, end)
+    tickers = sum(_process_tickers(stock_br, reit_br), [])
+    try:
+        await ws.accept()
+        async with heartbeats(ws):
+            await _websocket_loop(end, start, tickers, ws)
+    except WebSocketDisconnect:
+        print(f"{timestamp()}: websocket disconnected")
+
+
+async def _websocket_loop(end: date, start: date, tickers: list[str] | list[Any], ws: WebSocket):
+    while True:
+        synced_until = datetime.now(UTC)
+        print("*** waiting for signal ***")
+        await ipc_signal.api_wait()
+        new_data = _load_new_data(synced_until, tickers, start, end)
+        await ws.send_json(new_data)
+        print("*** woke up ***")
+
+
+def _load_new_data(date_since: datetime, tickers, start, end) -> dict[str, Any]:
+    new_scrapes: set[tuple[str, str, str]] = repository.query_scrapes_since(date_since, tickers)
+
+    # expands _global to all requested tickers and groups by ticker and asset_class
+    # results in a 2-level dict of asset_class to ticker to pipelines
+    expanded: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
+    for a, t, p in new_scrapes:
+        if t == "_global":
+            for t2 in tickers:
+                expanded[a][t2].add(p)
+        else:
+            expanded[a][t].add(p)
+
+    results = {}
+    for a, tp in expanded.items():
+        ticker_data = {}
+        for t, ps in tp.items():
+            pipe_data = {}
+            for p in ps:
+                pipeline_dir = root_dir / a / t / p
+                pipeline_data = _get_pipeline_data(pipeline_dir, start, end)
+                if pipeline_data:
+                    pipe_data[pipeline_dir.name] = pipeline_data
+            ticker_data[t] = _flatten(pipe_data, 1)
+        results[a] = ticker_data
+    return results
 
 
 def _load_data(asset_class: str, tickers, start, end) -> dict[str, Any]:
@@ -179,3 +241,28 @@ def _merge_sources(sources: dict[str, dict[str, str]], pipe_updated: dict[str, d
             "updated_at": d.astimezone(UTC) if d else d,
         }
     return merged_sources
+
+
+@contextlib.asynccontextmanager
+async def heartbeats(ws: WebSocket):
+    """Send periodic heartbeats to the WebSocket connection."""
+    heartbeat_task = None
+    try:
+        heartbeat_task = asyncio.create_task(_heartbeats(ws))
+        yield heartbeat_task
+    finally:
+        if heartbeat_task is not None:
+            heartbeat_task.cancel()
+            try:
+                await heartbeat_task
+            except asyncio.CancelledError:
+                pass
+
+
+async def _heartbeats(ws: WebSocket):
+    while True:
+        await asyncio.sleep(HEARTBEAT_INTERVAL)
+        try:
+            await ws.send_json({})
+        except Exception:
+            return

@@ -1,6 +1,8 @@
-# User Experience
+# Bug
 
-### live update the frontend via websocket
+investidor10 returned as nested objs
+
+# User Experience
 
 ### when importing b3, add all tickers (ask confirmation)
 

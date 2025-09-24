@@ -4,7 +4,7 @@ from pathlib import Path
 
 from playwright.async_api import Page
 
-from src.scraper.core import paths
+from src.scraper.core import paths_pipe
 from src.scraper.core.logs import log
 from src.scraper.core.paths import processed_path
 from src.scraper.core.scheduler import Pipeline
@@ -31,13 +31,13 @@ def pipeline():
 def scrape_first(pipe: Pipeline):
     proxy = random_proxy(pipe)
     url = "https://simplywall.st/stocks/br"
-    new_path = lambda: paths.for_pipe(pipe, "_global").output_file("normalization", "json")
+    new_path = lambda: paths_pipe.for_pipe(pipe, "_global").output_file("normalization", "json")
     asyncio.run(_scrape_first(url, new_path, proxy, pipe))
 
 
 def scrape_retry(pipe: Pipeline, input_path: Path):
     proxy = random_proxy(pipe)
-    new_path = lambda: paths.for_pipe(pipe, "_global").output_file("normalization", "json")
+    new_path = lambda: paths_pipe.for_pipe(pipe, "_global").output_file("normalization", "json")
     asyncio.run(_scrape_retry(input_path, new_path, proxy, pipe))
 
 
@@ -53,7 +53,7 @@ async def _scrape_first(url: str, new_path: Callable[[], Path], proxy: str, pipe
     except Exception as e:
         log(browser.error_name(e), "_global", pipe)
     if pending_urls:
-        pending_path = paths.for_pipe(pipe, "_global").output_file("extraction", "txt")
+        pending_path = paths_pipe.for_pipe(pipe, "_global").output_file("extraction", "txt")
         write_lines(list(pending_urls), pending_path)
 
 

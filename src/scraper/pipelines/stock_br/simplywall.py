@@ -2,7 +2,7 @@ import asyncio
 import json
 from pathlib import Path
 
-from src.scraper.core import paths
+from src.scraper.core import paths_pipe
 from src.scraper.core.logs import log
 from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.tasks.base import source_task
@@ -24,7 +24,7 @@ def pipeline():
 
 def scrape(pipe: Pipeline, ticker: str):
     url = f"https://simplywall.st/stock/bovespa/{ticker.lower()}"
-    path = paths.for_pipe(pipe, ticker).output_file("normalization", "json")
+    path = paths_pipe.for_pipe(pipe, ticker).output_file("normalization", "json")
     proxy = random_proxy(pipe)
     asyncio.run(_scrape(proxy, url, path, pipe, ticker))
 

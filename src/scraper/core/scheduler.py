@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Literal, TypeVar, get_args
 
 from src.common.services.repository import query_tickers
+from src.scraper.core import paths
 
 
 @dataclass
@@ -23,6 +24,34 @@ class Progress:
 
     def is_done(self) -> bool:
         return len(self.pending()) <= 0
+
+
+@dataclass
+class TaskDone:
+    """Remembers which input parameter (ticker) was processed by a task."""
+
+    task: "Task"
+    ticker: str
+
+    @classmethod
+    def from_input(cls, task: "Task", input: str | Path):
+        if isinstance(input, Path):
+            asset_class, ticker, pipe_name = paths.parts(input)
+            return cls(task, ticker)
+        else:
+            return cls(task, input)
+
+
+@dataclass
+class PipelineTaskDone:
+    """Remembers which input parameter (ticker) and task stage was processed."""
+
+    pipeline: "Pipeline"
+    task: TaskDone
+
+    def has_output(self) -> bool:
+        """Did this pipeline complete the last task for this particular ticker?"""
+        return self.pipeline.tasks[-1] == self.task.task or self.task.ticker == "_global"
 
 
 @dataclass
@@ -57,10 +86,12 @@ class Pipeline:
         pipeline.tasks = [t(pipeline) for t in tasks]
         return pipeline
 
-    def run_task(self):
+    def run_task(self) -> TaskDone | None:
         for task in self.tasks[::-1]:
-            if _try_task(task):
-                return
+            result = _try_task(task)
+            if result:
+                return result
+        return None
 
     def progress(self) -> Progress:
         return self.tasks[0].progress()
@@ -88,27 +119,28 @@ class Manager:
     def is_available(self, pipe: Pipeline):
         return not pipe.is_done() and all(self.pipes[f"{pipe.asset_class}-{r}"].is_done() for r in pipe.dependencies())
 
-    def run_next(self):
+    def run_next(self) -> PipelineTaskDone | None:
         pending = [p for p in self.pipes.values() if self.is_available(p)]
         if pending:
-            p = random.choice(pending)
-            p.run_task()
-            return True
+            pipe = random.choice(pending)
+            result = pipe.run_task()
+            return PipelineTaskDone(pipe, result)
         else:
-            return False
+            return None
 
 
-def _try_task(task: Task):
+def _try_task(task: Task) -> TaskDone | None:
     input_options = task.find_input()
     if input_options:
         if isinstance(input_options, set):
             selected_input = _select_input(input_options, task.pipeline.asset_class)
             task.execute(selected_input)
+            return TaskDone.from_input(task, selected_input)
         else:
             task.execute()  # global task takes no input
-        return True
+            return TaskDone(task, "_global")
     else:
-        return False
+        return None
 
 
 def _select_input(options: set[A], asset_class: AssetClass) -> A:

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from src.common.services.data import known_tickers
 from src.scraper.core.logs import log
-from src.scraper.core.paths import for_pipe
+from src.scraper.core.paths_pipe import for_pipe
 from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.tasks import normalization
 from src.scraper.core.tasks.base import global_task, intermediate_task

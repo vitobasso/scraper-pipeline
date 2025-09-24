@@ -1,3 +1,4 @@
+import asyncio
 import os
 import signal
 from pathlib import Path
@@ -8,29 +9,45 @@ api_pid = Path("/tmp/api.pid")
 
 
 def scraper_wait():
-    _wait(signal.SIGUSR1, scraper_pid)
+    _sync_wait(signal.SIGUSR1, scraper_pid)
 
 
 def scraper_notify():
-    _notify(signal.SIGUSR1)
+    _sync_notify(signal.SIGUSR1, scraper_pid)
 
 
-def _init(sig: signal.Signals, pid_file: Path):
+async def api_wait():
+    await _async_wait(signal.SIGUSR2, api_pid)
+
+
+def api_notify():
+    _sync_notify(signal.SIGUSR2, api_pid)
+
+
+def _sync_wait(sig: signal.Signals, pid_file: Path):
     signal.signal(sig, lambda _signum, _frame: None)
     with pid_file.open("w") as f:
         f.write(str(os.getpid()))
-
-
-def _wait(sig: signal.Signals, pid_file: Path):
-    _init(sig, pid_file)
     signal.alarm(alarm_seconds)
     signal.pause()
 
 
-def _notify(sig: signal.Signals):
+def _sync_notify(sig: signal.Signals, pid_file: Path):
     try:
-        with scraper_pid.open("r") as f:
+        with pid_file.open("r") as f:
             pid = int(f.read().strip())
         os.kill(pid, sig)
     except Exception as e:
         print(f"Failed to notify scraper: {e}")
+
+
+event = asyncio.Event()
+
+
+async def _async_wait(sig: signal.Signals, pid_file: Path):
+    loop = asyncio.get_running_loop()
+    loop.add_signal_handler(sig, lambda: event.set())
+    with pid_file.open("w") as f:
+        f.write(str(os.getpid()))
+    await event.wait()
+    event.clear()

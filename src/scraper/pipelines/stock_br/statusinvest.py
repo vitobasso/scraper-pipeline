@@ -1,6 +1,6 @@
 import asyncio
 
-from src.scraper.core import paths
+from src.scraper.core import paths_pipe
 from src.scraper.core.logs import log
 from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.tasks import normalization
@@ -24,7 +24,7 @@ def sync_download(pipe: Pipeline):
 
 
 async def _download(pipe: Pipeline):
-    path = paths.for_pipe(pipe, "_global").output_file("normalization", "csv")
+    path = paths_pipe.for_pipe(pipe, "_global").output_file("normalization", "csv")
     proxy = random_proxy(pipe)
     url = "https://statusinvest.com.br/acoes/busca-avancada"
     print(f"downloading csv, url: {url}, path: {path}, proxy: {proxy}")

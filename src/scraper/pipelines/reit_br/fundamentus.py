@@ -2,7 +2,7 @@ import asyncio
 
 import pandas
 
-from src.scraper.core import paths
+from src.scraper.core import paths_pipe
 from src.scraper.core.logs import log
 from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.tasks import normalization
@@ -27,7 +27,7 @@ def scrape(pipe: Pipeline):
 
 async def _scrape(pipe: Pipeline):
     url = "https://www.fundamentus.com.br/fii_resultado.php"
-    path = paths.for_pipe(pipe, "_global").output_file("normalization", "csv")
+    path = paths_pipe.for_pipe(pipe, "_global").output_file("normalization", "csv")
     proxy = random_proxy(pipe)
     print(f"scraping html, url: {url}, path: {path}, proxy: {proxy}")
     try:

@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from cachetools.func import ttl_cache
@@ -55,6 +55,44 @@ def upsert_tickers(tickers: list[str], asset_class: str):
             }
             cur.execute(query, params)
         cur.execute("COMMIT")
+
+
+def query_scrapes_since(date_since: datetime, tickers: list[str]) -> set[tuple[str, str, str]]:
+    init()
+    with sqlite3.connect(db_file) as conn:
+        cur = conn.cursor()
+        _tickers = ["_global", *tickers]
+        placeholders = ",".join("?" for _ in _tickers)
+        query = f"""
+                SELECT asset_class, ticker, pipeline
+                FROM scrapes
+                WHERE ticker IN ({placeholders})
+                AND last_scraped > ?
+                """
+        params = [*_tickers, date_since.replace(microsecond=0).isoformat(sep=" ")]
+        cur.execute(query, params)
+        out = set()
+        for asset_class, ticker, pipeline in cur.fetchall():
+            out.add((asset_class, ticker, pipeline))
+        return out
+
+
+def upsert_scrape(asset_class: str, ticker: str, pipeline: str):
+    init()
+    last_scraped = datetime.now(UTC)
+    with sqlite3.connect(db_file) as conn:
+        cur = conn.cursor()
+        query = """
+                INSERT OR REPLACE INTO scrapes (ticker, asset_class, pipeline, last_scraped)
+                VALUES (:ticker, :asset_class, :pipeline, :last_scraped)
+                """
+        params = {
+            "ticker": ticker,
+            "asset_class": asset_class,
+            "pipeline": pipeline,
+            "last_scraped": last_scraped.replace(microsecond=0),
+        }
+        cur.execute(query, params)
 
 
 def run_script(filename: str):

@@ -4,7 +4,7 @@ from pathlib import Path
 from src.common import config
 from src.common.services.repository import query_tickers
 from src.common.util.date_util import datetime_from_filename
-from src.scraper.core import paths
+from src.scraper.core import paths_pipe
 from src.scraper.core.logs import timestamp_from_log
 from src.scraper.core.scheduler import Pipeline, Progress
 
@@ -22,12 +22,12 @@ def intermediate_input(pipe: Pipeline, stage: str) -> set[Path]:
     return {
         file
         for ticker in query_tickers(pipe.asset_class) + ["_global"]
-        for file in paths.waiting_files(pipe, ticker, stage)
+        for file in paths_pipe.waiting_files(pipe, ticker, stage)
     }
 
 
 def has_recent_files(pipe: Pipeline, ticker: str, stage: str) -> bool:
-    latest = paths.latest_file(pipe, ticker, stage)
+    latest = paths_pipe.latest_file(pipe, ticker, stage)
     return latest and datetime_from_filename(latest) > datetime.now() - timedelta(days=config.data_refresh_days)
 
 
@@ -37,11 +37,11 @@ def _count_total_recent_failures(pipe: Pipeline, ticker: str) -> int:
 
 def _count_recent_failed_files(pipe: Pipeline, ticker: str) -> int:
     cutoff = datetime.now() - timedelta(days=config.data_refresh_days)
-    return sum(1 for file in paths.failed_files(pipe, ticker) if datetime_from_filename(file) > cutoff)
+    return sum(1 for file in paths_pipe.failed_files(pipe, ticker) if datetime_from_filename(file) > cutoff)
 
 
 def _count_recent_error_logs(pipe: Pipeline, ticker: str) -> int:
-    errors = paths.for_pipe(pipe, ticker).errors_log
+    errors = paths_pipe.for_pipe(pipe, ticker).errors_log
     if not errors.exists():
         return 0
     cutoff = datetime.now() - timedelta(days=config.data_refresh_days)
@@ -50,7 +50,7 @@ def _count_recent_error_logs(pipe: Pipeline, ticker: str) -> int:
 
 
 def _waiting(pipe: Pipeline, scope: set[str]) -> set[str]:
-    return {ticker for ticker in scope if paths.for_pipe(pipe, ticker).has_waiting_files}
+    return {ticker for ticker in scope if paths_pipe.for_pipe(pipe, ticker).has_waiting_files}
 
 
 def _ready(pipe: Pipeline, scope: set[str]) -> set[str]:

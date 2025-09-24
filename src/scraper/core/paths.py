@@ -1,10 +1,8 @@
-from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
 from src.common.config import data_root
 from src.common.util.date_util import timestamp
-from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.util.files import mkdir
 
 """
@@ -81,11 +79,6 @@ def for_parts(asset_class: str, ticker: str, pipeline_name: str) -> PipelinePath
     return PipelinePaths(asset_class, ticker, pipeline_name)
 
 
-def for_pipe(pipe: Pipeline, ticker: str) -> PipelinePaths:
-    """Get path helper for a pipeline and ticker."""
-    return for_parts(pipe.asset_class, ticker, pipe.name)
-
-
 def for_child(child_path: Path) -> PipelinePaths:
     """Get path helper from a child path within the pipeline structure."""
     asset_class, ticker, pipeline_name = parts(child_path)
@@ -106,25 +99,6 @@ def split_files(input_path: Path, current_stage: str, next_stage: str, out_ext: 
 def processed_path(input_path: Path) -> Path:
     paths = for_child(input_path)
     return paths.processed_dir / input_path.name
-
-
-def latest_file(pipe: Pipeline, ticker: str, stage: str) -> Path | None:
-    """Get the most recent file in a stage directory, if any."""
-    stage_path = for_pipe(pipe, ticker).stage_dir(stage)
-    files = [f for f in stage_path.glob("*") if f.is_file()]
-    return max(files, key=lambda f: f.stem) if files else None
-
-
-def waiting_files(pipe: Pipeline, ticker: str, stage: str) -> Iterator[Path]:
-    """Get all files in the waiting directory for a stage."""
-    stage_path = for_pipe(pipe, ticker).stage_dir(stage)
-    return stage_path.glob("*") if stage_path.exists() else []
-
-
-def failed_files(pipe: Pipeline, ticker: str) -> list[Path]:
-    """Get all files in the failed directory."""
-    failed_path = for_pipe(pipe, ticker).debug_dir / _FAILED
-    return [f for f in failed_path.rglob("*") if f.is_file()] if failed_path.exists() else []
 
 
 def parts(child_path: Path) -> tuple[str, str, str]:
