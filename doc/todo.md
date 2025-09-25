@@ -1,7 +1,3 @@
-# Bug
-
-investidor10 returned as nested objs
-
 # User Experience
 
 ### when importing b3, add all tickers (ask confirmation)

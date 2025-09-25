@@ -1,5 +1,6 @@
 import re
 
+from src.common.util.dict_util import flatten
 from src.scraper.core.scheduler import Pipeline
 from src.scraper.core.tasks import normalization
 from src.scraper.core.tasks.extraction import extract_json
@@ -71,7 +72,9 @@ def normalize(data):
             "liquidez_media_diaria": mil,
         }
     )
-    return normalization.pipe(rename_keys, norm_values, parse_magnitude)(data)
+
+    _flatten = lambda d: flatten(d, 3)
+    return normalization.pipe(rename_keys, norm_values, parse_magnitude, _flatten)(data)
 
 
 def _parse_magnitude(v):

@@ -20,6 +20,7 @@ from src.common import config
 from src.common.services import data, ipc_signal, repository
 from src.common.util import date_util
 from src.common.util.date_util import timestamp
+from src.common.util.dict_util import flatten
 from src.scraper.core import paths
 
 HEARTBEAT_INTERVAL = 300  # 5 minutes in seconds
@@ -131,7 +132,7 @@ def _load_new_data(date_since: datetime, tickers, start, end) -> dict[str, Any]:
                 pipeline_data = _get_pipeline_data(pipeline_dir, start, end)
                 if pipeline_data:
                     pipe_data[pipeline_dir.name] = pipeline_data
-            ticker_data[t] = _flatten(pipe_data, 1)
+            ticker_data[t] = flatten(pipe_data, 1)
         results[a] = ticker_data
     return results
 
@@ -156,7 +157,7 @@ def _get_ticker_data(asset_class: str, ticker: str, start: date, end: date) -> d
             pipelines[pipeline_dir.name] = pipeline_data
     if not pipelines:
         return None
-    return _flatten(pipelines, 1)
+    return flatten(pipelines, 1)
 
 
 def _get_pipeline_data(pipeline_dir: Path, start: date, end: date):
@@ -174,17 +175,6 @@ def _get_pipeline_data(pipeline_dir: Path, start: date, end: date):
 def _select_file(ready_dir: Path, start: date, end: date) -> Path | None:
     candidates = [f for f in ready_dir.glob("*.json") if start <= date_util.date_from_filename(f) <= end]
     return max(candidates, key=date_util.date_from_filename) if candidates else None
-
-
-def _flatten(d, depth=0, parent_key="") -> dict[str, Any]:
-    items = {}
-    for k, v in d.items():
-        new_key = f"{parent_key}.{k}" if parent_key else k
-        if isinstance(v, dict) and depth:
-            items.update(_flatten(v, depth - 1, new_key))
-        else:
-            items[new_key] = v
-    return items
 
 
 def _process_tickers(stock_br: str, reit_br: str) -> tuple[list[str], list[str]]:
