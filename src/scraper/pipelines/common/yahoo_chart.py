@@ -31,9 +31,8 @@ def call(ticker: str, proxy: str):
 MONTH_DAYS = 21
 YEAR_DAYS = 252
 
-# raw data expected to have 5 years of data in days, with 10% tolerance
-TOLERANCE_MIN = 5 * YEAR_DAYS * 0.7
-TOLERANCE_MAX = 5 * YEAR_DAYS * 1.2
+TOLERANCE_MIN = MONTH_DAYS
+TOLERANCE_MAX = 5 * YEAR_DAYS * 1.2  # some % tolerance added
 
 
 def validator(data):
@@ -48,17 +47,20 @@ def validator(data):
 def normalize(raw):
     avg = lambda start, end: sum(raw[start:end]) / (end - start)
     var = lambda a1, a2, b1, b2: (avg(b1, b2) - avg(a1, a2)) / avg(a1, a2)
-    return {
+    result = {
         "1mo": {
-            "series": raw[-21:],
+            "series": raw[-MONTH_DAYS:],
             "variation": var(-MONTH_DAYS - 1, -MONTH_DAYS + 1, -3, -1),
         },
-        "1y": {
-            "series": [v for i, v in enumerate(raw[-252:]) if i % 5 == 0],
-            "variation": var(-YEAR_DAYS - 12, -YEAR_DAYS + 12, -25, -1),
-        },
-        "5y": {
+    }
+    if len(raw) >= YEAR_DAYS * 0.9:
+        result["1y"] = {
+            "series": [v for i, v in enumerate(raw[-YEAR_DAYS:]) if i % 5 == 0],
+            "variation": var(-min(YEAR_DAYS + 12, len(raw)), -YEAR_DAYS + 12, -25, -1),
+        }
+    if len(raw) >= 5 * YEAR_DAYS * 0.9:
+        result["5y"] = {
             "series": [v for i, v in enumerate(raw) if i % 20 == 0],
             "variation": var(0, 100, -100, -1),
-        },
-    }
+        }
+    return result
