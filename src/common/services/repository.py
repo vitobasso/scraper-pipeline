@@ -16,7 +16,7 @@ def init():
 
 
 @ttl_cache(ttl=10)
-def query_tickers(asset_class: str, limit: int = 20, offset: int = 0) -> list[str]:
+def query_tickers(asset_class: str, limit: int = 100, offset: int = 0) -> list[str]:
     init()
     with sqlite3.connect(db_file) as conn:
         cur = conn.cursor()
